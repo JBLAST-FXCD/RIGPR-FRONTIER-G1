@@ -2,11 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//Anthony Grummett - 2/12/25
+
 /// <summary>
 /// Controls the grid-based building placement flow:
 /// Enter / exit build mode
 /// Spawn a ghost building
 /// Snap it to the grid
+/// Rotate buildings with R
 /// Check occupied cells
 /// Confirm or cancel placement
 /// 
@@ -21,6 +24,16 @@ public class BuildingManager : MonoBehaviour
     private const float CELL_BOUNDS_EPSILON = 0.001f;
     private const float PREVIEW_OPACITY = 0.6f;
     private const float PLACED_OPACITY = 1.0f;
+
+    private const float COARSE_ROTATION_STEP_DEGREES = 15.0f;
+    private const float FINE_ROTATION_STEP_DEGREES = 0.25f;
+    private const float ROTATION_HOLD_THRESHOLD_SECONDS = 0.2f;
+
+    private const float RMB_CLICK_MAX_DRAG_DISTANCE = 5.0f;      // pixels
+    private const float RMB_CLICK_MAX_DURATION = 0.3f;           // seconds
+
+    private Vector2 rmb_down_position = Vector2.zero;
+    private float rmb_down_time = 0.0f;
 
     [Header("Core References")]
     [SerializeField] private Camera main_camera;
@@ -38,6 +51,13 @@ public class BuildingManager : MonoBehaviour
     // Flow control flags
     private bool is_build_mode_active = false;
     private bool is_valid_build_zone = false;
+
+    // Rotation state for the current preview building
+    private float current_rotation_y = 0.0f;
+    private bool is_fine_rotation_mode = false;
+    private bool has_used_fine_rotation = false;
+    private float rotation_key_down_time = 0.0f;
+    private Quaternion base_building_rotation = Quaternion.identity;
 
     // Remember which prefab index is currently selected (for UI integration later)
     private int selected_building_index = 0;
@@ -70,6 +90,7 @@ public class BuildingManager : MonoBehaviour
 
         if (current_building != null)
         {
+            HandleRotationInput();
             UpdatePreviewPositionAndCells();
             HandleMouseInput();
         }
@@ -107,6 +128,12 @@ public class BuildingManager : MonoBehaviour
         current_building_collider = current_building.GetComponentInChildren<Collider>();
         current_preview_visual = current_building.GetComponentInChildren<BuildingPreviewVisual>();
 
+        // reset rotation state for this new preview
+        base_building_rotation = current_building.transform.rotation;
+        current_rotation_y = 0.0f;
+        is_fine_rotation_mode = false;
+        has_used_fine_rotation = false;
+
         SetBuildingOpacity(current_building, PREVIEW_OPACITY);
     }
 
@@ -139,6 +166,100 @@ public class BuildingManager : MonoBehaviour
         {
             ClearPreview();
         }
+    }
+
+    // ROTATION
+
+    /// <summary>
+    /// Handles rotation input for the current preview:
+    /// Tap R: rotate 15 degrees.
+    /// Hold R: fine rotation at 1 degree per frame.
+    /// After fine rotation, the next tap snaps to nearest 15 then rotates 15.
+    /// </summary>
+    private void HandleRotationInput()
+    {
+        if (current_building == null)
+        {
+            return;
+        }
+
+        // start tracking when R was pressed
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            rotation_key_down_time = Time.time;
+        }
+
+        // while R is held, check if we should enter fine rotation mode
+        if (Input.GetKey(KeyCode.R))
+        {
+            if (!is_fine_rotation_mode)
+            {
+                float held_time = Time.time - rotation_key_down_time;
+
+                if (held_time >= ROTATION_HOLD_THRESHOLD_SECONDS)
+                {
+                    is_fine_rotation_mode = true;
+                    has_used_fine_rotation = true;
+                }
+            }
+
+            if (is_fine_rotation_mode)
+            {
+                current_rotation_y += FINE_ROTATION_STEP_DEGREES;
+                NormalizeCurrentRotation();
+                ApplyCurrentRotationToBuilding();
+            }
+        }
+
+        // when R is released, if we never entered fine mode this is a tap
+        if (Input.GetKeyUp(KeyCode.R))
+        {
+            if (!is_fine_rotation_mode)
+            {
+                // coarse rotation: 15 degree steps
+                if (has_used_fine_rotation)
+                {
+                    // snap to nearest 15 degrees if we previously used fine rotation
+                    current_rotation_y = SnapAngleToStep(current_rotation_y, COARSE_ROTATION_STEP_DEGREES);
+                }
+
+                current_rotation_y += COARSE_ROTATION_STEP_DEGREES;
+                NormalizeCurrentRotation();
+                ApplyCurrentRotationToBuilding();
+            }
+
+            is_fine_rotation_mode = false;
+        }
+    }
+
+    /// <summary>
+    /// Applies the current Y rotation to the preview, relative to its original prefab rotation.
+    /// </summary>
+    private void ApplyCurrentRotationToBuilding()
+    {
+        if (current_building == null)
+        {
+            return;
+        }
+
+        current_building.transform.rotation =
+            base_building_rotation * Quaternion.Euler(0.0f, current_rotation_y, 0.0f);
+    }
+
+    /// <summary>
+    /// Keeps current_rotation_y within 0–360 range.
+    /// </summary>
+    private void NormalizeCurrentRotation()
+    {
+        current_rotation_y = Mathf.Repeat(current_rotation_y, 360.0f);
+    }
+
+    /// <summary>
+    /// Rounds an angle to the nearest multiple of a given step.
+    /// </summary>
+    private float SnapAngleToStep(float angle, float step_degrees)
+    {
+        return Mathf.Round(angle / step_degrees) * step_degrees;
     }
 
     // PREVIEW + VALIDATION
@@ -258,19 +379,38 @@ public class BuildingManager : MonoBehaviour
 
     /// <summary>
     /// Handles mouse input while in build mode:
-    /// Right-click cancels the current preview.
-    /// Left-click attempts to confirm placement if the zone is valid.
+    /// Right mouse button: drag = camera rotation, short click = cancel preview
+    /// Left mouse button: confirm placement if valid
     /// </summary>
     private void HandleMouseInput()
     {
-        // RMB - "Building placement cancelled" - branch
+        // Track RMB press for click vs drag detection
         if (Input.GetMouseButtonDown(1))
         {
-            CancelCurrentBuilding();
-            return;
+            rmb_down_position = Input.mousePosition;
+            rmb_down_time = Time.time;
         }
 
-        // LMB - check if placement is valid - confirm branch
+        // On RMB release, decide whether this was a "click" (cancel) or a drag (camera only)
+        if (Input.GetMouseButtonUp(1))
+        {
+            Vector2 rmb_up_position = Input.mousePosition;
+            float rmb_drag_distance = Vector2.Distance(rmb_down_position, rmb_up_position);
+            float rmb_duration = Time.time - rmb_down_time;
+
+            bool is_rmb_click = rmb_drag_distance <= RMB_CLICK_MAX_DRAG_DISTANCE &&
+                                rmb_duration <= RMB_CLICK_MAX_DURATION;
+
+            if (is_rmb_click)
+            {
+                // Treat as cancel placement, without interfering with camera rotation
+                CancelCurrentBuilding();
+                return;
+            }
+            // If it was a drag, we do nothing here – camera script handles rotation.
+        }
+
+        // LMB - attempt to confirm placement
         if (Input.GetMouseButtonDown(0))
         {
             if (!is_valid_build_zone)

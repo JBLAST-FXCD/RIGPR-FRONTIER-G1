@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//Anthony Grummett - 2/12/25
+
 /// <summary>
 /// Handles grid snapping and draws the editor gizmo grid.
 /// The grid is logical only there are no runtime cell objects.

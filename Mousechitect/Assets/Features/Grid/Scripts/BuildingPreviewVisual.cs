@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//Anthony Grummett - 2/12/25
+
 /// <summary>
 /// Handles temporary visual feedback for a building while it is being placed.
 /// The logic (valid / invalid) lives in BuildingManager this class only worries about colours.
