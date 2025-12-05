@@ -379,31 +379,31 @@ public class BuildingManager : MonoBehaviour
     // INPUT HANDLING
 
     // Handles mouse input while in build mode:
+    
+    // Note: Camera script locks the mouse to screen centre on RMB.
+    // For this reason, RMB cancel is time-based only, not drag-distance based.
     private void HandleMouseInput()
     {
-        // Track RMB press for click vs drag detection
+        // Track RMB press start time
         if (Input.GetMouseButtonDown(1))
         {
-            rmb_down_position = Input.mousePosition;
             rmb_down_time = Time.time;
         }
 
-        // On RMB release, decide whether this was a "click" (cancel) or a drag (camera only)
+        // On RMB release, decide whether this was a "click" (cancel) or a hold (camera rotate)
         if (Input.GetMouseButtonUp(1))
         {
-            Vector2 rmb_up_position = Input.mousePosition;
-            float rmb_drag_distance = Vector2.Distance(rmb_down_position, rmb_up_position);
             float rmb_duration = Time.time - rmb_down_time;
 
-            bool is_rmb_click = rmb_drag_distance <= RMB_CLICK_MAX_DRAG_DISTANCE &&
-                                rmb_duration <= RMB_CLICK_MAX_DURATION;
+            bool is_rmb_click = rmb_duration <= RMB_CLICK_MAX_DURATION;
 
             if (is_rmb_click)
             {
-                // Treat as cancel placement, without interfering with camera rotation
+                // Treat as cancel placement
                 CancelCurrentBuilding();
                 return;
             }
+
         }
 
         // LMB - attempt to confirm placement
