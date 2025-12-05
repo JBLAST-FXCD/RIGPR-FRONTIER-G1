@@ -5,7 +5,7 @@ using UnityEngine;
 //Anthony Grummett - 2/12/25
 
 /// <summary>
-/// Controls the grid-based building placement flow:
+/// Controls the grid-based building placement:
 /// Enter / exit build mode
 /// Spawn a ghost building
 /// Snap it to the grid
@@ -13,10 +13,14 @@ using UnityEngine;
 /// Check occupied cells
 /// Confirm or cancel placement
 /// 
-/// This script implements the three flowcharts:
-/// Main building placement loop
-/// BuildMode(bool) behaviour
-/// CheckCellSurfaces(cells) style validation
+/// GDD build mode behaviour:
+/// - Build mode entered from UI by selecting a building
+/// - Building spawns with reduced opacity + highlight
+/// - Player can rotate by 15 degrees using R
+/// - LMB places building, restores opacity & colour
+/// - Build mode exits on placement unless SHIFT is held
+/// - ESC exits build mode
+/// - RMB drag = camera rotation, RMB click = cancel preview
 /// </summary>
 public class BuildingManager : MonoBehaviour
 {
@@ -25,6 +29,7 @@ public class BuildingManager : MonoBehaviour
     private const float PREVIEW_OPACITY = 0.6f;
     private const float PLACED_OPACITY = 1.0f;
 
+    // R rotates building 15 degrees; fine mode is extra polish.
     private const float COARSE_ROTATION_STEP_DEGREES = 15.0f;
     private const float FINE_ROTATION_STEP_DEGREES = 0.25f;
     private const float ROTATION_HOLD_THRESHOLD_SECONDS = 0.2f;
@@ -43,12 +48,11 @@ public class BuildingManager : MonoBehaviour
     [Header("Building Prefabs")]
     [SerializeField] private GameObject[] building_prefabs;
 
-    // Active ghost / preview building while the player is choosing a location
+    // preview building while the player is choosing a location
     private GameObject current_building;
     private Collider current_building_collider;
     private BuildingPreviewVisual current_preview_visual;
 
-    // Flow control flags
     private bool is_build_mode_active = false;
     private bool is_valid_build_zone = false;
 
@@ -59,7 +63,7 @@ public class BuildingManager : MonoBehaviour
     private float rotation_key_down_time = 0.0f;
     private Quaternion base_building_rotation = Quaternion.identity;
 
-    // Remember which prefab index is currently selected (for UI integration later)
+    // Remember which prefab index is currently selected (for UI integration)
     private int selected_building_index = 0;
 
     // Cells already occupied by placed buildings
@@ -70,10 +74,16 @@ public class BuildingManager : MonoBehaviour
 
     private void Update()
     {
-        // player can toggle build mode with B key
+        // keyboard entry to build mode
         if (Input.GetKeyDown(KeyCode.B))
         {
             ToggleBuildMode();
+        }
+
+        // ESC always exits build mode as per GDD
+        if (Input.GetKeyDown(KeyCode.Escape) && is_build_mode_active)
+        {
+            CancelBuildingPlacement();
         }
 
         if (!is_build_mode_active)
@@ -81,8 +91,7 @@ public class BuildingManager : MonoBehaviour
             return;
         }
 
-        // press 1 to start placing the first building prefab
-        // Later this will also be driven by UI buttons.
+        // press 1 to start placing the first building prefab (instead of UI)
         if (current_building == null && Input.GetKeyDown(KeyCode.Alpha1))
         {
             StartPlacingBuilding(0);
@@ -98,15 +107,29 @@ public class BuildingManager : MonoBehaviour
 
     // PUBLIC FUNCTIONS
 
-    /// <summary>
-    /// Entry point when a building type is selected from UI.
-    /// Matches "Building selected -> Instantiate building -> BuildMode(true)" in the flowchart.
-    /// </summary>
+    // Called by UI when the player clicks a building button.
+    public void OnBuildingButtonPressed(int building_index)
+    {
+        if (!is_build_mode_active)
+        {
+            Debug.Log("Cannot select building: build mode is not active.");
+            return;
+        }
+
+        StartPlacingBuilding(building_index);
+    }
+
+    public bool GetIsBuildModeActive()
+    {
+        return is_build_mode_active;
+    }
+
+    // Entry point when a building type is selected (from UI or debug hotkey).
     public void StartPlacingBuilding(int building_index)
     {
         if (!is_build_mode_active)
         {
-            Debug.Log("Press B to enter build mode before selecting a building.");
+            Debug.Log("StartPlacingBuilding called while build mode is inactive.");
             return;
         }
 
@@ -134,15 +157,15 @@ public class BuildingManager : MonoBehaviour
         is_fine_rotation_mode = false;
         has_used_fine_rotation = false;
 
+        // building spawned with reduced opacity
         SetBuildingOpacity(current_building, PREVIEW_OPACITY);
     }
 
     // BUILD MODE
 
-    /// <summary>
-    /// Toggles the overall build mode state.
-    /// </summary>
-    private void ToggleBuildMode()
+    //Toggles the overall build mode state (debug only).
+    //Real entry point should be UI calling OnBuildingButtonPressed.
+    public void ToggleBuildMode()
     {
         if (is_build_mode_active)
         {
@@ -154,10 +177,8 @@ public class BuildingManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Enables or disables build mode.
-    /// When disabled, any active preview is cleared.
-    /// </summary>
+    // Enables or disables build mode.
+    //When disabled, any active preview is cleared.
     private void BuildMode(bool is_active)
     {
         is_build_mode_active = is_active;
@@ -170,12 +191,7 @@ public class BuildingManager : MonoBehaviour
 
     // ROTATION
 
-    /// <summary>
-    /// Handles rotation input for the current preview:
-    /// Tap R: rotate 15 degrees.
-    /// Hold R: fine rotation at 1 degree per frame.
-    /// After fine rotation, the next tap snaps to nearest 15 then rotates 15.
-    /// </summary>
+    // Handles rotation input for the current preview:
     private void HandleRotationInput()
     {
         if (current_building == null)
@@ -216,7 +232,7 @@ public class BuildingManager : MonoBehaviour
         {
             if (!is_fine_rotation_mode)
             {
-                // coarse rotation: 15 degree steps
+                // rotation: 15 degree steps
                 if (has_used_fine_rotation)
                 {
                     // snap to nearest 15 degrees if we previously used fine rotation
@@ -232,9 +248,7 @@ public class BuildingManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Applies the current Y rotation to the preview, relative to its original prefab rotation.
-    /// </summary>
+    // Applies the current Y rotation to the preview, relative to its original prefab rotation.
     private void ApplyCurrentRotationToBuilding()
     {
         if (current_building == null)
@@ -246,17 +260,13 @@ public class BuildingManager : MonoBehaviour
             base_building_rotation * Quaternion.Euler(0.0f, current_rotation_y, 0.0f);
     }
 
-    /// <summary>
-    /// Keeps current_rotation_y within 0–360 range.
-    /// </summary>
+    // Keeps current_rotation_y within 0–360 range.
     private void NormalizeCurrentRotation()
     {
         current_rotation_y = Mathf.Repeat(current_rotation_y, 360.0f);
     }
 
-    /// <summary>
-    /// Rounds an angle to the nearest multiple of a given step.
-    /// </summary>
+    // Rounds an angle to the nearest multiple of a given step.
     private float SnapAngleToStep(float angle, float step_degrees)
     {
         return Mathf.Round(angle / step_degrees) * step_degrees;
@@ -264,10 +274,8 @@ public class BuildingManager : MonoBehaviour
 
     // PREVIEW + VALIDATION
 
-    /// <summary>
-    /// Updates the ghost building position and calculates the cells it covers.
-    /// Also updates "is_valid_build_zone" based on occupied cells.
-    /// </summary>
+    // Updates the ghost building position and calculates the cells it covers.
+    // Also updates "is_valid_build_zone" based on occupied cells.
     private void UpdatePreviewPositionAndCells()
     {
         Ray mouse_ray = main_camera.ScreenPointToRay(Input.mousePosition);
@@ -304,10 +312,8 @@ public class BuildingManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Converts the collider bounds into a list of integer grid cell indices.
-    /// This defines the "building footprint" on the grid.
-    /// </summary>
+    // Converts the collider bounds into a list of integer grid cell indices.
+    // This defines the "building footprint" on the grid.
     private void GetCellsForBounds(Bounds bounds, List<Vector2Int> result)
     {
         result.Clear();
@@ -334,10 +340,7 @@ public class BuildingManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Checks whether any of the candidate cells are already occupied.
-    /// Equivalent to the "CheckCellSurfaces(cells)" flowchart.
-    /// </summary>
+    // Checks whether any of the candidate cells are already occupied.
     private bool CheckCellSurfaces(List<Vector2Int> cells)
     {
         bool is_valid = true;
@@ -358,9 +361,7 @@ public class BuildingManager : MonoBehaviour
         return is_valid;
     }
 
-    /// <summary>
-    /// Destroys the current preview building and clears temporary state.
-    /// </summary>
+    // Destroys the current preview building and clears temporary state.
     private void ClearPreview()
     {
         if (current_building != null)
@@ -377,11 +378,7 @@ public class BuildingManager : MonoBehaviour
 
     // INPUT HANDLING
 
-    /// <summary>
-    /// Handles mouse input while in build mode:
-    /// Right mouse button: drag = camera rotation, short click = cancel preview
-    /// Left mouse button: confirm placement if valid
-    /// </summary>
+    // Handles mouse input while in build mode:
     private void HandleMouseInput()
     {
         // Track RMB press for click vs drag detection
@@ -407,7 +404,6 @@ public class BuildingManager : MonoBehaviour
                 CancelCurrentBuilding();
                 return;
             }
-            // If it was a drag, we do nothing here – camera script handles rotation.
         }
 
         // LMB - attempt to confirm placement
@@ -422,27 +418,21 @@ public class BuildingManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Cancels only the current ghost building, but keeps build mode active.
-    /// </summary>
+    // Cancels only the current ghost building, but keeps build mode active.
     private void CancelCurrentBuilding()
     {
         ClearPreview();
     }
 
-    /// <summary>
-    /// Cancels the current building and exits build mode entirely.
-    /// </summary>
+    // Cancels the current building and exits build mode entirely.
     private void CancelBuildingPlacement()
     {
         CancelCurrentBuilding();
         BuildMode(false);
     }
 
-    /// <summary>
-    /// Confirms the building placement.
-    /// Marks the footprint cells as occupied and restores the original visuals.
-    /// </summary>
+    // Confirms the building placement.
+    // Marks the footprint cells as occupied and restores the original visuals.
     private void ConfirmBuildingPlacement()
     {
         if (current_preview_visual != null)
@@ -465,16 +455,26 @@ public class BuildingManager : MonoBehaviour
         current_building_collider = null;
         covered_cells.Clear();
 
-        // We deliberately stay in build mode so the player can place more of the same type.
-        // Call BuildMode(false) here for single placement instead.
+        bool is_shift_held =
+            Input.GetKey(KeyCode.LeftShift) ||
+            Input.GetKey(KeyCode.RightShift);
+
+        if (is_shift_held)
+        {
+            // holding SHIFT spawns a new copy in preview mode, build mode stays active
+            StartPlacingBuilding(selected_building_index);
+        }
+        else
+        {
+            // build mode exits after placing a building
+            BuildMode(false);
+        }
     }
 
     // HELPERS
 
-    /// <summary>
-    /// Sets the alpha channel on all materials for the given building.
-    /// RGB is left unchanged, preview tint is handled by BuildingPreviewVisual.
-    /// </summary>
+    // Sets the alpha channel on all materials for the given building.
+    // RGB is left unchanged, preview tint is handled by BuildingPreviewVisual.
     private void SetBuildingOpacity(GameObject building, float opacity)
     {
         if (building == null)
