@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class parent_building : MonoBehaviour
@@ -27,13 +28,13 @@ public class parent_building : MonoBehaviour
         capacity = capacitys[tier];
     }
 
-    private void OnTriggerEnter(MouseTemp other)
+    private void OnTriggerEnter(Collider other)
     {
-
-        if (other != null && Mouse.Count <= capacity)
+        Debug.Log("Hit");
+        if (other != null && other.tag == "MouseTemp" && Mouse.Count <= capacity)
         {
             other.transform.gameObject.SetActive(false);
-            Mouse.Add(other);
+            //Mouse.Add(other);
         }
     }
 

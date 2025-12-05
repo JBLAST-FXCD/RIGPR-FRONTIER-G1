@@ -1,11 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using UnityEngine;
 
 public class MouseTemp : MonoBehaviour
 {
-    [SerializeField] private GameObject building_prefab;
-
     // Start is called before the first frame update
     void Start()
     {
@@ -15,6 +12,12 @@ public class MouseTemp : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        GameObject building = GameObject.FindGameObjectWithTag("BuildingTest");
+        Vector3 building_loc = building.transform.localPosition;
+        Vector3 cube_loc = this.transform.localPosition;
+
+        Vector3 Diffrence = building_loc - cube_loc;
+        Vector3 New_loc = Diffrence.normalized * Time.deltaTime * 2 + cube_loc;
+        this.transform.position = New_loc;
     }
 }
