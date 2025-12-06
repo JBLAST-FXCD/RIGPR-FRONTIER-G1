@@ -1,46 +1,94 @@
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
+// Iain Benner 05/12/2025
+
+/// <summary>
+/// Designer can set up mesh and data for tiers of buildings.
+/// On start the correct varition of the building is picked.
+/// Mice can enter and leave the building.
+/// </summary>
 public class parent_building : MonoBehaviour
 {
+    //Varibles for designers to create tiers.
     [SerializeField] private GameObject[] building_prefabs;
     [SerializeField] private int[]        capacitys;
     [SerializeField] private int          tier;
 
-    private GameObject building_prefab;
-    private List<MouseTemp> Mouse;
-    private int capacity;
+    //Varibles to select the correct paramiters for the tier.
+    private GameObject      building_prefab;
+    private GameObject      building;
+    private List<MouseTemp> mouse_occupants;
+    private int             capacity;
 
-    // Start is called before the first frame update
+    parent_building()
+    {
+        building_prefab = null;
+        mouse_occupants = new List<MouseTemp>();
+        capacity = 0;
+    }
+
     void Start()
     {
-        ConstructTier(tier);
-        building_prefab.transform.localPosition = this.transform.localPosition;
-        Instantiate(building_prefab);
+        ConstructTier();
     }
 
-    // Pick and the diffrenmt mesh and stats for the teirs
-    private void ConstructTier(int tier) 
+    protected void Update()
     {
-        tier--;
-        building_prefab = building_prefabs[tier];
-        capacity = capacitys[tier];
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        Debug.Log("Hit");
-        if (other != null && other.tag == "MouseTemp" && Mouse.Count <= capacity)
+        //This is for debuging.
+        //Mise will leave when certain conditions are met, depending on the building type.
+        if (Input.GetKeyDown(KeyCode.E))
         {
-            other.transform.gameObject.SetActive(false);
-            //Mouse.Add(other);
+            MouseLeave(mouse_occupants[0]);
+        }
+
+        //This is for debuging.
+        //Buildings will be upgraded when certain conditions are met, depending on the building type.
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            UpdateTier();
         }
     }
 
-    private void MouseLeave(MouseTemp m1)
+    //The funtionb allows for diffrent varition depending on the designers choise and can be used for when the player upgrades the building.
+    private void ConstructTier() 
     {
-        Vector3 new_loc = m1.transform.localPosition;
+        if (tier > 0 && tier <= capacitys.Length)
+        {
+            building_prefab = building_prefabs[tier - 1];
+            capacity = capacitys[tier - 1];
+            building_prefab.transform.localPosition = new Vector3(0, 0, 0);
+            building = Instantiate(building_prefab, gameObject.transform);
+        }
+    }
+
+    private void UpdateTier()
+    {
+        tier++;
+        if (tier > 0 && tier <= capacitys.Length)
+        {
+            Destroy(building);
+            building_prefab = building_prefabs[tier - 1];
+            capacity = capacitys[tier - 1];
+            building_prefab.transform.localPosition = new Vector3(0, 0, 0);
+            building = Instantiate(building_prefab, gameObject.transform);
+        }
+    }
+
+    //Mouse is storded and turned off to make effetivly inside the building.
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other != null && other.tag == "MouseTemp" && mouse_occupants.Count < capacity)
+        {
+            other.transform.gameObject.SetActive(false);
+            mouse_occupants.Add(other.gameObject.GetComponent<MouseTemp>());
+        }
+    }
+
+    //checks building rotion to place the mice on the right side to stop mice appaering inside building.
+    private void MouseLeave(MouseTemp mouse)
+    {
+        Vector3 new_loc = mouse.transform.localPosition;
 
         switch (this.transform.eulerAngles.y)
         {
@@ -58,7 +106,9 @@ public class parent_building : MonoBehaviour
                 break;
         }
 
-        m1.transform.localPosition = new_loc;
-        m1.transform.gameObject.SetActive(true);
+        mouse_occupants.Remove(mouse);
+
+        mouse.transform.localPosition = new_loc;
+        mouse.transform.gameObject.SetActive(true);
     }
 }
