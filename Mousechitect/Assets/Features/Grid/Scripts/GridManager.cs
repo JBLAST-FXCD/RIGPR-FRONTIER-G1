@@ -6,7 +6,8 @@ using UnityEngine;
 
 /// <summary>
 /// Handles grid snapping and draws the editor gizmo grid.
-/// The grid is logical only there are no runtime cell objects.
+/// The grid is logical only; there are no runtime cell objects.
+/// Also stores per-cell movement speed modifiers for pathfinding.
 /// </summary>
 public class GridManager : MonoBehaviour
 {
@@ -15,7 +16,15 @@ public class GridManager : MonoBehaviour
     [SerializeField] private Color grid_color = Color.gray;   // Color used for visual gizmos in scene view
     [SerializeField] private int grid_extent = 500;           // How far the grid extends from origin in gizmos
 
+    [Header("Movement Settings")]
+    [SerializeField] private float default_move_speed = 1.0f; // Base movement speed on plain floor
+
     private const float GRID_Y_POSITION = 0.0f;
+
+    // Per-cell speed modifiers (e.g. paths faster/slower than default).
+    // Pathfinding will use: default_move_speed + modifier.
+    private readonly Dictionary<Vector2Int, float> cell_speed_modifiers =
+        new Dictionary<Vector2Int, float>();
 
     // PUBLIC ACCESSORS
 
@@ -25,6 +34,14 @@ public class GridManager : MonoBehaviour
     public float GridSize
     {
         get { return grid_size; }
+    }
+
+    /// <summary>
+    /// Base movement speed before any path modifiers.
+    /// </summary>
+    public float DefaultMoveSpeed
+    {
+        get { return default_move_speed; }
     }
 
     // PUBLIC FUNCTIONS
@@ -49,6 +66,39 @@ public class GridManager : MonoBehaviour
 
         // Return back to world space
         return result + transform.position;
+    }
+
+    /// <summary>
+    /// Sets a movement speed modifier for all given cells.
+    /// Pathfinding will treat those cells as (default_move_speed + speed_modifier).
+    /// </summary>
+    public void SetPathOnCells(List<Vector2Int> cells, float speed_modifier)
+    {
+        int i = 0;
+
+        while (i < cells.Count)
+        {
+            cell_speed_modifiers[cells[i]] = speed_modifier;
+            ++i;
+        }
+    }
+
+    //Anthony 7/12/25
+
+    /// <summary>
+    /// Returns the final movement speed for a given cell.
+    /// If there is no path modifier, returns the default speed.
+    /// </summary>
+    public float GetCellMoveSpeed(Vector2Int cell)
+    {
+        float speed_modifier;
+
+        if (cell_speed_modifiers.TryGetValue(cell, out speed_modifier))
+        {
+            return default_move_speed + speed_modifier;
+        }
+
+        return default_move_speed;
     }
 
     // PRIVATE FUNCTIONS

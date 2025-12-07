@@ -74,17 +74,19 @@ public class BuildingManager : MonoBehaviour
 
     private void Update()
     {
-        // keyboard entry to build mode
+        /* keyboard entry to build mode
         if (Input.GetKeyDown(KeyCode.B))
         {
             ToggleBuildMode();
         }
+        
 
         // ESC always exits build mode as per GDD
         if (Input.GetKeyDown(KeyCode.Escape) && is_build_mode_active)
         {
             CancelBuildingPlacement();
         }
+        */
 
         if (!is_build_mode_active)
         {
@@ -108,6 +110,28 @@ public class BuildingManager : MonoBehaviour
     // PUBLIC FUNCTIONS
 
     // Called by UI when the player clicks a building button.
+
+    /// <summary>
+    /// Enables or disables the building tool.
+    /// Called by BuildToolController when the player selects / deselects this tool.
+    /// </summary>
+    public void SetToolEnabled(bool is_enabled)
+    {
+        // Turn the MonoBehaviour on/off so Update() only runs when this tool is active
+        enabled = is_enabled;
+
+        if (is_enabled)
+        {
+            // Enter build mode for this tool
+            BuildMode(true);
+        }
+        else
+        {
+            // Cleanly cancel any preview and leave build mode
+            CancelBuildingPlacement();
+            BuildMode(false);
+        }
+    }
     public void OnBuildingButtonPressed(int building_index)
     {
         if (!is_build_mode_active)
