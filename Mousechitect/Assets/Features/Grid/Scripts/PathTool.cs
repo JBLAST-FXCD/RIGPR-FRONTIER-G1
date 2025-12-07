@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//Anthony - 7/12/25
+
 /// <summary>
 /// Grid-based placement tool for paths.
 /// - Uses the same grid as buildings
