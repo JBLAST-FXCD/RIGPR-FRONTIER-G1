@@ -17,6 +17,7 @@ public class PerspectiveCameraController : MonoBehaviour
     [SerializeField] private float edge_pan_speed = 0.0f;
     [SerializeField] private float follow_smoothing = 0.0f;
     [SerializeField] private float edge_pan_size = 0.0f;
+    [SerializeField] private LayerMask ground_layer;
 
     [Header("Camera Zoom Settings")]
     [SerializeField] private float zoom_speed = 0.0f;
@@ -28,10 +29,12 @@ public class PerspectiveCameraController : MonoBehaviour
     private Vector3 target_position_current, target_position_desired;
     private Camera camera_component;
 
+    private const float FADE_START_DISTANCE = 20.0f;
+    private const float FADE_END_DISTANCE = 10.0f;
     private const float ROTATION_MIN_DEGREES = -25.0f;
     private const float ROTATION_MAX_DEGREES = 45.0f;
-    private const float ZOOM_MIN_PERCENT = 0.01f;
-    private const float ZOOM_MAX_PERCENT = 1.5f;
+    private const float ZOOM_MIN_PERCENT = 0.3f;
+    private const float ZOOM_MAX_PERCENT = 1.30f;
 
     private const int MOUSE_RIGHT_BUTTON = 1;
 
@@ -61,6 +64,7 @@ public class PerspectiveCameraController : MonoBehaviour
         HandleInput();
         UpdateTargetPosition();
         UpdateCameraTransform();
+        ApplyFadeCulling();
     }
 
     private void HandleInput()
@@ -163,10 +167,43 @@ public class PerspectiveCameraController : MonoBehaviour
 
         float max_cast_distance = 1000.0f;
 
-        if (Physics.Raycast(ray, out hit, max_cast_distance))
+        if (Physics.Raycast(ray, out hit, max_cast_distance, ground_layer))
         {
                        return hit.distance;
         }
         return 100.0f;
+    }
+
+    private void ApplyFadeCulling()
+    {
+        Collider[] hits = Physics.OverlapSphere(transform.position, FADE_START_DISTANCE);
+
+        foreach (var hit in hits)
+        {
+            ObjectFading fadeable = hit.GetComponent<ObjectFading>();
+            // skips if no fade component is found
+            if (fadeable == null)
+            {
+                continue;
+            }
+
+            float distance_to_camera = Vector3.Distance(transform.position, fadeable.transform.position);
+
+            // constrains alpha values to 0-1 range based on distance to camera, parses into the ObjectFading component
+            if (distance_to_camera <= FADE_END_DISTANCE)
+            {
+                fadeable.SetObjectFade(0.0f);
+            }
+
+            else if (distance_to_camera >= FADE_START_DISTANCE)
+            {
+                fadeable.SetObjectFade(1.0f);
+            }
+            else
+            {
+                float alpha = (distance_to_camera - FADE_END_DISTANCE) / (FADE_START_DISTANCE - FADE_END_DISTANCE);
+                fadeable.SetObjectFade(alpha);
+            }
+        }
     }
 }
