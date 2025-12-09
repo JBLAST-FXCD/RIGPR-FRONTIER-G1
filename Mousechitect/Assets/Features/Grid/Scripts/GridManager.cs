@@ -28,17 +28,13 @@ public class GridManager : MonoBehaviour
 
     // PUBLIC ACCESSORS
 
-    /// <summary>
-    /// Grid cell size used by other systems (e.g. BuildingManager).
-    /// </summary>
+    // Grid cell size used by other systems (e.g. BuildingManager).
     public float GridSize
     {
         get { return grid_size; }
     }
 
-    /// <summary>
-    /// Base movement speed before any path modifiers.
-    /// </summary>
+    // Base movement speed before any path modifiers.
     public float DefaultMoveSpeed
     {
         get { return default_move_speed; }
@@ -46,9 +42,7 @@ public class GridManager : MonoBehaviour
 
     // PUBLIC FUNCTIONS
 
-    /// <summary>
-    /// Returns the nearest snapped point on the grid given a world-space position.
-    /// </summary>
+    // Returns the nearest snapped point on the grid given a world-space position.
     public Vector3 GetNearestPointOnGrid(Vector3 position)
     {
         // Snap each axis relative to the grid origin (this GameObject)
@@ -68,10 +62,8 @@ public class GridManager : MonoBehaviour
         return result + transform.position;
     }
 
-    /// <summary>
-    /// Sets a movement speed modifier for all given cells.
-    /// Pathfinding will treat those cells as (default_move_speed + speed_modifier).
-    /// </summary>
+    // Sets a movement speed modifier for all given cells.
+    // Pathfinding will treat those cells as (default_move_speed + speed_modifier).
     public void SetPathOnCells(List<Vector2Int> cells, float speed_modifier)
     {
         int i = 0;
@@ -85,10 +77,8 @@ public class GridManager : MonoBehaviour
 
     //Anthony 7/12/25
 
-    /// <summary>
-    /// Returns the final movement speed for a given cell.
-    /// If there is no path modifier, returns the default speed.
-    /// </summary>
+    // Returns the final movement speed for a given cell.
+    // If there is no path modifier, returns the default speed.
     public float GetCellMoveSpeed(Vector2Int cell)
     {
         float speed_modifier;
@@ -103,10 +93,8 @@ public class GridManager : MonoBehaviour
 
     // PRIVATE FUNCTIONS
 
-    /// <summary>
-    /// Draws visible grid lines in the Scene view (editor only).
-    /// This is purely visual and has no runtime cost in builds.
-    /// </summary>
+    // Draws visible grid lines in the Scene view (editor only).
+    // This is purely visual and has no runtime cost in builds.
     private void OnDrawGizmos()
     {
         Gizmos.color = grid_color;

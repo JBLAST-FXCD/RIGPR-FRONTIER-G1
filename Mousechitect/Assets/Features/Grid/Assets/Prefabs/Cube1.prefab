@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4157129432719296686}
   - component: {fileID: 8149008976875254651}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Cube1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -57,6 +57,26 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Cube 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2423731202640210737, guid: c8cac1079366c724ebf716540dffb80f,
+        type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 5330120569468710261, guid: c8cac1079366c724ebf716540dffb80f,
+        type: 3}
+      propertyPath: m_Size.x
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5330120569468710261, guid: c8cac1079366c724ebf716540dffb80f,
+        type: 3}
+      propertyPath: m_Size.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5330120569468710261, guid: c8cac1079366c724ebf716540dffb80f,
+        type: 3}
+      propertyPath: m_Size.z
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 6131630549026816104, guid: c8cac1079366c724ebf716540dffb80f,
         type: 3}

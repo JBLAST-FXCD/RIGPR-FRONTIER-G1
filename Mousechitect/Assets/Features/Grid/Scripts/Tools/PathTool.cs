@@ -13,9 +13,6 @@ using UnityEngine;
 /// - Left mouse places a path and keeps the tool active
 /// - Right mouse quick tap cancels the current preview
 /// 
-/// NOTE:
-/// This script is designed to be enabled/disabled by a separate
-/// BuildToolController (or similar). Use SetToolEnabled() for that.
 /// </summary>
 public class PathTool : MonoBehaviour
 {
@@ -73,10 +70,7 @@ public class PathTool : MonoBehaviour
 
     // PUBLIC
 
-    /// <summary>
-    /// Enables or disables the path tool.
-    /// Called by your BuildToolController when switching tools.
-    /// </summary>
+    // Enables or disables the path tool.
     public void SetToolEnabled(bool is_enabled)
     {
         enabled = is_enabled;
@@ -88,9 +82,7 @@ public class PathTool : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Called by a UI button to select a path type by index.
-    /// </summary>
+    // Called by a UI button to select a path type by index.
     public void OnPathButtonPressed(int path_index)
     {
         if (!is_tool_active)
@@ -102,10 +94,8 @@ public class PathTool : MonoBehaviour
         StartPlacingPath(path_index);
     }
 
-    /// <summary>
-    /// Returns the movement speed modifier for a given cell.
-    /// Pathfinding can combine this with a default floor speed.
-    /// </summary>
+    // Returns the movement speed modifier for a given cell.
+    // Pathfinding can combine this with a default floor speed.
     public float GetCellSpeedModifier(Vector2Int cell)
     {
         float modifier;
@@ -117,8 +107,6 @@ public class PathTool : MonoBehaviour
 
         return 0.0f;
     }
-
-    // UNITY
 
     private void Update()
     {

@@ -16,7 +16,7 @@ public class BuildToolController : MonoBehaviour
 
     [SerializeField] private BuildingManager building_tool;
     [SerializeField] private PathTool path_tool;
-   // [SerializeField] private DestroyTool destroy_tool;
+    [SerializeField] private DestroyTool destroy_tool;
 
     private TOOL_TYPE current_tool_type = TOOL_TYPE.TOOL_TYPE_NONE;
 
@@ -41,6 +41,6 @@ public class BuildToolController : MonoBehaviour
 
         building_tool.SetToolEnabled(current_tool_type == TOOL_TYPE.TOOL_TYPE_BUILDING);
         path_tool.SetToolEnabled(current_tool_type == TOOL_TYPE.TOOL_TYPE_PATH);
-        //destroy_tool.SetToolEnabled(current_tool_type == TOOL_TYPE.TOOL_TYPE_DESTROY);
+        destroy_tool.SetToolEnabled(current_tool_type == TOOL_TYPE.TOOL_TYPE_DESTROY);
     }
 }

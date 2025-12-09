@@ -17,7 +17,7 @@ using UnityEngine;
 /// - Build mode entered from UI by selecting a building
 /// - Building spawns with reduced opacity + highlight
 /// - Player can rotate by 15 degrees using R
-/// - LMB places building, restores opacity & colour
+/// - LMB places building
 /// - Build mode exits on placement unless SHIFT is held
 /// - ESC exits build mode
 /// - RMB drag = camera rotation, RMB click = cancel preview
@@ -79,15 +79,18 @@ public class BuildingManager : MonoBehaviour
         {
             ToggleBuildMode();
         }
+        */
         
-
-        // ESC always exits build mode as per GDD
-        if (Input.GetKeyDown(KeyCode.Escape) && is_build_mode_active)
+        // Exit build mode entirely when ESC is pressed
+        if (is_build_mode_active && Input.GetKeyDown(KeyCode.Escape))
         {
             CancelBuildingPlacement();
         }
-        */
 
+        if (!is_build_mode_active)
+        {
+            return;
+        }
         if (!is_build_mode_active)
         {
             return;
@@ -109,12 +112,8 @@ public class BuildingManager : MonoBehaviour
 
     // PUBLIC FUNCTIONS
 
-    // Called by UI when the player clicks a building button.
 
-    /// <summary>
-    /// Enables or disables the building tool.
-    /// Called by BuildToolController when the player selects / deselects this tool.
-    /// </summary>
+    // Enables or disables the building tool.
     public void SetToolEnabled(bool is_enabled)
     {
         // Turn the MonoBehaviour on/off so Update() only runs when this tool is active
@@ -185,10 +184,34 @@ public class BuildingManager : MonoBehaviour
         SetBuildingOpacity(current_building, PREVIEW_OPACITY);
     }
 
+    // Removes the given cells from the occupied set.
+    // Used by DestroyTool when a placed object is removed.
+    public void ClearOccupiedCells(List<Vector2Int> cells)
+    {
+        if (cells == null)
+        {
+            return;
+        }
+
+        int i = 0;
+
+        while (i < cells.Count)
+        {
+            occupied_cells.Remove(cells[i]);
+            ++i;
+        }
+    }
+
+    // Allows UI / tool controller to cancel only the current preview
+    // without exiting build mode entirely.
+    public void CancelCurrentBuildingPreview()
+    {
+        CancelCurrentBuilding();
+    }
+
     // BUILD MODE
 
-    //Toggles the overall build mode state (debug only).
-    //Real entry point should be UI calling OnBuildingButtonPressed.
+    // Toggles the overall build mode state
     public void ToggleBuildMode()
     {
         if (is_build_mode_active)
@@ -202,7 +225,7 @@ public class BuildingManager : MonoBehaviour
     }
 
     // Enables or disables build mode.
-    //When disabled, any active preview is cleared.
+    // When disabled, any active preview is cleared.
     private void BuildMode(bool is_active)
     {
         is_build_mode_active = is_active;
@@ -455,8 +478,8 @@ public class BuildingManager : MonoBehaviour
         BuildMode(false);
     }
 
-    // Confirms the building placement.
-    // Marks the footprint cells as occupied and restores the original visuals.
+    // Confirms the building placement
+
     private void ConfirmBuildingPlacement()
     {
         if (current_preview_visual != null)
@@ -465,13 +488,28 @@ public class BuildingManager : MonoBehaviour
             current_preview_visual = null;
         }
 
-        SetBuildingOpacity(current_building, PLACED_OPACITY);
+        SetBuildingOpacity(current_building, 1.0f);
+
+        // Attach / fill footprint data so DestroyTool can free these cells later
+        PlacedObjectData placed_data = current_building.GetComponent<PlacedObjectData>();
+
+        if (placed_data == null)
+        {
+            placed_data = current_building.gameObject.AddComponent<PlacedObjectData>();
+        }
+
+        placed_data.is_path = false;
+        placed_data.occupied_cells.Clear();
 
         int i = 0;
 
         while (i < covered_cells.Count)
         {
-            occupied_cells.Add(covered_cells[i]);
+            Vector2Int cell = covered_cells[i];
+
+            placed_data.occupied_cells.Add(cell);
+            occupied_cells.Add(cell);
+
             ++i;
         }
 
@@ -479,18 +517,19 @@ public class BuildingManager : MonoBehaviour
         current_building_collider = null;
         covered_cells.Clear();
 
+        // exit build mode unless SHIFT is held
         bool is_shift_held =
             Input.GetKey(KeyCode.LeftShift) ||
             Input.GetKey(KeyCode.RightShift);
 
         if (is_shift_held)
         {
-            // holding SHIFT spawns a new copy in preview mode, build mode stays active
+            // Stay in build mode and spawn a new ghost of the same building
             StartPlacingBuilding(selected_building_index);
         }
         else
         {
-            // build mode exits after placing a building
+            // Leave build mode (this will also hide the build panel via BuildModeUI)
             BuildMode(false);
         }
     }

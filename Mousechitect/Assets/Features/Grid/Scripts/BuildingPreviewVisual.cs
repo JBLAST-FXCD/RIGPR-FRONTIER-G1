@@ -41,7 +41,7 @@ public class BuildingPreviewVisual : MonoBehaviour
     // Tints the building to indicate whether the current placement is valid.
     public void SetPreviewColor(bool is_valid)
     {
-        // GDD: blue highlight while building is in a valid placement state.
+        // blue highlight while building is in a valid placement state.
         Color tint_color = is_valid ? Color.blue : Color.red;
 
         for (int r = 0; r < renderers.Length; ++r)
