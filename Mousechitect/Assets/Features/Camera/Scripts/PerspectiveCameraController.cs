@@ -5,6 +5,8 @@ using UnityEngine;
 // Jess @ 02/12/2025
 // <summary>
 // Camera controller for perspective view that orbits while holding RMB, pans with WASD or by moving cursor to screen edge, and zooms with mouse wheel.
+// Script raycasts down to find ground distance and constrain zoom accordingly, which also constrains pitch to avoid ground clipping
+// Checks a sphere around the camera defined by camera position and the FADE_START_DISTANCE const to check for overlaps. then calls objectfading for each hit it finds to update the alpha.
 // </summary>
 
 public class PerspectiveCameraController : MonoBehaviour
