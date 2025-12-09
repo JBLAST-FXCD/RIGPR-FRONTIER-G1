@@ -2,6 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 // Jess @ 09/12/25
+//<summary>
+// This script essentially finds the renderer component on the object its assigned to, then for each renderer it finds the material which has the dissolve shader, and adjusts the alpha value by parsing in the logic from the camera script
+//</summary>
 public class ObjectFading : MonoBehaviour
 {
     private Renderer[] object_renderers;
