@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+// Jess @ 09/12/25
 public class ObjectFading : MonoBehaviour
 {
     private Renderer[] object_renderers;
