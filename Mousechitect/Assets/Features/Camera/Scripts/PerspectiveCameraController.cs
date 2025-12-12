@@ -9,7 +9,7 @@ using UnityEngine;
 // Checks a sphere around the camera defined by camera position and the FADE_START_DISTANCE const to check for overlaps. then calls objectfading for each hit it finds to update the alpha.
 // </summary>
 
-public class PerspectiveCameraController : MonoBehaviour
+public class PerspectiveCameraController : MonoBehaviour, ISaveable
 {
     public Transform target;
 
@@ -207,5 +207,28 @@ public class PerspectiveCameraController : MonoBehaviour
                 fadeable.SetObjectFade(alpha);
             }
         }
+    }
+
+    public void PopulateSaveData(GameData data)
+    {
+        data.player_data.camera_state.zoom_distance = zoom_distance;
+        data.player_data.camera_state.yaw = yaw;
+        data.player_data.camera_state.pitch = pitch;
+
+        data.player_data.camera_state.target_position = target_position_desired;
+    }
+
+    public void LoadFromSaveData(GameData data)
+    {
+        camera_save_data camera_state = data.player_data.camera_state;
+
+        zoom_distance = camera_state.zoom_distance;
+        yaw = camera_state.yaw;
+        pitch = camera_state.pitch;
+
+        target_position_current = camera_state.target_position;
+        target_position_desired = camera_state.target_position;
+
+
     }
 }
