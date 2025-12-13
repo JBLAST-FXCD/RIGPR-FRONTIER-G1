@@ -18,6 +18,7 @@ public class DestroyTool : MonoBehaviour
     [SerializeField] private Camera main_camera;
     [SerializeField] private LayerMask destroy_target_mask;
     [SerializeField] private BuildingManager building_manager;
+    [SerializeField] private PathTool path_tool;
 
     private bool is_tool_active = false;
 
@@ -149,18 +150,29 @@ public class DestroyTool : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0) && current_target != null)
         {
-            // Cache target before ClearHighlight() nulls the fields
-            GameObject target_to_destroy = current_target;
+            PlacedObjectData placed_data = current_target.GetComponent<PlacedObjectData>();
 
-            PlacedObjectData placed_data = target_to_destroy.GetComponent<PlacedObjectData>();
-
-            if (placed_data != null && building_manager != null)
+            if (placed_data == null)
             {
-                building_manager.ClearOccupiedCells(placed_data.occupied_cells);
+                return;
+            }
+
+            if (placed_data.is_path)
+            {
+                if (path_tool != null)
+                {
+                    path_tool.RemovePlacedPathById(placed_data.unique_id);
+                }
+            }
+            else
+            {
+                if (building_manager != null)
+                {
+                    building_manager.RemovePlacedBuildingById(placed_data.unique_id);
+                }
             }
 
             ClearHighlight();
-            Destroy(target_to_destroy);
         }
     }
 }

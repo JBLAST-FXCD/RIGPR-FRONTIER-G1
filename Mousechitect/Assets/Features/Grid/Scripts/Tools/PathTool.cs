@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 //Anthony - 7/12/25
 
@@ -14,8 +15,11 @@ using UnityEngine;
 /// - Right mouse quick tap cancels the current preview
 /// 
 /// </summary>
-public class PathTool : MonoBehaviour
+public class PathTool : MonoBehaviour, ISaveable
 {
+    private readonly Dictionary<string, PlacedObjectData> placed_paths_by_id =
+        new Dictionary<string, PlacedObjectData>();
+
     [System.Serializable]
     public struct PathTypeData
     {
@@ -67,6 +71,13 @@ public class PathTool : MonoBehaviour
         new Dictionary<Vector2Int, float>();
 
     private float rmb_down_time = 0.0f;
+
+    private bool is_painting_paths = false;
+    private Vector2Int last_painted_cell = new Vector2Int(int.MinValue, int.MinValue);
+
+    // prevents multiple placements in the same frame if update runs weirdly
+    private float next_paint_time = 0.0f;
+    private const float PAINT_INTERVAL_SECONDS = 0.02f;
 
     // PUBLIC
 
@@ -189,6 +200,25 @@ public class PathTool : MonoBehaviour
 
         PathTypeData path_type = path_types[selected_path_index];
 
+        // Attach / fill placed metadata so DestroyTool + save/load can identify this instance
+        PlacedObjectData placed_data = current_path.GetComponent<PlacedObjectData>();
+
+        if (placed_data == null)
+        {
+            placed_data = current_path.AddComponent<PlacedObjectData>();
+        }
+
+        placed_data.is_path = true;
+        placed_data.prefab_index = selected_path_index;
+        placed_data.speed_modifier = path_type.speed_modifier;
+
+        if (string.IsNullOrEmpty(placed_data.unique_id))
+        {
+            placed_data.unique_id = Guid.NewGuid().ToString("N");
+        }
+
+        placed_data.occupied_cells.Clear();
+
         // Mark cells as occupied and store their speed modifiers
         int i = 0;
 
@@ -199,8 +229,16 @@ public class PathTool : MonoBehaviour
             occupied_path_cells.Add(cell);
             cell_speed_modifiers[cell] = path_type.speed_modifier;
 
+            placed_data.occupied_cells.Add(cell);
+
             ++i;
         }
+
+        // also write into GridManager for pathfinding
+        grid_manager.SetPathOnCells(placed_data.occupied_cells, placed_data.speed_modifier);
+
+        // register by id for save/load + destroy delegation
+        placed_paths_by_id[placed_data.unique_id] = placed_data;
 
         current_path = null;
         current_path_collider = null;
@@ -319,7 +357,6 @@ public class PathTool : MonoBehaviour
     }
 
     // INPUT
-
     private void HandleMouseInput()
     {
         // RMB quick tap cancels the preview.
@@ -352,6 +389,7 @@ public class PathTool : MonoBehaviour
             ConfirmPlacement();
         }
     }
+
 
     // HELPERS
 
@@ -387,6 +425,155 @@ public class PathTool : MonoBehaviour
             }
 
             ++i;
+        }
+    }
+
+
+    public bool RemovePlacedPathById(string unique_id)
+    {
+        if (string.IsNullOrEmpty(unique_id))
+        {
+            return false;
+        }
+
+        PlacedObjectData placed;
+
+        if (!placed_paths_by_id.TryGetValue(unique_id, out placed))
+        {
+            return false;
+        }
+
+        // Free occupied cells
+        int i = 0;
+
+        while (i < placed.occupied_cells.Count)
+        {
+            occupied_path_cells.Remove(placed.occupied_cells[i]);
+            ++i;
+        }
+
+        // Clear speed modifiers
+        grid_manager.SetPathOnCells(placed.occupied_cells, 0.0f);
+
+        placed_paths_by_id.Remove(unique_id);
+
+        if (placed != null)
+        {
+            Destroy(placed.gameObject);
+        }
+
+        return true;
+    }
+    public void PopulateSaveData(GameData data)
+    {
+        if (data == null || data.path_data == null)
+        {
+            return;
+        }
+
+        data.path_data.paths.Clear();
+
+        foreach (KeyValuePair<string, PlacedObjectData> kvp in placed_paths_by_id)
+        {
+            PlacedObjectData placed = kvp.Value;
+
+            if (placed == null)
+            {
+                continue;
+            }
+
+            path_save_data entry = new path_save_data();
+            entry.unique_id = placed.unique_id;
+            entry.path_type_index = placed.prefab_index;
+            entry.position = placed.transform.position;
+            entry.rotation = placed.transform.rotation;
+            entry.speed_modifier = placed.speed_modifier;
+
+            entry.occupied_cells = new List<Vector2Int>();
+            int i = 0;
+
+            while (i < placed.occupied_cells.Count)
+            {
+                entry.occupied_cells.Add(placed.occupied_cells[i]);
+                ++i;
+            }
+
+            data.path_data.paths.Add(entry);
+        }
+    }
+
+    public void LoadFromSaveData(GameData data)
+    {
+        if (data == null || data.path_data == null || data.path_data.paths == null)
+        {
+            return;
+        }
+
+        // Destroy existing paths
+        foreach (KeyValuePair<string, PlacedObjectData> kvp in placed_paths_by_id)
+        {
+            if (kvp.Value != null)
+            {
+                Destroy(kvp.Value.gameObject);
+            }
+        }
+
+        placed_paths_by_id.Clear();
+        occupied_path_cells.Clear();
+
+        // Clear all path modifiers
+
+        int p = 0;
+
+        while (p < data.path_data.paths.Count)
+        {
+            path_save_data entry = data.path_data.paths[p];
+
+            if (entry.path_type_index < 0 || entry.path_type_index >= path_types.Length)
+            {
+                ++p;
+                continue;
+            }
+
+            GameObject new_path = Instantiate(
+                path_types[entry.path_type_index].path_prefab,
+                entry.position,
+                entry.rotation
+            );
+
+            PlacedObjectData placed = new_path.GetComponent<PlacedObjectData>();
+
+            if (placed == null)
+            {
+                placed = new_path.AddComponent<PlacedObjectData>();
+            }
+
+            placed.unique_id = entry.unique_id;
+            placed.prefab_index = entry.path_type_index;
+            placed.is_path = true;
+            placed.speed_modifier = entry.speed_modifier;
+
+            placed.occupied_cells.Clear();
+
+            if (entry.occupied_cells != null)
+            {
+                int i = 0;
+
+                while (i < entry.occupied_cells.Count)
+                {
+                    Vector2Int cell = entry.occupied_cells[i];
+                    placed.occupied_cells.Add(cell);
+                    occupied_path_cells.Add(cell);
+                    ++i;
+                }
+            }
+
+            // Restore speed modifiers for pathfinding
+            grid_manager.SetPathOnCells(placed.occupied_cells, placed.speed_modifier);
+
+            placed_paths_by_id[placed.unique_id] = placed;
+
+            ++p;
         }
     }
 }

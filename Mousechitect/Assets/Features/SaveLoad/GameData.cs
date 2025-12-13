@@ -17,12 +17,14 @@ public class GameData
     public PlayerData player_data;
     public BuildingData building_data;
     public ResearchData research_data;
+    public PathData path_data;
 
     public GameData()
     {
         player_data = new PlayerData();
         building_data = new BuildingData();
         research_data = new ResearchData();
+        path_data = new PathData();
     }
 }
 
@@ -49,15 +51,38 @@ public class BuildingData
     }
 }
 
+[System.Serializable]
+public class PathData
+{
+    public List<path_save_data> paths;
+    public PathData()
+    {
+        paths = new List<path_save_data>();
+    }
+}
+
 // to be implemented
 [System.Serializable]
 public struct building_save_data
 {
-    public string building_id;
-    public Vector3 building_position;
-    public Quaternion building_rotation;
-    public int building_level;
+    public string unique_id;
+    public int prefab_index;
+    public Vector3 position;
+    public Quaternion rotation;
+    public List<Vector2Int> occupied_cells;
 }
+
+[System.Serializable]
+public struct path_save_data
+{
+    public string unique_id;
+    public int path_type_index;
+    public Vector3 position;
+    public Quaternion rotation;
+    public float speed_modifier;
+    public List<Vector2Int> occupied_cells;
+}
+
 [System.Serializable]
 public struct camera_save_data
 {

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System; // for Guid
 
 //Anthony Grummett - 2/12/25
 
@@ -22,8 +23,11 @@ using UnityEngine;
 /// - ESC exits build mode
 /// - RMB drag = camera rotation, RMB click = cancel preview
 /// </summary>
-public class BuildingManager : MonoBehaviour
+public class BuildingManager : MonoBehaviour, ISaveable
 {
+    private readonly Dictionary<string, PlacedObjectData> placed_buildings_by_id =
+    new Dictionary<string, PlacedObjectData>();
+
     private const float RAYCAST_MAX_DISTANCE = 5000.0f;
     private const float CELL_BOUNDS_EPSILON = 0.001f;
     private const float PREVIEW_OPACITY = 0.6f;
@@ -71,6 +75,9 @@ public class BuildingManager : MonoBehaviour
 
     // Cells under the current preview building
     private readonly List<Vector2Int> covered_cells = new List<Vector2Int>();
+
+    // Track placed buildings so we can save/load them.
+    private readonly List<PlacedObjectData> placed_buildings = new List<PlacedObjectData>();
 
     private void Update()
     {
@@ -501,6 +508,14 @@ public class BuildingManager : MonoBehaviour
         placed_data.is_path = false;
         placed_data.occupied_cells.Clear();
 
+        placed_data.is_path = false;
+        placed_data.prefab_index = selected_building_index;
+
+        if (string.IsNullOrEmpty(placed_data.unique_id))
+        {
+            placed_data.unique_id = Guid.NewGuid().ToString("N");
+        }
+
         int i = 0;
 
         while (i < covered_cells.Count)
@@ -509,6 +524,7 @@ public class BuildingManager : MonoBehaviour
 
             placed_data.occupied_cells.Add(cell);
             occupied_cells.Add(cell);
+            placed_buildings_by_id[placed_data.unique_id] = placed_data;
 
             ++i;
         }
@@ -570,6 +586,142 @@ public class BuildingManager : MonoBehaviour
             }
 
             ++i;
+        }
+    }
+
+    public bool RemovePlacedBuildingById(string unique_id)
+    {
+        if (string.IsNullOrEmpty(unique_id))
+        {
+            return false;
+        }
+
+        PlacedObjectData placed_data;
+
+        if (!placed_buildings_by_id.TryGetValue(unique_id, out placed_data))
+        {
+            return false;
+        }
+
+        // Free cells in grid manager
+        ClearOccupiedCells(placed_data.occupied_cells);
+
+        placed_buildings_by_id.Remove(unique_id);
+
+        if (placed_data != null)
+        {
+            Destroy(placed_data.gameObject);
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Writes all placed buildings into GameData for saving.
+    /// </summary>
+    public void PopulateSaveData(GameData data)
+    {
+        if (data == null || data.building_data == null)
+        {
+            return;
+        }
+
+        data.building_data.buildings.Clear();
+
+        foreach (KeyValuePair<string, PlacedObjectData> kvp in placed_buildings_by_id)
+        {
+            PlacedObjectData placed = kvp.Value;
+
+            if (placed == null)
+            {
+                continue;
+            }
+
+            building_save_data entry = new building_save_data();
+            entry.unique_id = placed.unique_id;
+            entry.prefab_index = placed.prefab_index;
+            entry.position = placed.transform.position;
+            entry.rotation = placed.transform.rotation;
+
+            entry.occupied_cells = new List<Vector2Int>();
+            int i = 0;
+
+            while (i < placed.occupied_cells.Count)
+            {
+                entry.occupied_cells.Add(placed.occupied_cells[i]);
+                ++i;
+            }
+
+            data.building_data.buildings.Add(entry);
+        }
+    }
+
+    public void LoadFromSaveData(GameData data)
+    {
+        if (data == null || data.building_data == null || data.building_data.buildings == null)
+        {
+            return;
+        }
+
+        // Clear existing placed buildings
+        foreach (KeyValuePair<string, PlacedObjectData> kvp in placed_buildings_by_id)
+        {
+            if (kvp.Value != null)
+            {
+                Destroy(kvp.Value.gameObject);
+            }
+        }
+
+        placed_buildings_by_id.Clear();
+        occupied_cells.Clear();
+
+        int b = 0;
+
+        while (b < data.building_data.buildings.Count)
+        {
+            building_save_data entry = data.building_data.buildings[b];
+
+            if (entry.prefab_index < 0 || entry.prefab_index >= building_prefabs.Length)
+            {
+                ++b;
+                continue;
+            }
+
+            GameObject new_building = Instantiate(
+                building_prefabs[entry.prefab_index],
+                entry.position,
+                entry.rotation
+            );
+
+            PlacedObjectData placed = new_building.GetComponent<PlacedObjectData>();
+
+            if (placed == null)
+            {
+                placed = new_building.AddComponent<PlacedObjectData>();
+            }
+
+            placed.unique_id = entry.unique_id;
+            placed.prefab_index = entry.prefab_index;
+            placed.is_path = false;
+
+            placed.occupied_cells.Clear();
+
+            if (entry.occupied_cells != null)
+            {
+                int i = 0;
+
+                while (i < entry.occupied_cells.Count)
+                {
+                    Vector2Int cell = entry.occupied_cells[i];
+                    placed.occupied_cells.Add(cell);
+                    occupied_cells.Add(cell);
+                    ++i;
+                }
+            }
+
+            placed_buildings_by_id[placed.unique_id] = placed;
+
+            ++b;
         }
     }
 }
