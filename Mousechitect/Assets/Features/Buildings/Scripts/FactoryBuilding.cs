@@ -5,10 +5,33 @@ using UnityEngine;
 public class FactoryBuilding : ParentBuilding
 {
     //first element is for rarity and second element is for cheese type.
-    [SerializeField] protected CheeseTemp[,] cheesetypes;
+    [SerializeField] protected CheeseTemp[,] cheese_types;
+    [SerializeField] protected int[] scrap_costs;
 
-    protected int selectedcheese;
-    protected CheeseTemp cheesetype;
+    protected CheeseTemp cheese_type;
+    protected int scrap_cost;
+
+    //Delete these varibles when script is connect to global cheese and scrap counter
+    protected int cheese;
+    protected int scrap;
+
+
+    protected float stored_milk;
+    protected bool  produce_cheese;
+    protected bool  factory_switch;
+
+    public FactoryBuilding()
+    {
+        cheese_type = new CheeseTemp();
+
+        //Delete these varibles when script is connect to global cheese and scrap counter
+        cheese = 0;
+        scrap = 0;
+
+        stored_milk = 0;
+        produce_cheese = false;
+        factory_switch = true;
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -16,9 +39,88 @@ public class FactoryBuilding : ParentBuilding
         
     }
 
+    protected new void Update()
+    {
+        //This is for debuging.
+        //Later this will be a bottun in the UI.
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            if (produce_cheese)
+                produce_cheese = false;
+            else
+                produce_cheese = true;
+
+            ProduceCheese(produce_cheese);
+        }
+    }
+
     //for player to select cheese
     protected void SelectCheese(int input) 
     {
-        cheesetype = cheesetypes[tier - 1, input];
+        cheese_type = cheese_types[tier - 1, input];
+    }
+    protected new void TierSelection()
+    {
+        building_prefab = building_prefabs[tier - 1];
+        capacity        = capacitys[tier - 1];
+        scrap_cost      = scrap_costs[tier - 1];
+    }
+
+    protected void UpdradeFactory()
+    {
+        if (scrap >= scrap_cost)
+        {
+            scrap -= scrap_cost;
+            factory_switch = false;
+            Invoke(nameof(UpdateTier), 60.0f);
+        }
+    }
+
+    protected new void UpdateTier()
+    {
+        tier++;
+        if (tier > 0 && tier <= capacitys.Length)
+        {
+            Destroy(building);
+            TierSelection();
+            building_prefab.transform.localPosition = new Vector3(0, 0, 0);
+            building = Instantiate(building_prefab, gameObject.transform);
+            factory_switch = true;
+        }
+    }
+
+    //creates
+    protected void CheeseProduction()
+    {
+        if (cheese_type.GetMilkCost() >= stored_milk && produce_cheese == true)
+            Invoke(nameof(CreateCheese), cheese_type.GetProductionTime());
+    }
+
+    //This is apart of CheeseProduction() and is called when its invoked.
+    protected void CreateCheese()
+    {
+        //Later replace cheese with global cheese counter
+        cheese++;
+        stored_milk -= cheese_type.GetMilkCost();
+
+        //Repeat cheese prodution until milk runs out or player switches produce_cheese to false
+        CheeseProduction();
+    }
+
+    //For player to create cheese when factory is running
+    protected void ProduceCheese(bool input)
+    {
+        if (factory_switch == true)
+        {
+            produce_cheese = input;
+            CheeseProduction();
+        }
+    }
+
+    //Fits GDD requirement of making cheese when theres enough milk
+    protected void AddMilk(float milk)
+    {
+        stored_milk += milk;
+        CheeseProduction();
     }
 }

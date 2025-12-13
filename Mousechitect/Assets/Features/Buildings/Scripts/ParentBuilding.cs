@@ -51,13 +51,18 @@ public class ParentBuilding : MonoBehaviour
         }
     }
 
+    protected void TierSelection()
+    {
+        building_prefab = building_prefabs[tier - 1];
+        capacity        = capacitys[tier - 1];
+    }
+
     //The funtionb allows for diffrent varition depending on the designers choise and can be used for when the player upgrades the building.
     protected void ConstructTier() 
     {
         if (tier > 0 && tier <= capacitys.Length)
         {
-            building_prefab = building_prefabs[tier - 1];
-            capacity = capacitys[tier - 1];
+            TierSelection();
             building_prefab.transform.localPosition = new Vector3(0, 0, 0);
             building = Instantiate(building_prefab, gameObject.transform);
         }
@@ -69,8 +74,7 @@ public class ParentBuilding : MonoBehaviour
         if (tier > 0 && tier <= capacitys.Length)
         {
             Destroy(building);
-            building_prefab = building_prefabs[tier - 1];
-            capacity = capacitys[tier - 1];
+            TierSelection();
             building_prefab.transform.localPosition = new Vector3(0, 0, 0);
             building = Instantiate(building_prefab, gameObject.transform);
         }

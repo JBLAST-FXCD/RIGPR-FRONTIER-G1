@@ -19,15 +19,10 @@ public class ResidentialBuilding : ParentBuilding
         
     }
 
-    private void ConstructTier()
+    protected new void TierSelection()
     {
-        if (tier > 0 && tier <= capacitys.Length)
-        {
-            building_prefab = building_prefabs[tier - 1];
-            capacity = capacitys[tier - 1];
-            quality = max_quality[tier - 1];
-            building_prefab.transform.localPosition = new Vector3(0, 0, 0);
-            building = Instantiate(building_prefab, gameObject.transform);
-        }
+        building_prefab = building_prefabs[tier - 1];
+        capacity        = capacitys[tier - 1];
+        quality         = max_quality[tier - 1];
     }
 }
