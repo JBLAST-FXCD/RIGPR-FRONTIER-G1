@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
+using System.Diagnostics.Contracts;
 using UnityEngine;
 
 // Iain Benner 05/12/2025
@@ -9,18 +11,18 @@ using UnityEngine;
 /// On start the correct varition of the building is picked.
 /// Mice can enter and leave the building.
 /// </summary>
-public class ParentBuilding : MonoBehaviour, ISaveable
+public class ParentBuilding : MonoBehaviour
 {
     //Varibles for designers to create tiers.
     [SerializeField] protected GameObject[] building_prefabs;
-    [SerializeField] protected int[]        capacitys;
-    [SerializeField] protected int          tier;
+    [SerializeField] protected int[] capacitys;
+    [SerializeField] protected int tier;
 
     //Varibles to select the correct paramiters for the tier.
-    protected GameObject      building_prefab;
-    protected GameObject      building;
+    protected GameObject building_prefab;
+    protected GameObject building;
     protected List<MouseTemp> mouse_occupants;
-    protected int             capacity;
+    protected int capacity;
 
     public ParentBuilding()
     {
@@ -54,11 +56,11 @@ public class ParentBuilding : MonoBehaviour, ISaveable
     protected void TierSelection()
     {
         building_prefab = building_prefabs[tier - 1];
-        capacity        = capacitys[tier - 1];
+        capacity = capacitys[tier - 1];
     }
 
     //The funtionb allows for diffrent varition depending on the designers choise and can be used for when the player upgrades the building.
-    protected void ConstructTier() 
+    protected void ConstructTier()
     {
         if (tier > 0 && tier <= capacitys.Length)
         {
@@ -117,18 +119,26 @@ public class ParentBuilding : MonoBehaviour, ISaveable
         mouse.transform.gameObject.SetActive(true);
     }
 
-    public void PopulateSaveData(GameData data) 
+    public void PopulateInstanceSaveData(ref building_save_data data)
     {
-        data.Parent_Building.building_prefabs = building_prefabs;
-        data.Parent_Building.capacitys = capacitys;
-        data.Parent_Building.tier = tier;
-    }
-    public void LoadFromSaveData(GameData data) 
-    {
-        building_prefabs = data.Parent_Building.building_prefabs;
-        capacitys = data.Parent_Building.capacitys;
-        tier = data.Parent_Building.tier;
+        data.tier = tier;
+        data.mouse_ids = new List<string>();
 
-        Start();
+        for (int i = 0; i < mouse_occupants.Count; i++)
+        {
+            data.mouse_ids.Add(mouse_occupants[i].GetMouseID());
+        }
+    }
+
+    public void PopulateInstanceLoadData(ref building_save_data data, MouseTemp mouse)
+    {
+        tier = data.tier;
+        mouse_occupants = new List<MouseTemp>();
+
+        for (int i = 0; i < data.mouse_ids.Count; i++)
+        {
+            if (mouse.GetMouseID() == data.mouse_ids[i])
+                mouse_occupants.Add(mouse);
+        }
     }
 }

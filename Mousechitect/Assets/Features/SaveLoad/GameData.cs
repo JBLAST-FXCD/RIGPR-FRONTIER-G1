@@ -15,7 +15,6 @@ using UnityEngine;
 public class GameData
 {
     public PlayerData player_data;
-    public ParentBuildingData Parent_Building; 
     public BuildingData building_data;
     public ResearchData research_data;
     public PathData path_data;
@@ -23,7 +22,6 @@ public class GameData
     public GameData()
     {
         player_data = new PlayerData();
-        Parent_Building = new ParentBuildingData();
         building_data = new BuildingData();
         research_data = new ResearchData();
         path_data = new PathData();
@@ -40,15 +38,6 @@ public class PlayerData
     public string city_name;
 
     public camera_save_data camera_state;
-}
-
-// to be implemented
-[System.Serializable]
-public class ParentBuildingData
-{
-    public GameObject[] building_prefabs;
-    public int[] capacitys;
-    public int tier;
 }
 
 // to be implemented
@@ -81,6 +70,9 @@ public struct building_save_data
     public Vector3 position;
     public Quaternion rotation;
     public List<Vector2Int> occupied_cells;
+
+    public int tier;
+    public List<string> mouse_ids;
 }
 
 [System.Serializable]

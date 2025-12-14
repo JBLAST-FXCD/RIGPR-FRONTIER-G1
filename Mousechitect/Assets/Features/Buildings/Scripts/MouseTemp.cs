@@ -3,10 +3,17 @@ using UnityEngine;
 
 public class MouseTemp : MonoBehaviour
 {
+    protected string mouse_id;
+
+    public string GetMouseID()
+    {
+        return mouse_id;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
-
+        mouse_id = System.Guid.NewGuid().ToString("N");
     }
 
     // Update is called once per frame
