@@ -129,16 +129,4 @@ public class ParentBuilding : MonoBehaviour
             data.mouse_ids.Add(mouse_occupants[i].GetMouseID());
         }
     }
-
-    public void PopulateInstanceLoadData(ref building_save_data data, MouseTemp mouse)
-    {
-        tier = data.tier;
-        mouse_occupants = new List<MouseTemp>();
-
-        for (int i = 0; i < data.mouse_ids.Count; i++)
-        {
-            if (mouse.GetMouseID() == data.mouse_ids[i])
-                mouse_occupants.Add(mouse);
-        }
-    }
 }
