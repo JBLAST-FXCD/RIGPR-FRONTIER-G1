@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,20 +9,20 @@ using UnityEngine;
 /// On start the correct varition of the building is picked.
 /// Mice can enter and leave the building.
 /// </summary>
-public class parent_building : MonoBehaviour
+public class ParentBuilding : MonoBehaviour
 {
     //Varibles for designers to create tiers.
-    [SerializeField] private GameObject[] building_prefabs;
-    [SerializeField] private int[]        capacitys;
-    [SerializeField] private int          tier;
+    [SerializeField] protected GameObject[] building_prefabs;
+    [SerializeField] protected int[]        capacitys;
+    [SerializeField] protected int          tier;
 
     //Varibles to select the correct paramiters for the tier.
-    private GameObject      building_prefab;
-    private GameObject      building;
-    private List<MouseTemp> mouse_occupants;
-    private int             capacity;
+    protected GameObject      building_prefab;
+    protected GameObject      building;
+    protected List<MouseTemp> mouse_occupants;
+    protected int             capacity;
 
-    parent_building()
+    public ParentBuilding()
     {
         building_prefab = null;
         mouse_occupants = new List<MouseTemp>();
@@ -50,33 +51,37 @@ public class parent_building : MonoBehaviour
         }
     }
 
+    protected void TierSelection()
+    {
+        building_prefab = building_prefabs[tier - 1];
+        capacity        = capacitys[tier - 1];
+    }
+
     //The funtionb allows for diffrent varition depending on the designers choise and can be used for when the player upgrades the building.
-    private void ConstructTier() 
+    protected void ConstructTier() 
     {
         if (tier > 0 && tier <= capacitys.Length)
         {
-            building_prefab = building_prefabs[tier - 1];
-            capacity = capacitys[tier - 1];
+            TierSelection();
             building_prefab.transform.localPosition = new Vector3(0, 0, 0);
             building = Instantiate(building_prefab, gameObject.transform);
         }
     }
 
-    private void UpdateTier()
+    protected void UpdateTier()
     {
         tier++;
         if (tier > 0 && tier <= capacitys.Length)
         {
             Destroy(building);
-            building_prefab = building_prefabs[tier - 1];
-            capacity = capacitys[tier - 1];
+            TierSelection();
             building_prefab.transform.localPosition = new Vector3(0, 0, 0);
             building = Instantiate(building_prefab, gameObject.transform);
         }
     }
 
     //Mouse is storded and turned off to make effetivly inside the building.
-    private void OnTriggerEnter(Collider other)
+    protected void OnTriggerEnter(Collider other)
     {
         if (other != null && other.tag == "MouseTemp" && mouse_occupants.Count < capacity)
         {
@@ -86,7 +91,7 @@ public class parent_building : MonoBehaviour
     }
 
     //checks building rotion to place the mice on the right side to stop mice appaering inside building.
-    private void MouseLeave(MouseTemp mouse)
+    protected void MouseLeave(MouseTemp mouse)
     {
         Vector3 new_loc = mouse.transform.localPosition;
 
