@@ -9,7 +9,7 @@ using UnityEngine;
 /// On start the correct varition of the building is picked.
 /// Mice can enter and leave the building.
 /// </summary>
-public class ParentBuilding : MonoBehaviour
+public class ParentBuilding : MonoBehaviour, ISaveable
 {
     //Varibles for designers to create tiers.
     [SerializeField] protected GameObject[] building_prefabs;
@@ -115,5 +115,20 @@ public class ParentBuilding : MonoBehaviour
 
         mouse.transform.localPosition = new_loc;
         mouse.transform.gameObject.SetActive(true);
+    }
+
+    public void PopulateSaveData(GameData data) 
+    {
+        data.Parent_Building.building_prefabs = building_prefabs;
+        data.Parent_Building.capacitys = capacitys;
+        data.Parent_Building.tier = tier;
+    }
+    public void LoadFromSaveData(GameData data) 
+    {
+        building_prefabs = data.Parent_Building.building_prefabs;
+        capacitys = data.Parent_Building.capacitys;
+        tier = data.Parent_Building.tier;
+
+        Start();
     }
 }
