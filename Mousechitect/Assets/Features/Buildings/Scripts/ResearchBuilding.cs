@@ -2,6 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// Iain Benner 05/12/2025
+
+/// <summary>
+/// class can research node with timer and subtract costs and set node to has been researched
+/// </summary>
 public class ResearchBuilding : ParentBuilding
 {
     //Delete these varibles when script is connect to global cheese and scrap counter

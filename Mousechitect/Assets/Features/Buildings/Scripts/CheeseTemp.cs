@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class CheeseTemp : MonoBehaviour
 {
-    [SerializeField] protected int[] scrap_values;
-    [SerializeField] protected int select_value;
+    protected int[] scrap_values;
+    protected int select_value;
 
     protected int scrap_value;
     protected float prodution_time;

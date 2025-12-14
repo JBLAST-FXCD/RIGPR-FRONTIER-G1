@@ -2,10 +2,18 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// Iain Benner 05/12/2025
+
+/// <summary>
+/// select cheese funtion is ready for player input to select cheese.
+/// the scrap cost for building changes depending on tier and upgrading building has delay.
+/// cheese is produced with delay and milk cost dependent on type of cheese.
+/// cheese is made if theres enough milk or player input fitting GDD.
+/// </summary>
 public class FactoryBuilding : ParentBuilding
 {
     //first element is for rarity and second element is for cheese type.
-    [SerializeField] protected CheeseTemp[,] cheese_types;
+    [SerializeField] protected CheeseTemp[,] cheese_amount;
     [SerializeField] protected int[] scrap_costs;
 
     protected CheeseTemp cheese_type;
@@ -57,7 +65,7 @@ public class FactoryBuilding : ParentBuilding
     //for player to select cheese
     protected void SelectCheese(int input) 
     {
-        cheese_type = cheese_types[tier - 1, input];
+        cheese_type = cheese_amount[tier - 1, input];
     }
     protected new void TierSelection()
     {
@@ -66,6 +74,7 @@ public class FactoryBuilding : ParentBuilding
         scrap_cost      = scrap_costs[tier - 1];
     }
 
+    //Delay is hard coded because theres variation in the GDD
     protected void UpdradeFactory()
     {
         if (scrap >= scrap_cost)
@@ -89,7 +98,7 @@ public class FactoryBuilding : ParentBuilding
         }
     }
 
-    //creates
+    //Each cheese has production time
     protected void CheeseProduction()
     {
         if (cheese_type.GetMilkCost() >= stored_milk && produce_cheese == true)
@@ -120,7 +129,10 @@ public class FactoryBuilding : ParentBuilding
     //Fits GDD requirement of making cheese when theres enough milk
     protected void AddMilk(float milk)
     {
-        stored_milk += milk;
-        CheeseProduction();
+        if (factory_switch == true)
+        {
+            stored_milk += milk;
+            CheeseProduction();
+        }
     }
 }

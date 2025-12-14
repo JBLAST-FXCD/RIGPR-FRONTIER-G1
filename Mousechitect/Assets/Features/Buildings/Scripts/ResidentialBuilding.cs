@@ -2,6 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// Iain Benner 14/12/2025
+
+/// <summary>
+/// only difrence from ResidentialBuilding and ParentBuilding is quality matric  
+/// </summary>
 public class ResidentialBuilding : ParentBuilding
 {
     [SerializeField] protected int[] max_quality;
