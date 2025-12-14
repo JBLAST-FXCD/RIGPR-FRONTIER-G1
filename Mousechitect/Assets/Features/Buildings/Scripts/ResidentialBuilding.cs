@@ -18,12 +18,6 @@ public class ResidentialBuilding : ParentBuilding
         quality = 0;
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
     protected new void TierSelection()
     {
         building_prefab = building_prefabs[tier - 1];

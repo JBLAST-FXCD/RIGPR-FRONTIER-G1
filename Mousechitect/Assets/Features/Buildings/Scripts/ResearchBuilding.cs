@@ -20,12 +20,6 @@ public class ResearchBuilding : ParentBuilding
         scrap  = 0;
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-
-    }
-
     //The player will call the funtion through the UI 
     protected void ResearchNode(ResearchTreeTemp tree)
     {

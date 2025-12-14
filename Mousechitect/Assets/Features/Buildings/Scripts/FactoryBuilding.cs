@@ -41,12 +41,6 @@ public class FactoryBuilding : ParentBuilding
         factory_switch = true;
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
     protected new void Update()
     {
         //This is for debuging.
