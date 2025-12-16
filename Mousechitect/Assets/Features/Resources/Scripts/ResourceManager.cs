@@ -7,7 +7,7 @@ using TMPro;
 /// This script handles the resource count (scrap & cheese) as well as purchase logic.
 /// </summary>
 
-public class ResourceManager : MonoBehaviour
+public class ResourceManager : MonoBehaviour, ISaveable
 {
     private const int INITIAL_SCRAP = 100;
 
@@ -76,5 +76,15 @@ public class ResourceManager : MonoBehaviour
         {
             cheese_text.text = "Cheese: " + current_cheese;
         }
+    }
+
+    public void PopulateSaveData(GameData data)
+    {
+        data.player_data.money = this.currentMoney;
+    }
+
+    public void LoadFromSaveData(GameData data)
+    {
+        this.currentMoney = data.player_data.money;
     }
 }
