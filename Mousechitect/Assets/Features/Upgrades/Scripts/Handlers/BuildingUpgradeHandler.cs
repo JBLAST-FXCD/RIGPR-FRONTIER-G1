@@ -10,10 +10,13 @@ using System.Collections.Generic;
 /// Also ensures prerequisites in the upgrade tree are met before an upgrade is purchasable.
 /// </summary>
 
-public abstract class BuildingUpgradeHandler : MonoBehaviour
+public abstract class BuildingUpgradeHandler : MonoBehaviour, ISaveable
 {
-    [Header("Config")]
+    [Header("Save Data")]
+    public string unique_id;
+    public int prefab_index;
 
+    [Header("Config")]
     public List<UpgradeDefinition> AvailableUpgrades;
 
     protected HashSet<string> UnlockedUpgradeIDs = new HashSet<string>();
@@ -65,6 +68,33 @@ public abstract class BuildingUpgradeHandler : MonoBehaviour
         }
 
         return true;
+    }
+
+    public void PopulateSaveData(GameData data)
+    {
+        building_save_data saveData = new building_save_data();
+
+        saveData.unique_id = this.unique_id;
+        saveData.prefab_index = this.prefab_index;
+        saveData.position = transform.position;
+        saveData.rotation = transform.rotation;
+        saveData.occupied_cells = new List<Vector2Int>();
+
+        data.building_data.buildings.Add(saveData);
+    }
+
+    public void LoadFromSaveData(GameData data)
+    {
+        foreach (var savedBuilding in data.building_data.buildings)
+        {
+            if (savedBuilding.unique_id == this.unique_id)
+            {
+                transform.position = savedBuilding.position;
+                transform.rotation = savedBuilding.rotation;
+
+                return;
+            }
+        }
     }
 
     protected abstract void ApplyUpgradeEffect(UpgradeDefinition upgrade);
