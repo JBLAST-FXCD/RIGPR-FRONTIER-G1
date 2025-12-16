@@ -1,21 +1,26 @@
 using UnityEngine;
 using System.Collections.Generic;
 
+//// Hani Hailston 14/12/2025
+
 /// <summary>
-/// Abstract Base Class for the upgrade system,  meaning this script should not be attached to building objects. Attach ResidentialUpgradeHandler, CommercialUpgradeHandler etc instead.
+/// Abstract Base Class for the upgrade system, meaning this script should not be attached to building objects. 
+/// Attach ResidentialUpgradeHandler, CommercialUpgradeHandler etc instead.
 /// Handles the 'spending' logic: checking costs against resource availability via the ResourceManager.
 /// Also ensures prerequisites in the upgrade tree are met before an upgrade is purchasable.
 /// </summary>
+
 public abstract class BuildingUpgradeHandler : MonoBehaviour
 {
     [Header("Config")]
-    public List<UpgradeDefinition> availableUpgrades;
-    protected HashSet<string> unlockedUpgradeIDs = new HashSet<string>();
-    protected abstract void ApplyUpgradeEffect(UpgradeDefinition upgrade);
+
+    public List<UpgradeDefinition> AvailableUpgrades;
+
+    protected HashSet<string> UnlockedUpgradeIDs = new HashSet<string>();
 
     public bool TryPurchaseUpgrade(UpgradeDefinition upgrade)
     {
-        if (ResourceManager.Instance == null)
+        if (ResourceManager.instance == null)
         {
             Debug.LogError("ResourceManager not present in scene!");
             return false;
@@ -27,12 +32,16 @@ public abstract class BuildingUpgradeHandler : MonoBehaviour
             return false;
         }
 
-        if (ResourceManager.Instance.CanAfford(upgrade.scrapCost, upgrade.cheeseCost))
+        if (ResourceManager.instance.CanAfford(upgrade.scrap_cost, upgrade.cheese_cost))
         {
-            ResourceManager.Instance.SpendResources(upgrade.scrapCost, upgrade.cheeseCost);
-            unlockedUpgradeIDs.Add(upgrade.upgradeID);
+            ResourceManager.instance.SpendResources(upgrade.scrap_cost, upgrade.cheese_cost);
+
+            UnlockedUpgradeIDs.Add(upgrade.upgrade_id);
+
             ApplyUpgradeEffect(upgrade);
-            Debug.Log($"Purchased: {upgrade.upgradeName}");
+
+            Debug.Log($"Purchased: {upgrade.upgrade_name}");
+
             return true;
         }
 
@@ -42,11 +51,21 @@ public abstract class BuildingUpgradeHandler : MonoBehaviour
 
     public bool CanUnlock(UpgradeDefinition upgrade)
     {
-        if (unlockedUpgradeIDs.Contains(upgrade.upgradeID)) return false;
-        if (upgrade.requiredPrerequisite != null)
+        if (UnlockedUpgradeIDs.Contains(upgrade.upgrade_id))
         {
-            if (!unlockedUpgradeIDs.Contains(upgrade.requiredPrerequisite.upgradeID)) return false;
+            return false;
         }
+
+        if (upgrade.required_prerequisite != null)
+        {
+            if (!UnlockedUpgradeIDs.Contains(upgrade.required_prerequisite.upgrade_id))
+            {
+                return false;
+            }
+        }
+
         return true;
     }
+
+    protected abstract void ApplyUpgradeEffect(UpgradeDefinition upgrade);
 }

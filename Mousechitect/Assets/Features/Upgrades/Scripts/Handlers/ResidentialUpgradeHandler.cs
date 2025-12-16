@@ -1,71 +1,119 @@
 using UnityEngine;
 using System.Collections;
 
+//// Hani Hailston 14/12/2025
+
 /// <summary>
 /// Manages all upgrades for residential buildings.
 /// Handles morale boosting, the population cap on each residential building type, unlockables and passive cheese generation.
 /// </summary>
+
 public class ResidentialUpgradeHandler : BuildingUpgradeHandler
 {
+    private const string ID_MORALE_SMALL = "RES_2_1";
+    private const string ID_POP_SMALL = "RES_2_2";
+    private const string ID_PASSIVE_TELLY = "RES_2_3";
+    private const string ID_UNLOCK_MANOR = "RES_3";
+    private const string ID_MORALE_LARGE = "RES_4_1";
+    private const string ID_POP_LARGE = "RES_4_2";
+    private const string ID_PASSIVE_BIG = "RES_4_3";
+    private const string ID_RAPID_CONSTRUCTION = "RES_5";
+    private const string ID_UNLOCK_FLATS = "RES_6";
+
+    private const float SECONDS_IN_MINUTE = 60.0f;
+    private const float DEFAULT_MORALE_SMALL = 0.10f;
+    private const float DEFAULT_MORALE_LARGE = 0.15f;
+    private const int DEFAULT_NEIGHBOR_SMALL = 1;
+    private const int DEFAULT_NEIGHBOR_LARGE = 3;
+    private const int DEFAULT_TELLY_AMOUNT = 5;
+    private const float DEFAULT_TELLY_INTERVAL = 15.0f;
+    private const int DEFAULT_BIG_CHEESE_AMOUNT = 10;
+    private const float DEFAULT_BIG_CHEESE_INTERVAL = 10.0f;
+
     [Header("Base Stats (Only Editable In-Script)")]
-    public float currentMoraleMultiplier = 1.0f;
-    public int globalPopulationCapBonus = 0;
-    public bool rapidConstructionActive = false;
+    public float current_morale_multiplier = 1.0f;
+
+    public int global_population_cap_bonus = 0;
+
+    public bool is_rapid_construction_active = false;
 
     [Header("Configurables - RES Building Bonuses")]
-    [SerializeField] private float moraleBonusSmall = 0.10f;
-    [SerializeField] private float moraleBonusLarge = 0.15f;
-    [SerializeField] private int neighborPopBonusSmall = 1;
-    [SerializeField] private int neighborPopBonusLarge = 3;
+    [SerializeField]
+    private float morale_bonus_small = DEFAULT_MORALE_SMALL, morale_bonus_large = DEFAULT_MORALE_LARGE;
+
+    [SerializeField]
+    private int neighbor_pop_bonus_small = DEFAULT_NEIGHBOR_SMALL, neighbor_pop_bonus_large = DEFAULT_NEIGHBOR_LARGE;
 
     [Header("Configurables - RES Passive Bonuses")]
-    [SerializeField] private int tellyCheeseAmount = 5;
-    [SerializeField] private float tellyIntervalMinutes = 15f;
-    [SerializeField] private int bigCheeseAmount = 10;
-    [SerializeField] private float bigCheeseIntervalMinutes = 10f;
+    [SerializeField]
+    private int telly_cheese_amount = DEFAULT_TELLY_AMOUNT;
+
+    [SerializeField]
+    private float telly_interval_minutes = DEFAULT_TELLY_INTERVAL;
+
+    [SerializeField]
+    private int big_cheese_amount = DEFAULT_BIG_CHEESE_AMOUNT;
+
+    [SerializeField]
+    private float big_cheese_interval_minutes = DEFAULT_BIG_CHEESE_INTERVAL;
 
     protected override void ApplyUpgradeEffect(UpgradeDefinition upgrade)
     {
-        switch (upgrade.upgradeID)
+        switch (upgrade.upgrade_id)
         {
-            case "RES_2_1":
-                currentMoraleMultiplier += moraleBonusSmall;
+            case ID_MORALE_SMALL:
+                current_morale_multiplier += morale_bonus_small;
                 break;
-            case "RES_2_2":
-                globalPopulationCapBonus += neighborPopBonusSmall;
+
+            case ID_POP_SMALL:
+                global_population_cap_bonus += neighbor_pop_bonus_small;
                 break;
-            case "RES_2_3":
-                StartCoroutine(PassiveCheeseRoutine(tellyCheeseAmount, tellyIntervalMinutes));
+
+            case ID_PASSIVE_TELLY:
+                StartCoroutine(PassiveCheeseRoutine(telly_cheese_amount, telly_interval_minutes));
                 break;
-            case "RES_3":
-                BuildingUnlockManager.Instance.UnlockBuilding("MilkCartonManor");
+
+            case ID_UNLOCK_MANOR:
+                if (BuildingUnlockManager.instance != null)
+                {
+                    BuildingUnlockManager.instance.UnlockBuilding("MilkCartonManor");
+                }
                 break;
-            case "RES_4_1":
-                currentMoraleMultiplier += moraleBonusLarge;
+
+            case ID_MORALE_LARGE:
+                current_morale_multiplier += morale_bonus_large;
                 break;
-            case "RES_4_2":
-                globalPopulationCapBonus += neighborPopBonusLarge;
+
+            case ID_POP_LARGE:
+                global_population_cap_bonus += neighbor_pop_bonus_large;
                 break;
-            case "RES_4_3":
-                StartCoroutine(PassiveCheeseRoutine(bigCheeseAmount, bigCheeseIntervalMinutes));
+
+            case ID_PASSIVE_BIG:
+                StartCoroutine(PassiveCheeseRoutine(big_cheese_amount, big_cheese_interval_minutes));
                 break;
-            case "RES_5":
-                rapidConstructionActive = true;
+
+            case ID_RAPID_CONSTRUCTION:
+                is_rapid_construction_active = true;
                 break;
-            case "RES_6":
-                BuildingUnlockManager.Instance.UnlockBuilding("LunchBoxFlats");
+
+            case ID_UNLOCK_FLATS:
+                if (BuildingUnlockManager.instance != null)
+                {
+                    BuildingUnlockManager.instance.UnlockBuilding("LunchBoxFlats");
+                }
                 break;
         }
     }
 
-    IEnumerator PassiveCheeseRoutine(int amount, float intervalMinutes)
+    private IEnumerator PassiveCheeseRoutine(int amount, float interval_minutes)
     {
         while (true)
         {
-            yield return new WaitForSeconds(intervalMinutes * 60f);
-            if (ResourceManager.Instance != null)
+            yield return new WaitForSeconds(interval_minutes * SECONDS_IN_MINUTE);
+
+            if (ResourceManager.instance != null)
             {
-                ResourceManager.Instance.AddResources(0, amount);
+                ResourceManager.instance.AddResources(0, amount);
                 Debug.Log($"Gained {amount} Cheese passively!");
             }
         }
