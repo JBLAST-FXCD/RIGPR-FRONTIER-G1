@@ -16,6 +16,7 @@ public class ResourceManager : MonoBehaviour, ISaveable
     [Header("Current Resources")]
     public int current_scrap = INITIAL_SCRAP;
     public int current_cheese = 0;
+    public int current_money = 0; // added temp as forgotten
 
     [Header("UI References")]
     public TextMeshProUGUI scrap_text;
@@ -80,11 +81,11 @@ public class ResourceManager : MonoBehaviour, ISaveable
 
     public void PopulateSaveData(GameData data)
     {
-        data.player_data.money = this.currentMoney;
+        data.player_data.money = this.current_money;
     }
 
     public void LoadFromSaveData(GameData data)
     {
-        this.currentMoney = data.player_data.money;
+        this.current_money = data.player_data.money;
     }
 }
