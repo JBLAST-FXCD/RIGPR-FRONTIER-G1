@@ -70,6 +70,9 @@ public struct building_save_data
     public Vector3 position;
     public Quaternion rotation;
     public List<Vector2Int> occupied_cells;
+
+    public int tier;
+    public List<string> mouse_ids;
 }
 
 [System.Serializable]
