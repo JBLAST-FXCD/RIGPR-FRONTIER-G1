@@ -14,13 +14,13 @@ public class CommercialBuilding : ParentBuilding
     protected int[] cheese_prices;
     protected int cheese_amount;
 
-    //Delete these varibles when script is connect to global cheese and scrap counter
-    protected int cheese;
-    protected int scrap;
+    //Delete these varible when script is connect to global variable
+    protected int population;
 
     //Numbers for PopularityAlgorithm()
     protected float[] cheese_popularity;
     protected float remaining_percent;
+    protected int max_persent;
     protected int mini_percent;
     protected int remaining_cheese;
     protected int index;
@@ -39,12 +39,12 @@ public class CommercialBuilding : ParentBuilding
         cheese_prices = new int[7] {10, 15, 25, 40, 60, 85, 100 };
         cheese_amount = 7;
 
-        //Delete these varibles when script is connect to global cheese and scrap counter
-        cheese = 0;
-        scrap = 0;
+        //Delete these varible when script is connect to global variable
+        population = 20;
 
         cheese_popularity = new float[cheese_amount];
         remaining_percent = 100.0f;
+        max_persent       = 50;
         mini_percent      = 5;
         remaining_cheese  = 0;
         index             = 0;
@@ -65,8 +65,8 @@ public class CommercialBuilding : ParentBuilding
         UnityEngine.Random.InitState((int)DateTime.Now.Ticks);
 
         //These funtions are looped infinitely per GDD
-        RecalculatePopularity();
-        SellDelay();
+        //RecalculatePopularity();
+        //SellDelay();
     }
 
     protected new void Update()
@@ -74,7 +74,6 @@ public class CommercialBuilding : ParentBuilding
         //For debuging the popularity numbers
         if (Input.GetKeyDown(KeyCode.C))
         {
-            cheese_popularity = new float[cheese_amount];
             float temp = 0;
             PopularityAlgorithm();
             for (int i = 0; i < cheese_popularity.Length; i++)
@@ -93,7 +92,10 @@ public class CommercialBuilding : ParentBuilding
         //Make the random number a factor of mini_percent because the minimum_percent is equivalent to the percentage for the unit
         int random = UnityEngine.Random.Range(mini_percent, max_range);
         int factor = random - (random % mini_percent);
-        cheese_popularity[i] = factor;
+
+        int capped = factor > max_persent ? max_persent : factor;
+
+        cheese_popularity[i] = capped;
 
         //Record these number to contune funtionality outside for loop
         remaining_percent -= cheese_popularity[i];
@@ -103,6 +105,12 @@ public class CommercialBuilding : ParentBuilding
 
     protected void PopularityAlgorithm()
     {
+        //For resetting value when looped
+        cheese_popularity = new float[cheese_amount];
+        remaining_percent = 100.0f;
+        remaining_cheese = 0;
+        index = 0;
+
         for (int i = 0; i <= cheese_popularity.Length - 1; i++)
         {
             //Stop the element of the array having a disproportionate chance of being the maximum numbe
@@ -147,7 +155,6 @@ public class CommercialBuilding : ParentBuilding
     {
         pop_delay = UnityEngine.Random.Range(mini_pop_delay, max_pop_delay);
 
-        cheese_popularity = new float[cheese_amount];
         Invoke(nameof(PopularityAlgorithm), pop_delay);
     }
 
@@ -161,15 +168,17 @@ public class CommercialBuilding : ParentBuilding
 
     protected void Sell()
     {
+        ResourceManager resources = ResourceManager.instance;
+
         for (int i = 0; i <= cheese_prices.Length - 1; i++)
         {
-            int units = (int)cheese_popularity[i] / mini_percent;
+            int units = population / 10 * (int)cheese_popularity[i] / mini_percent;
 
-            if(cheese >= units)
+            if(resources.Cheese >= units)
             {
                 //Later replace scrap and cheese with global scrap and cheese counter
-                cheese -= units;
-                scrap += cheese_prices[i] * units;
+                resources.SpendResources(0, units);
+                resources.AddResources(cheese_prices[i] * units, 0);
             }
 
             //Repeat loop of selling cheese

@@ -14,9 +14,9 @@ public class ResourceManager : MonoBehaviour, ISaveable
     public static ResourceManager instance;
 
     [Header("Current Resources")]
-    public int current_scrap = INITIAL_SCRAP;
-    public int current_cheese = 0;
-    public int current_money = 0; // added temp as forgotten
+    protected static int scrap  = INITIAL_SCRAP;
+    protected static int cheese = 0;
+    protected static int money  = 0; // added temp as forgotten
 
     [Header("UI References")]
     public TextMeshProUGUI scrap_text;
@@ -25,7 +25,7 @@ public class ResourceManager : MonoBehaviour, ISaveable
     // Checks if player can afford a specific purchase.
     public bool CanAfford(int scrap_cost, int cheese_cost)
     {
-        if (current_scrap >= scrap_cost && current_cheese >= cheese_cost)
+        if (scrap >= scrap_cost && cheese >= cheese_cost)
         {
             return true;
         }
@@ -33,18 +33,21 @@ public class ResourceManager : MonoBehaviour, ISaveable
         return false;
     }
 
+    public int Scrap {  get { return scrap; } }
+    public int Cheese { get { return cheese; } }
+
     public void SpendResources(int scrap_cost, int cheese_cost)
     {
-        current_scrap -= scrap_cost;
-        current_cheese -= cheese_cost;
+        scrap -= scrap_cost;
+        cheese -= cheese_cost;
 
         UpdateUI();
     }
 
     public void AddResources(int scrap_to_add, int cheese_to_add)
     {
-        current_scrap += scrap_to_add;
-        current_cheese += cheese_to_add;
+        scrap += scrap_to_add;
+        cheese += cheese_to_add;
 
         UpdateUI();
     }
@@ -70,22 +73,22 @@ public class ResourceManager : MonoBehaviour, ISaveable
     {
         if (scrap_text != null)
         {
-            scrap_text.text = "Scrap: " + current_scrap;
+            scrap_text.text = "Scrap: " + scrap;
         }
 
         if (cheese_text != null)
         {
-            cheese_text.text = "Cheese: " + current_cheese;
+            cheese_text.text = "Cheese: " + cheese;
         }
     }
 
     public void PopulateSaveData(GameData data)
     {
-        data.player_data.money = this.current_money;
+        data.player_data.money = money;
     }
 
     public void LoadFromSaveData(GameData data)
     {
-        this.current_money = data.player_data.money;
+        money = data.player_data.money;
     }
 }

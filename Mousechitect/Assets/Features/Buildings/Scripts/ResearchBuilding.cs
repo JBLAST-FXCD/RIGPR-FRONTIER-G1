@@ -9,24 +9,14 @@ using UnityEngine;
 /// </summary>
 public class ResearchBuilding : ParentBuilding
 {
-    //Delete these varibles when script is connect to global cheese and scrap counter
-    protected int cheese;
-    protected int scrap;
-
-    public ResearchBuilding()
-    {
-        //Delete these varibles when script is connect to global cheese and scrap counter
-        cheese = 0;
-        scrap  = 0;
-    }
-
     //The player will call the funtion through the UI 
     protected void ResearchNode(ResearchTreeTemp tree)
     {
-        if (tree.CheckIfResearched() == false && tree.GetCheeseCost() >= cheese && tree.GetScrapCost() >= scrap)
+        ResourceManager resources = ResourceManager.instance;
+
+        if (tree.CheckIfResearched() == false && tree.GetCheeseCost() >= resources.Cheese && tree.GetScrapCost() >= resources.Scrap)
         {
-            cheese -= tree.GetCheeseCost();
-            scrap  -= tree.GetScrapCost();
+            resources.SpendResources(tree.GetScrapCost(), tree.GetCheeseCost());
             StartCoroutine(CompleteResearch(tree));
         }
     }
