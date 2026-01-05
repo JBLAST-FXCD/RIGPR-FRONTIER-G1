@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 // Iain Benner 05/12/2025
@@ -93,11 +94,9 @@ public class CommercialBuilding : ParentBuilding
         int random = UnityEngine.Random.Range(mini_percent, max_range);
         int factor = random - (random % mini_percent);
 
-        int capped = factor > max_persent ? max_persent : factor;
+        cheese_popularity[i] = factor;
 
-        cheese_popularity[i] = capped;
-
-        //Record these number to contune funtionality outside for loop
+        //Record these numbers to contune funtionality outside for loop
         remaining_percent -= cheese_popularity[i];
         remaining_cheese = cheese_popularity.Length - 1 - i;
         index++;
@@ -113,15 +112,15 @@ public class CommercialBuilding : ParentBuilding
 
         for (int i = 0; i <= cheese_popularity.Length - 1; i++)
         {
-            //Stop the element of the array having a disproportionate chance of being the maximum numbe
-            if (remaining_percent > 100 - remaining_cheese * mini_percent && remaining_percent > mini_percent * remaining_cheese)
-            {
-                PickPercent(i, (int)(remaining_percent - (remaining_cheese - 1) * mini_percent));
-            }
             //Runs when remian percent is not too little 
-            else if (remaining_percent >= mini_percent * remaining_cheese)
+            if (remaining_percent >= mini_percent * remaining_cheese)
             {
-                PickPercent(i, (int)remaining_percent);
+                //Stop the element of the array having a disproportionate chance of being the maximum numbe
+                int highest = (int)(remaining_percent - (remaining_cheese - 1) * mini_percent);
+                int max_range = max_persent < highest ? max_persent : highest;
+                max_range = max_range < remaining_percent ? max_range : (int)remaining_percent;
+
+                PickPercent(i, max_range);
             }
             else
                 break;
@@ -136,6 +135,18 @@ public class CommercialBuilding : ParentBuilding
                 {
                     cheese_popularity[j] -= mini_percent;
                     remaining_percent += mini_percent;
+                }
+            }
+        }
+        //Stops total popularity  being less than 100%
+        if (remaining_percent > 0)
+        {
+            for (int x = index - 1; x > remaining_cheese; x--)
+            {
+                if (cheese_popularity[x] < max_persent && remaining_percent > 0)
+                {
+                    cheese_popularity[x] += mini_percent;
+                    remaining_percent -= mini_percent;
                 }
             }
         }
