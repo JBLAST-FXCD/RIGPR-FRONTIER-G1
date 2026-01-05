@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 // Iain Benner 05/12/2025
@@ -14,13 +15,13 @@ public class CommercialBuilding : ParentBuilding
     protected int[] cheese_prices;
     protected int cheese_amount;
 
-    //Delete these varibles when script is connect to global cheese and scrap counter
-    protected int cheese;
-    protected int scrap;
+    //Delete these varible when script is connect to global variable
+    protected int population;
 
     //Numbers for PopularityAlgorithm()
     protected float[] cheese_popularity;
     protected float remaining_percent;
+    protected int max_persent;
     protected int mini_percent;
     protected int remaining_cheese;
     protected int index;
@@ -39,12 +40,12 @@ public class CommercialBuilding : ParentBuilding
         cheese_prices = new int[7] {10, 15, 25, 40, 60, 85, 100 };
         cheese_amount = 7;
 
-        //Delete these varibles when script is connect to global cheese and scrap counter
-        cheese = 0;
-        scrap = 0;
+        //Delete these varible when script is connect to global variable
+        population = 20;
 
         cheese_popularity = new float[cheese_amount];
         remaining_percent = 100.0f;
+        max_persent       = 50;
         mini_percent      = 5;
         remaining_cheese  = 0;
         index             = 0;
@@ -74,7 +75,6 @@ public class CommercialBuilding : ParentBuilding
         //For debuging the popularity numbers
         if (Input.GetKeyDown(KeyCode.C))
         {
-            cheese_popularity = new float[cheese_amount];
             float temp = 0;
             PopularityAlgorithm();
             for (int i = 0; i < cheese_popularity.Length; i++)
@@ -93,9 +93,10 @@ public class CommercialBuilding : ParentBuilding
         //Make the random number a factor of mini_percent because the minimum_percent is equivalent to the percentage for the unit
         int random = UnityEngine.Random.Range(mini_percent, max_range);
         int factor = random - (random % mini_percent);
+
         cheese_popularity[i] = factor;
 
-        //Record these number to contune funtionality outside for loop
+        //Record these numbers to contune funtionality outside for loop
         remaining_percent -= cheese_popularity[i];
         remaining_cheese = cheese_popularity.Length - 1 - i;
         index++;
@@ -103,17 +104,23 @@ public class CommercialBuilding : ParentBuilding
 
     protected void PopularityAlgorithm()
     {
+        //For resetting value when looped
+        cheese_popularity = new float[cheese_amount];
+        remaining_percent = 100.0f;
+        remaining_cheese = 0;
+        index = 0;
+
         for (int i = 0; i <= cheese_popularity.Length - 1; i++)
         {
-            //Stop the element of the array having a disproportionate chance of being the maximum numbe
-            if (remaining_percent > 100 - remaining_cheese * mini_percent && remaining_percent > mini_percent * remaining_cheese)
-            {
-                PickPercent(i, (int)(remaining_percent - (remaining_cheese - 1) * mini_percent));
-            }
             //Runs when remian percent is not too little 
-            else if (remaining_percent >= mini_percent * remaining_cheese)
+            if (remaining_percent >= mini_percent * remaining_cheese)
             {
-                PickPercent(i, (int)remaining_percent);
+                //Stop the element of the array having a disproportionate chance of being the maximum numbe
+                int highest = (int)(remaining_percent - (remaining_cheese - 1) * mini_percent);
+                int max_range = max_persent < highest ? max_persent : highest;
+                max_range = max_range < remaining_percent ? max_range : (int)remaining_percent;
+
+                PickPercent(i, max_range);
             }
             else
                 break;
@@ -131,11 +138,17 @@ public class CommercialBuilding : ParentBuilding
                 }
             }
         }
-
-        //Remaing cheese equal mini_percentmum percent
-        for (int k = index; k <= cheese_popularity.Length - 1; k++)
+        //Stops total popularity  being less than 100%
+        if (remaining_percent > 0)
         {
-            cheese_popularity[k] += mini_percent;
+            for (int x = index - 1; x > remaining_cheese; x--)
+            {
+                if (cheese_popularity[x] < max_persent && remaining_percent > 0)
+                {
+                    cheese_popularity[x] += mini_percent;
+                    remaining_percent -= mini_percent;
+                }
+            }
         }
 
         //Repeat loop of recalculating popularity values
@@ -147,7 +160,6 @@ public class CommercialBuilding : ParentBuilding
     {
         pop_delay = UnityEngine.Random.Range(mini_pop_delay, max_pop_delay);
 
-        cheese_popularity = new float[cheese_amount];
         Invoke(nameof(PopularityAlgorithm), pop_delay);
     }
 
@@ -161,15 +173,17 @@ public class CommercialBuilding : ParentBuilding
 
     protected void Sell()
     {
+        ResourceManager resources = ResourceManager.instance;
+
         for (int i = 0; i <= cheese_prices.Length - 1; i++)
         {
-            int units = (int)cheese_popularity[i] / mini_percent;
+            int units = population / 10 * (int)cheese_popularity[i] / mini_percent;
 
-            if(cheese >= units)
+            if(resources.Cheese >= units)
             {
                 //Later replace scrap and cheese with global scrap and cheese counter
-                cheese -= units;
-                scrap += cheese_prices[i] * units;
+                resources.SpendResources(0, units);
+                resources.AddResources(cheese_prices[i] * units, 0);
             }
 
             //Repeat loop of selling cheese

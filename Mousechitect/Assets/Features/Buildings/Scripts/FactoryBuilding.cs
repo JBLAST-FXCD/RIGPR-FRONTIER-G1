@@ -9,6 +9,7 @@ using UnityEngine;
 /// the scrap cost for building changes depending on tier and upgrading building has delay.
 /// cheese is produced with delay and milk cost dependent on type of cheese.
 /// cheese is made if theres enough milk or player input fitting GDD.
+/// cheese is not produced if there are too many factories for the population, as per GDD.
 /// </summary>
 public class FactoryBuilding : ParentBuilding
 {
@@ -19,10 +20,12 @@ public class FactoryBuilding : ParentBuilding
     protected CheeseTemp cheese_type;
     protected int scrap_cost;
 
-    //Delete these varibles when script is connect to global cheese and scrap counter
-    protected int cheese;
-    protected int scrap;
+    //Delete these varible when script is connect to global variable
+    protected int population;
 
+    //For counting the factories to know if there to many as per the GDD
+    static protected int count;
+    protected int id;
 
     protected float stored_milk;
     protected bool  produce_cheese;
@@ -32,13 +35,24 @@ public class FactoryBuilding : ParentBuilding
     {
         cheese_type = new CheeseTemp();
 
-        //Delete these varibles when script is connect to global cheese and scrap counter
-        cheese = 0;
-        scrap = 0;
+        //Delete these varible when script is connect to global variable
+        population = 20;
+
+        id = count;
 
         stored_milk = 0;
         produce_cheese = false;
         factory_switch = true;
+    }
+
+    void Start()
+    {
+        //Warns the player if cheese can't be produced when the building is constructed
+        if (id >= population / 20)
+            Debug.Log("Not enough mice to operate this factory");
+
+        count++;
+        ConstructTier();
     }
 
     protected new void Update()
@@ -71,9 +85,11 @@ public class FactoryBuilding : ParentBuilding
     //Delay is hard coded because theres variation in the GDD
     protected void UpdradeFactory()
     {
-        if (scrap >= scrap_cost)
+        ResourceManager resources = ResourceManager.instance;
+
+        if (resources.Scrap >= scrap_cost)
         {
-            scrap -= scrap_cost;
+            resources.SpendResources(scrap_cost,0);
             factory_switch = false;
             Invoke(nameof(UpdateTier), 60.0f);
         }
@@ -95,16 +111,26 @@ public class FactoryBuilding : ParentBuilding
     //Each cheese has production time
     protected void CheeseProduction()
     {
-        if (cheese_type.GetMilkCost() >= stored_milk && produce_cheese == true)
-            Invoke(nameof(CreateCheese), cheese_type.GetProductionTime());
+        //Checks if theres enought mise for factory as per GDD. id starts at 0 not 1
+        if (id < population / 20)
+        {
+            if (cheese_type.GetMilkCost() >= stored_milk && produce_cheese == true)
+                Invoke(nameof(CreateCheese), cheese_type.GetProductionTime());
+        }
+        else
+            Debug.Log("Not enough mice to operate this factory");
     }
 
     //This is apart of CheeseProduction() and is called when its invoked.
     protected void CreateCheese()
     {
-        //Later replace cheese with global cheese counter
-        cheese++;
+        ResourceManager resources = ResourceManager.instance;
+
+        //cheese++
+        resources.AddResources(0,1);
+
         stored_milk -= cheese_type.GetMilkCost();
+        resources.SpendResources(cheese_type.GetScrapCost(),0);
 
         //Repeat cheese prodution until milk runs out or player switches produce_cheese to false
         CheeseProduction();
