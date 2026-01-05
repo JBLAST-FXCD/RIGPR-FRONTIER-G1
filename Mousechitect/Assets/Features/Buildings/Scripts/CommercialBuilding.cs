@@ -66,8 +66,8 @@ public class CommercialBuilding : ParentBuilding
         UnityEngine.Random.InitState((int)DateTime.Now.Ticks);
 
         //These funtions are looped infinitely per GDD
-        //RecalculatePopularity();
-        //SellDelay();
+        RecalculatePopularity();
+        SellDelay();
     }
 
     protected new void Update()
@@ -149,12 +149,6 @@ public class CommercialBuilding : ParentBuilding
                     remaining_percent -= mini_percent;
                 }
             }
-        }
-
-        //Remaing cheese equal mini_percentmum percent
-        for (int k = index; k <= cheese_popularity.Length - 1; k++)
-        {
-            cheese_popularity[k] += mini_percent;
         }
 
         //Repeat loop of recalculating popularity values
