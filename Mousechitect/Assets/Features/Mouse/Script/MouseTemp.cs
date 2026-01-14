@@ -3,8 +3,11 @@ using UnityEngine;
 
 public class MouseTemp : MonoBehaviour
 {
+    [SerializeField] GridManager grid_manager;
+
     protected string mouse_id;
     protected Vector2Int postion;
+    Vector2Int building_loc;
 
     public Vector2Int Postion {  get { return postion; } }
 
@@ -16,12 +19,20 @@ public class MouseTemp : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        GameObject building = GameObject.FindGameObjectWithTag("BuildingTest");
+        building_loc = new Vector2Int(0, 0);
+        building_loc.x = (int)building.transform.localPosition.x;
+        building_loc.y = (int)building.transform.localPosition.z;
 
+        PathFinding.Grid_manager = grid_manager;
     }
 
     // Update is called once per frame
     void Update()
     {
-
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            PathFinding.Pathfinding(this, building_loc);
+        }
     }
 }

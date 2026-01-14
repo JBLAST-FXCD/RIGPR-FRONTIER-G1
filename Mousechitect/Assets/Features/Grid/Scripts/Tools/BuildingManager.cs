@@ -510,6 +510,7 @@ public class BuildingManager : MonoBehaviour, ISaveable
 
         placed_data.is_path = false;
         placed_data.prefab_index = selected_building_index;
+        placed_data.speed_modifier = -1;
 
         if (string.IsNullOrEmpty(placed_data.unique_id))
         {
@@ -528,6 +529,9 @@ public class BuildingManager : MonoBehaviour, ISaveable
 
             ++i;
         }
+
+        // also write into GridManager to set speed to 0 stopping mice from walking
+        grid_manager.SetPathOnCells(placed_data.occupied_cells, placed_data.speed_modifier);
 
         current_building = null;
         current_building_collider = null;
@@ -703,6 +707,7 @@ public class BuildingManager : MonoBehaviour, ISaveable
             placed.unique_id = entry.unique_id;
             placed.prefab_index = entry.prefab_index;
             placed.is_path = false;
+            placed.speed_modifier = -1;
 
             placed.occupied_cells.Clear();
 
@@ -718,6 +723,9 @@ public class BuildingManager : MonoBehaviour, ISaveable
                     ++i;
                 }
             }
+
+            // Restore speed modifiers for pathfinding
+            grid_manager.SetPathOnCells(placed.occupied_cells, placed.speed_modifier);
 
             placed_buildings_by_id[placed.unique_id] = placed;
 
