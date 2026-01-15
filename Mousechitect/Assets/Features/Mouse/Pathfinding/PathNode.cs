@@ -14,6 +14,6 @@ public class PathNode
     {
         this.postion = postion;
 
-        this.cost    = (int)(1 / grid_manager.GetCellMoveSpeed(postion) * 100.0f);
+        this.cost = (int)(1 / grid_manager.GetCellMoveSpeed(postion) * 100.0f);
     }
 }

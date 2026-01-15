@@ -23,8 +23,6 @@ public class MouseTemp : MonoBehaviour
         building_loc = new Vector2Int(0, 0);
         building_loc.x = (int)building.transform.localPosition.x;
         building_loc.y = (int)building.transform.localPosition.z;
-
-        PathFinding.Grid_manager = grid_manager;
     }
 
     // Update is called once per frame
@@ -32,7 +30,9 @@ public class MouseTemp : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.C))
         {
-            PathFinding.Pathfinding(this, building_loc);
+            PathFinding finding = new PathFinding();
+            finding.Grid_manager = grid_manager;
+            finding.Pathfinding(this, building_loc);
         }
     }
 }
