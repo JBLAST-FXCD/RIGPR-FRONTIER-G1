@@ -23,6 +23,9 @@ public class MouseTemp : MonoBehaviour
         building_loc = new Vector2Int(0, 0);
         building_loc.x = (int)building.transform.localPosition.x;
         building_loc.y = (int)building.transform.localPosition.z;
+
+        postion.x = (int)transform.localPosition.x;
+        postion.y = (int)transform.localPosition.z;
     }
 
     // Update is called once per frame
