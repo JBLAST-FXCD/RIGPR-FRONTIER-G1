@@ -13,6 +13,7 @@ public class PathNode
 
 
     public Vector2Int Postion { get { return postion; } set { postion = value; } }
+    public float Speed { get { return speed; } }
     public int Cost { get { return cost; } set { cost = value; } }
     public int Total_cost { get { return total_cost; } set { total_cost = value; } }
     public bool Searched { get { return searched; } set { searched = value; } }
@@ -21,11 +22,19 @@ public class PathNode
     public PathNode(Vector2Int postion, GridManager grid_manager)
     {
         this.postion = postion;
-        this.speed = grid_manager.GetCellMoveSpeed(postion);
+
+        if(grid_manager.GetCellMoveSpeed(postion) > 0)
+        {
+            this.speed = grid_manager.GetCellMoveSpeed(postion);
+            this.searched = false;
+        }
+        else
+        {
+            this.searched = true;
+        }
 
         this.cost = (int)(1 / speed * 100.0f);
         this.total_cost = int.MaxValue;
-        this.searched = false;
         this.previous_node = null;
-    }
+    } 
 }

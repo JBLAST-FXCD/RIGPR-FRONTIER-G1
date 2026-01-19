@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PathFinding
@@ -56,14 +57,14 @@ public class PathFinding
         }
 
         int cheeper = nodes[current_loc.x, current_loc.y].Total_cost + nodes[x, y].Cost;
-        if (cheeper < nodes[x, y].Total_cost) 
+        if (cheeper < nodes[x, y].Total_cost)
         {
             nodes[x, y].Total_cost = cheeper;
             nodes[x, y].Previous_node = nodes[current_loc.x, current_loc.y];
         }
     }
 
-    public void Pathfinding(MouseTemp mouse, Vector2Int building)
+    public List<PathNode> Pathfinding(MouseTemp mouse, Vector2Int building)
     {
 
         start = FindChunk(mouse.Postion);
@@ -136,14 +137,30 @@ public class PathFinding
 
             if (current_loc == mouse_loc)
             {
-                open_nodes.Clear();
-                PathNode current_node = nodes[current_loc.x, current_loc.y];
-                route.Add(current_node);
-
-                while (current_node.Previous_node != null) 
+                for (int n = 0; n < open_nodes.Count; n++)
                 {
-                    route.Add(current_node.Previous_node);
-                    current_node = current_node.Previous_node;
+                    if (nodes[open_nodes[n].x, open_nodes[n].y].Total_cost >= nodes[current_loc.x, current_loc.y].Total_cost)
+                        open_nodes.RemoveAt(n);
+                }
+
+                if (open_nodes.Count == 0) 
+                {
+                    PathNode current_node = nodes[current_loc.x, current_loc.y];
+                    route.Add(current_node);
+
+                    while (current_node.Previous_node != null)
+                    {
+                        route.Add(current_node.Previous_node);
+                        current_node = current_node.Previous_node;
+                    }
+
+                    return route;
+                }
+                else
+                {
+                    nodes[current_loc.x, current_loc.y].Searched = false;
+                    test++;
+                    current_loc = open_nodes[0];
                 }
             }
 
@@ -167,6 +184,20 @@ public class PathFinding
             open_nodes.RemoveAt(0);
         }
 
-        Debug.Log("");
+        if (nodes[mouse_loc.x, mouse_loc.y].Previous_node != null)
+        {
+            PathNode current_node = nodes[mouse_loc.x, mouse_loc.y];
+            route.Add(current_node);
+
+            while (current_node.Previous_node != null)
+            {
+                route.Add(current_node.Previous_node);
+                current_node = current_node.Previous_node;
+            }
+
+            return route;
+        }
+        else
+            return null;
     }
 }

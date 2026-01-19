@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class MouseTemp : MonoBehaviour
@@ -8,8 +9,17 @@ public class MouseTemp : MonoBehaviour
     protected string mouse_id;
     protected Vector2Int postion;
     Vector2Int building_loc;
+    List<PathNode> path;
+    float time_elapsed;
+    int i;
 
     public Vector2Int Postion {  get { return postion; } }
+
+    public MouseTemp()
+    {
+        i = 0;
+        time_elapsed = 0;
+    }
 
     public string GetMouseID()
     {
@@ -35,7 +45,23 @@ public class MouseTemp : MonoBehaviour
         {
             PathFinding finding = new PathFinding();
             finding.Grid_manager = grid_manager;
-            finding.Pathfinding(this, building_loc);
+            path = finding.Pathfinding(this, building_loc);
+        }
+
+        if (path != null && i < path.Count)
+        {
+            Vector3 loc = new Vector3(path[i].Postion.x, 0, path[i].Postion.y);
+            if (time_elapsed < 1)
+            {
+                this.transform.position = Vector3.Lerp(this.transform.position, loc, time_elapsed * path[i].Speed * Time.deltaTime);
+                time_elapsed += path[i].Speed * Time.deltaTime;
+            }
+            else
+            {
+                this.transform.position = loc;
+                time_elapsed = 0;
+                i++;
+            }
         }
     }
 }
