@@ -57,7 +57,7 @@ public class ParentBuilding : MonoBehaviour
         capacity = capacitys[tier - 1];
     }
 
-    //The funtionb allows for diffrent varition depending on the designers choise and can be used for when the player upgrades the building.
+    //The function allows for diffrent varition depending on the designers choise and can be used for when the player upgrades the building.
     protected void ConstructTier()
     {
         if (tier > 0 && tier <= capacitys.Length)

@@ -29,13 +29,7 @@ public class MouseTemp : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        GameObject building = GameObject.FindGameObjectWithTag("BuildingTest");
-        building_loc = new Vector2Int(0, 0);
-        building_loc.x = (int)building.transform.localPosition.x;
-        building_loc.y = (int)building.transform.localPosition.z;
 
-        postion.x = (int)transform.localPosition.x;
-        postion.y = (int)transform.localPosition.z;
     }
 
     // Update is called once per frame
@@ -43,14 +37,26 @@ public class MouseTemp : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.C))
         {
-            PathFinding finding = new PathFinding();
-            finding.Grid_manager = grid_manager;
-            path = finding.Pathfinding(this, building_loc);
+            GameObject building = GameObject.FindGameObjectWithTag("BuildingTest");
+
+            if (building != null)
+            {
+                building_loc = new Vector2Int(0, 0);
+                building_loc.x = (int)building.transform.localPosition.x;
+                building_loc.y = (int)building.transform.localPosition.z;
+
+                postion.x = (int)transform.localPosition.x;
+                postion.y = (int)transform.localPosition.z;
+
+                PathFinding finding = new PathFinding();
+                finding.Grid_manager = grid_manager;
+                path = finding.Pathfinding(this, building_loc);
+            }
         }
 
         if (path != null && i < path.Count)
         {
-            Vector3 loc = new Vector3(path[i].Postion.x, 0, path[i].Postion.y);
+            Vector3 loc = new Vector3(path[i].Postion.x, 0.5f, path[i].Postion.y);
             if (time_elapsed < 1)
             {
                 this.transform.position = Vector3.Lerp(this.transform.position, loc, time_elapsed * path[i].Speed * Time.deltaTime);

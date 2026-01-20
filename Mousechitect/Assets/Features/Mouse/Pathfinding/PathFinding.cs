@@ -7,8 +7,7 @@ public class PathFinding
 {
     protected GridManager grid_manager;
 
-    protected int test;
-    protected int chunk;
+    protected int test, chunk;
     protected Vector2Int start, end, mouse_loc, building_loc;
 
     protected PathNode[,] nodes;
@@ -37,13 +36,13 @@ public class PathFinding
         Vector2Int rv = new Vector2Int();
 
         if (loc.x < 0)
-            rv.x = Mathf.FloorToInt(loc.x / chunk) * 16;
+            rv.x = Mathf.FloorToInt(loc.x / chunk) * chunk;
         else
-            rv.x = Mathf.CeilToInt(loc.x / chunk) * 16;
+            rv.x = Mathf.CeilToInt(loc.x  / chunk) * chunk;
         if (loc.y < 0)
-            rv.y = Mathf.FloorToInt(loc.y / chunk) * 16;
+            rv.y = Mathf.FloorToInt(loc.y / chunk) * chunk;
         else
-            rv.y = Mathf.CeilToInt(loc.y / chunk) * 16;
+            rv.y = Mathf.CeilToInt(loc.y  / chunk) * chunk;
 
         return rv;
     }
@@ -68,13 +67,16 @@ public class PathFinding
     {
 
         start = FindChunk(mouse.Postion);
-        end = FindChunk(building);
+        end   = FindChunk(building);
 
         start.x = start.x > end.x ? start.x : end.x;
         start.y = start.y > end.y ? start.y : end.y;
 
         end.x = end.x < start.x ? end.x : start.x;
-        end.y = end.y < start.y ? end.y : start.y; 
+        end.y = end.y < start.y ? end.y : start.y;
+
+        end.x = end.x == start.x ? end.x - chunk: end.x;
+        end.y = end.y == start.y ? end.y - chunk : end.y;
 
         mouse_loc = mouse.Postion;
         building_loc = building;
@@ -82,7 +84,7 @@ public class PathFinding
         int i = end.x;
         int j = end.y;
 
-        while(end.x < 0)
+        while (end.x < 0)
         {
             end.x += chunk;
             start.x += chunk;
@@ -114,10 +116,10 @@ public class PathFinding
 
         nodes = new PathNode[start.x, start.y];
 
-        for (int x = end.x; x < start.x; x++)
+        for (int x = 0; x < start.x; x++)
         {
             int temp = j;
-            for (int y = end.y; y < start.y; y++)
+            for (int y = 0; y < start.y; y++)
             {
                 nodes[x, y] = new PathNode(new Vector2Int(i, j), Grid_manager);
                 j++;
@@ -126,7 +128,7 @@ public class PathFinding
             i++;
         }
 
-        nodes[building_loc.x, building_loc.y].Total_cost = 0;
+        nodes[building_loc.x, building_loc.y].Total_cost = int.MinValue;
         nodes[building_loc.x, building_loc.y].Searched = true;
         open_nodes.Add(new Vector2Int(building_loc.x, building_loc.y));
 
