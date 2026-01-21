@@ -2,6 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//Iain Benner 21/01/2026
+
+/// <summary>
+/// Stores data for pathfinding and speed from the grid manager.
+/// </summary>
 public class PathNode
 {
     protected Vector2Int postion;
@@ -10,7 +15,6 @@ public class PathNode
     protected int total_cost;
     protected bool searched;
     protected PathNode previous_node;
-
 
     public Vector2Int Postion { get { return postion; } set { postion = value; } }
     public float Speed { get { return speed; } }
@@ -23,7 +27,7 @@ public class PathNode
     {
         this.postion = postion;
 
-        if(grid_manager.GetCellMoveSpeed(postion) > 0)
+        if (grid_manager.GetCellMoveSpeed(postion) > 0)
         {
             this.speed = grid_manager.GetCellMoveSpeed(postion);
             this.searched = false;

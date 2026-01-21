@@ -1,6 +1,7 @@
 using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEditor.Experimental.RestService;
 using UnityEngine;
 
@@ -18,16 +19,17 @@ public class GameData
     public BuildingData building_data;
     public ResearchData research_data;
     public PathData path_data;
+    public Routes routes;
 
     public GameData()
     {
-        player_data = new PlayerData();
+        player_data   = new PlayerData();
         building_data = new BuildingData();
         research_data = new ResearchData();
-        path_data = new PathData();
+        path_data     = new PathData();
+        routes        = new Routes();
     }
 }
-
 
 // to be implemented (excluding camera state)
 [System.Serializable]
@@ -102,4 +104,15 @@ public class ResearchData
     public List<string> completed_research = new List<string>();
 
     public float current_research_progress;
+}
+
+[System.Serializable]
+public class Routes
+{
+    public Dictionary<Vector2Int[], List<Vector2Int>> paths;
+
+    public Routes()
+    {
+        paths = new Dictionary<Vector2Int[], List<Vector2Int>>();
+    }
 }
