@@ -1,12 +1,57 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1001 &720203386490965969
+--- !u!1 &5097389391360059737
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5497989507303141168}
+  - component: {fileID: 3187688624260190290}
+  m_Layer: 0
+  m_Name: ResidentialBuilding1
+  m_TagString: BuildingTest
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5497989507303141168
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5097389391360059737}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 7257770070725304933}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3187688624260190290
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5097389391360059737}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16e22c5c2d6f8da43943441c74c5da29, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!1001 &7147914167682745742
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 0}
+    m_TransformParent: {fileID: 5497989507303141168}
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 4a714c4949dec5d40a163438149910d6,
         type: 3}
@@ -70,25 +115,48 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 4a714c4949dec5d40a163438149910d6,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: 8349993456814084212}
+      addedObject: {fileID: 3978957012643607509}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 4a714c4949dec5d40a163438149910d6,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: 168195442020737519}
+      addedObject: {fileID: 6720158129118092520}
   m_SourcePrefab: {fileID: 100100000, guid: 4a714c4949dec5d40a163438149910d6, type: 3}
---- !u!1 &378237480029057664 stripped
+--- !u!4 &7257770070725304933 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 4a714c4949dec5d40a163438149910d6,
+    type: 3}
+  m_PrefabInstance: {fileID: 7147914167682745742}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &8066817477758908639 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 4a714c4949dec5d40a163438149910d6,
     type: 3}
-  m_PrefabInstance: {fileID: 720203386490965969}
+  m_PrefabInstance: {fileID: 7147914167682745742}
   m_PrefabAsset: {fileID: 0}
---- !u!65 &8349993456814084212
+--- !u!114 &3978957012643607509
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8066817477758908639}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5fc3cb6a994e3c345bf20aaa81b9c895, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  building_prefabs:
+  - {fileID: 919132149155446097, guid: 4a714c4949dec5d40a163438149910d6, type: 3}
+  capacitys: 04000000
+  tier: 1
+  max_quality: 
+--- !u!65 &6720158129118092520
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 378237480029057664}
+  m_GameObject: {fileID: 8066817477758908639}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -103,20 +171,3 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 2.5, y: 2, z: 0.1}
   m_Center: {x: 2.8, y: 1, z: 0}
---- !u!114 &168195442020737519
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 378237480029057664}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5fc3cb6a994e3c345bf20aaa81b9c895, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  building_prefabs:
-  - {fileID: 919132149155446097, guid: 4a714c4949dec5d40a163438149910d6, type: 3}
-  capacitys: 04000000
-  tier: 1
-  max_quality: 
