@@ -79,6 +79,12 @@ public class BuildingManager : MonoBehaviour, ISaveable
     // Track placed buildings so we can save/load them.
     private readonly List<PlacedObjectData> placed_buildings = new List<PlacedObjectData>();
 
+    // Anthony 22/01/26 
+
+    public event Action<GameObject> building_placed;
+    public event Action<string> building_removed;
+
+
     private void Update()
     {
         /* keyboard entry to build mode
@@ -529,6 +535,13 @@ public class BuildingManager : MonoBehaviour, ISaveable
             ++i;
         }
 
+        GameObject placed_building = current_building;
+
+        if (building_placed != null)
+        {
+            building_placed.Invoke(placed_building);
+        }
+
         current_building = null;
         current_building_collider = null;
         covered_cells.Clear();
@@ -611,6 +624,11 @@ public class BuildingManager : MonoBehaviour, ISaveable
         if (placed_data != null)
         {
             Destroy(placed_data.gameObject);
+        }
+
+        if (building_removed != null)
+        {
+            building_removed.Invoke(unique_id);
         }
 
         return true;

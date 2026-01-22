@@ -75,7 +75,7 @@ public class FactoryBuilding : ParentBuilding
     {
         cheese_type = cheese_amount[tier - 1, input];
     }
-    protected new void TierSelection()
+    protected override void TierSelection()
     {
         building_prefab = building_prefabs[tier - 1];
         capacity        = capacitys[tier - 1];

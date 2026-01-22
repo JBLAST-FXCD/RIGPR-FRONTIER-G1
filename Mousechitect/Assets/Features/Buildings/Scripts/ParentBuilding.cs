@@ -4,6 +4,7 @@ using UnityEngine;
 
 // Iain Benner 05/12/2025
 
+
 /// <summary>
 /// Designer can set up mesh and data for tiers of buildings.
 /// On start the correct varition of the building is picked.
@@ -22,9 +23,11 @@ public class ParentBuilding : MonoBehaviour
     protected List<MouseTemp> mouse_occupants;
     protected int capacity;
 
-    public ParentBuilding()
+    // Updated by Anthony 22/01/26 (added awake, updated TierSelection, updated ConstructTier ) 
+    protected virtual void Awake()
     {
         building_prefab = null;
+        building = null;
         mouse_occupants = new List<MouseTemp>();
         capacity = 0;
     }
@@ -51,24 +54,51 @@ public class ParentBuilding : MonoBehaviour
         }
     }
 
-    protected void TierSelection()
+    protected virtual void TierSelection()
     {
-        building_prefab = building_prefabs[tier - 1];
-        capacity = capacitys[tier - 1];
+        if (capacitys == null || capacitys.Length <= 0)
+        {
+            capacity = 0;
+            return;
+        }
+
+        int tier_index = tier - 1;
+
+        if (tier_index < 0)
+        {
+            tier_index = 0;
+        }
+
+        if (tier_index >= capacitys.Length)
+        {
+            tier_index = capacitys.Length - 1;
+        }
+
+        capacity = capacitys[tier_index];
+
+        // Only assign building_prefab if the array exists
+        if (building_prefabs != null && building_prefabs.Length > tier_index)
+        {
+            building_prefab = building_prefabs[tier_index];
+        }
     }
 
     //The funtionb allows for diffrent varition depending on the designers choise and can be used for when the player upgrades the building.
     protected void ConstructTier()
     {
-        if (tier > 0 && tier <= capacitys.Length)
+        if (tier > 0 && capacitys != null && tier <= capacitys.Length)
         {
             TierSelection();
-            building_prefab.transform.localPosition = new Vector3(0, 0, 0);
-            building = Instantiate(building_prefab, gameObject.transform);
+
+            if (building_prefab != null)
+            {
+                building_prefab.transform.localPosition = new Vector3(0, 0, 0);
+                building = Instantiate(building_prefab, gameObject.transform);
+            }
         }
     }
 
-    protected void UpdateTier()
+    protected virtual void UpdateTier()
     {
         tier++;
         if (tier > 0 && tier <= capacitys.Length)

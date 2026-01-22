@@ -11,9 +11,10 @@ GameObject:
   - component: {fileID: 7168824547791492975}
   - component: {fileID: 3626138514475166284}
   - component: {fileID: 6619350289366639286}
+  - component: {fileID: 2863757985355364823}
   m_Layer: 7
-  m_Name: Cylinder1
-  m_TagString: Untagged
+  m_Name: Research
+  m_TagString: BuildingTest
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -65,8 +66,23 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 2, z: 1}
-  m_Center: {x: 0, y: 1, z: 0}
+  m_Size: {x: 5, y: 10, z: 5}
+  m_Center: {x: 0, y: 5, z: 0}
+--- !u!114 &2863757985355364823
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2212835445630256447}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 268fffade4c462740a2506d4bda7c6c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  building_prefabs: []
+  capacitys: 
+  tier: 0
 --- !u!1001 &441667837573379528
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -87,13 +103,28 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1855002514467727449, guid: 11d65cab531e84e4889089c2fae2a3ed,
         type: 3}
+      propertyPath: m_LocalScale.x
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1855002514467727449, guid: 11d65cab531e84e4889089c2fae2a3ed,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1855002514467727449, guid: 11d65cab531e84e4889089c2fae2a3ed,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1855002514467727449, guid: 11d65cab531e84e4889089c2fae2a3ed,
+        type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1855002514467727449, guid: 11d65cab531e84e4889089c2fae2a3ed,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 1855002514467727449, guid: 11d65cab531e84e4889089c2fae2a3ed,
         type: 3}
