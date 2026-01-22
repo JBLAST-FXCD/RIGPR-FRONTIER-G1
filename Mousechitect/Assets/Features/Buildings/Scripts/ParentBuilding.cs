@@ -38,7 +38,7 @@ public class ParentBuilding : MonoBehaviour
     {
         //This is for debuging.
         //Mise will leave when certain conditions are met, depending on the building type.
-        if (Input.GetKeyDown(KeyCode.E))
+        if (Input.GetKeyDown(KeyCode.E) && mouse_occupants.Count > 0)
         {
             MouseLeave(mouse_occupants[0]);
         }

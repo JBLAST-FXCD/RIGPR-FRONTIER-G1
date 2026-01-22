@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class MouseTemp : MonoBehaviour
@@ -42,11 +43,21 @@ public class MouseTemp : MonoBehaviour
         path = pathfinding.Pathfinding(this.postion, building_loc);
     }
 
-    // Start is called before the first frame update
-    void Start()
+    protected void Move(float speed, Vector3 loc)
     {
-
+        if (time_elapsed < 1)
+        {
+            this.transform.position = Vector3.Lerp(this.transform.position, loc, time_elapsed * speed * Time.deltaTime);
+            time_elapsed += speed * Time.deltaTime;
+        }
+        else
+        {
+            this.transform.position = loc;
+            time_elapsed = 0;
+            i++;
+        }
     }
+
 
     // Update is called once per frame
     void Update()
@@ -64,21 +75,11 @@ public class MouseTemp : MonoBehaviour
         if (path != null && i < path.Count)
         {
             Vector3 loc = new Vector3(path[i].postion.x, 0.5f, path[i].postion.y);
-            float speed = grid_manager.GetCellMoveSpeed(path[i].postion);
+            float speed = new PathNode(path[i].postion, grid_manager).Speed;
 
             if (path[i].speed == speed)
             {
-                if (time_elapsed < 1)
-                {
-                    this.transform.position = Vector3.Lerp(this.transform.position, loc, time_elapsed * speed * Time.deltaTime);
-                    time_elapsed += speed * Time.deltaTime;
-                }
-                else
-                {
-                    this.transform.position = loc;
-                    time_elapsed = 0;
-                    i++;
-                }
+                Move(speed, loc);
             }
             else
             {

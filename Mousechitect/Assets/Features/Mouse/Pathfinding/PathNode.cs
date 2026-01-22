@@ -31,7 +31,7 @@ public class PathNode
     protected PathNode previous_node;
 
     public Vector2Int Postion { get { return node.postion; } set { node.postion = value; } }
-    public float Speed { get { return node.speed; } }
+    public float Speed { get { return node.speed; } set { node.speed = value; } }
     public int Cost { get { return cost; } set { cost = value; } }
     public int Total_cost { get { return total_cost; } set { total_cost = value; } }
     public bool Searched { get { return searched; } set { searched = value; } }
@@ -48,6 +48,7 @@ public class PathNode
         }
         else
         {
+            this.node.speed = 1;
             this.searched = true;
         }
 

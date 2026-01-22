@@ -32,6 +32,14 @@ public class PathFinding: MonoBehaviour, ISaveable
 
     public GridManager Grid_manager { get { return grid_manager; } set { grid_manager = value; } }
 
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.P))
+        {
+            solutions.Clear();
+        }
+    }
+
     //chunks are calculated because the route can go around the vector which can't be calulated if they in the corner of the grid.
     protected Vector2Int FindChunk(Vector2 loc)
     {
@@ -189,21 +197,21 @@ public class PathFinding: MonoBehaviour, ISaveable
             i++;
         }
 
-        //The starting node most not be seartched.
+        //The starting node most not be searched.
         nodes[building_loc.x, building_loc.y].Total_cost = int.MinValue;
         nodes[building_loc.x, building_loc.y].Searched = true;
-        //The building node is the start because previous_node get loop throught in revers.
+        //The building node is the start because previous_node get loop throught in revers meaning mouse will be the start.
         open_nodes.Add(new Vector2Int(building_loc.x, building_loc.y));
 
         while (open_nodes.Count > 0)
         {
-            //Open nodes are one being searched.
+            //Open nodes are node that need to be searched.
             current_loc = open_nodes[0];
 
             //Checking if route is finished.
             if (current_loc == mouse_loc)
             {
-                //Remove any route that is longer.
+                //Remove any route that is longer then current.
                 for (int n = 0; n < open_nodes.Count; n++)
                 {
                     if (nodes[open_nodes[n].x, open_nodes[n].y].Total_cost >= nodes[current_loc.x, current_loc.y].Total_cost)

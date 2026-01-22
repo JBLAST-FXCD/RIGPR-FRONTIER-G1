@@ -500,9 +500,10 @@ GameObject:
   - component: {fileID: 989177837}
   - component: {fileID: 989177836}
   - component: {fileID: 989177840}
+  - component: {fileID: 989177841}
   m_Layer: 0
   m_Name: Mouse
-  m_TagString: Untagged
+  m_TagString: MouseTemp
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -609,6 +610,33 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   grid_manager: {fileID: 2040251161}
   pathfinding: {fileID: 1538441730}
+--- !u!54 &989177841
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 989177834}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 84
+  m_CollisionDetection: 0
 --- !u!1 &992220825
 GameObject:
   m_ObjectHideFlags: 0
@@ -702,7 +730,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   building_prefabs:
-  - {fileID: 8401419103788779933, guid: a7137e9acdee8c644b9d52efd884ebaf, type: 3}
+  - {fileID: 5097389391360059737, guid: a7137e9acdee8c644b9d52efd884ebaf, type: 3}
   - {fileID: 6884297326217601079, guid: 0bf0a46da3469a54d9f36b5f11aebbb0, type: 3}
   - {fileID: 2212835445630256447, guid: 31b05bb4fddf0bd46962d12aa3c275b4, type: 3}
 --- !u!4 &992220830
