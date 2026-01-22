@@ -18,18 +18,16 @@ public class PathFinding: MonoBehaviour, ISaveable
     protected Vector2Int start, end, mouse_loc, building_loc, current_loc;
     protected List<Vector2Int> open_nodes;
     protected PathNode[,] nodes;
-    public string Test;
 
     //Varible for saving routes.
-    protected Dictionary<Vector2Int[], List<Vector2Int>> solutions;
+    protected Dictionary<string, List<BaseNode>> solutions;
 
     public PathFinding()
     {
         chunk = 16;
-
         open_nodes = new List<Vector2Int>();
 
-        solutions = new Dictionary<Vector2Int[], List<Vector2Int>>();
+        solutions = new Dictionary<string, List<BaseNode>>();
     }
 
     public GridManager Grid_manager { get { return grid_manager; } set { grid_manager = value; } }
@@ -51,8 +49,8 @@ public class PathFinding: MonoBehaviour, ISaveable
         return rv;
     }
 
-    //open list is for nodes to search
-    //cheeper means faster route even if the mice travels over more units.
+    //Open list is for nodes too search.
+    //Cheeper means faster route even if the mice travels over more units.
     protected void SearchNode(int x, int y)
     {
         if (nodes[x, y].Searched == false)
@@ -69,39 +67,59 @@ public class PathFinding: MonoBehaviour, ISaveable
         }
     }
 
-    //Turn nodes into vectors to save and return.
-    protected List<Vector2Int> CreateRoute(Vector2Int mouse, Vector2Int building)
+    //For saving known route in dictionary.
+    protected string GenKey(Vector2Int mouse, Vector2Int building)
     {
-        List<Vector2Int> route = new List<Vector2Int>();
+        string rv = string.Empty;
+
+        string first  = mouse.ToString();
+        string second = building.ToString();
+
+        rv = first + second;
+
+        return rv;
+    }
+
+    //If grid changes the solutions need to be removed so they can be recalculated.
+    public void RemoveValue(Vector2Int mouse, Vector2Int building)
+    {
+        string key = GenKey(mouse, building);
+        solutions.Remove(key);
+    }
+
+    //Returns all the base nodes in the path nodes creating route.
+    protected List<BaseNode> CreateRoute(Vector2Int mouse, Vector2Int building)
+    {
+        List<BaseNode> route = new List<BaseNode>();
 
         //Start with mouse and decend throught the costs (flood fill).
         PathNode current_node = nodes[mouse_loc.x, mouse_loc.y];
-        route.Add(current_node.Postion);
+        route.Add(new BaseNode(current_node.Postion, current_node.Speed));
 
         //Building node is null indacating the end
         while (current_node.Previous_node != null)
         {
-            route.Add(current_node.Previous_node.Postion);
+            route.Add(new BaseNode(current_node.Previous_node.Postion, current_node.Previous_node.Speed));
             current_node = current_node.Previous_node;
         }
 
         //Save
-        Vector2Int[] key = new Vector2Int[2] { mouse, building };
+        string key = GenKey(mouse, building);
         solutions.Add(key, route);
 
         return route;
     }
 
-    public List<Vector2Int> Pathfinding(Vector2Int mouse, Vector2Int building)
+    public List<BaseNode> Pathfinding(Vector2Int mouse, Vector2Int building)
     {
-        //Save using algorithm if route was calculated.
-        List<Vector2Int> route = new List<Vector2Int>();
-        Vector2Int[] key = new Vector2Int[2] { mouse, building };
+        //Load route if it been calculated before.
+        List<BaseNode> route;
+        string key = GenKey(mouse, building);
         if (solutions.TryGetValue(key, out route))
         {
             return route;
         }
-
+        
         //Find grid to search.
         start = FindChunk(mouse);
         end   = FindChunk(building);
@@ -226,18 +244,29 @@ public class PathFinding: MonoBehaviour, ISaveable
 
         if (nodes[mouse_loc.x, mouse_loc.y].Previous_node != null)
             return CreateRoute(mouse, building);
-        //If rout can't be found mouse need to sleep as per GDD.
+        //If route can't be found mouse need to sleep as per GDD.
         else
             return null;
     }
 
     public void PopulateSaveData(GameData data)
     {
-        data.routes.paths = solutions;
+        foreach (var (key, value) in solutions)
+        {
+            route_save_data path = new route_save_data();
+            path.key    = key;
+            path.values = value;
+            data.pathmap.paths.Add(path);
+        }
     }
 
     public void LoadFromSaveData(GameData data)
     {
-        solutions = data.routes.paths;
+        List<route_save_data> paths = data.pathmap.paths;
+
+        for (int n = 0; n < paths.Count; n++) 
+        {
+            solutions.Add(paths[n].key, paths[n].values);
+        }
     }
 }

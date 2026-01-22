@@ -19,7 +19,7 @@ public class GameData
     public BuildingData building_data;
     public ResearchData research_data;
     public PathData path_data;
-    public Routes routes;
+    public PathMap pathmap;
 
     public GameData()
     {
@@ -27,7 +27,7 @@ public class GameData
         building_data = new BuildingData();
         research_data = new ResearchData();
         path_data     = new PathData();
-        routes        = new Routes();
+        pathmap       = new PathMap();
     }
 }
 
@@ -107,12 +107,18 @@ public class ResearchData
 }
 
 [System.Serializable]
-public class Routes
+public class PathMap
 {
-    public Dictionary<Vector2Int[], List<Vector2Int>> paths;
-
-    public Routes()
+    public List<route_save_data> paths;
+    public PathMap() 
     {
-        paths = new Dictionary<Vector2Int[], List<Vector2Int>>();
+        paths = new List<route_save_data>();
     }
+}
+
+[System.Serializable]
+public struct route_save_data
+{
+    public string key;
+    public List<BaseNode> values; 
 }
