@@ -22,6 +22,8 @@ public class ParentBuilding : MonoBehaviour
     protected List<MouseTemp> mouse_occupants;
     protected int capacity;
 
+    public int Tier { get { return tier; } }
+
     public ParentBuilding()
     {
         building_prefab = null;

@@ -78,8 +78,8 @@ public class FactoryBuilding : ParentBuilding
     protected new void TierSelection()
     {
         building_prefab = building_prefabs[tier - 1];
-        capacity = capacitys[tier - 1];
-        scrap_cost = scrap_costs[tier - 1];
+        capacity        = capacitys[tier - 1];
+        scrap_cost      = scrap_costs[tier - 1];
     }
 
     //Delay is hard coded because theres variation in the GDD

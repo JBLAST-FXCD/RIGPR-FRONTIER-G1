@@ -13,10 +13,8 @@ public class ResidentialBuilding : ParentBuilding
 
     protected int quality;
 
-    public ResidentialBuilding()
-    {
-        quality = 0;
-    }
+    public int Quality {  get { return quality; } }
+    public int[] Max_quality { get { return max_quality; } }
 
     protected new void TierSelection()
     {
