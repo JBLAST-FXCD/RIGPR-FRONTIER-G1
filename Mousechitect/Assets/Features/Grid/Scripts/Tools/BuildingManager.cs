@@ -320,7 +320,7 @@ public class BuildingManager : MonoBehaviour, ISaveable
             base_building_rotation * Quaternion.Euler(0.0f, current_rotation_y, 0.0f);
     }
 
-    // Keeps current_rotation_y within 0–360 range.
+    // Keeps current_rotation_y within 0ï¿½360 range.
     private void NormalizeCurrentRotation()
     {
         current_rotation_y = Mathf.Repeat(current_rotation_y, 360.0f);
@@ -516,6 +516,7 @@ public class BuildingManager : MonoBehaviour, ISaveable
 
         placed_data.is_path = false;
         placed_data.prefab_index = selected_building_index;
+        placed_data.speed_modifier = -1;
 
         if (string.IsNullOrEmpty(placed_data.unique_id))
         {
@@ -535,12 +536,8 @@ public class BuildingManager : MonoBehaviour, ISaveable
             ++i;
         }
 
-        GameObject placed_building = current_building;
-
-        if (building_placed != null)
-        {
-            building_placed.Invoke(placed_building);
-        }
+        // also write into GridManager to set speed to 0 stopping mice from walking
+        grid_manager.SetPathOnCells(placed_data.occupied_cells, placed_data.speed_modifier);
 
         current_building = null;
         current_building_collider = null;
@@ -721,6 +718,7 @@ public class BuildingManager : MonoBehaviour, ISaveable
             placed.unique_id = entry.unique_id;
             placed.prefab_index = entry.prefab_index;
             placed.is_path = false;
+            placed.speed_modifier = -1;
 
             placed.occupied_cells.Clear();
 
@@ -736,6 +734,9 @@ public class BuildingManager : MonoBehaviour, ISaveable
                     ++i;
                 }
             }
+
+            // Restore speed modifiers for pathfinding
+            grid_manager.SetPathOnCells(placed.occupied_cells, placed.speed_modifier);
 
             placed_buildings_by_id[placed.unique_id] = placed;
 

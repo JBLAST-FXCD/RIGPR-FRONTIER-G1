@@ -73,16 +73,16 @@ public class CommercialBuilding : ParentBuilding
     protected new void Update()
     {
         //For debuging the popularity numbers
-        if (Input.GetKeyDown(KeyCode.C))
-        {
-            float temp = 0;
-            PopularityAlgorithm();
-            for (int i = 0; i < cheese_popularity.Length; i++)
-                Debug.Log(cheese_popularity[i]);
-            for (int j = 0; j < cheese_popularity.Length; j++)
-                temp += cheese_popularity[j];
-            Debug.Log(temp);
-        }
+        //if (Input.GetKeyDown(KeyCode.C))
+        //{
+        //    float temp = 0;
+        //    PopularityAlgorithm();
+        //    for (int i = 0; i < cheese_popularity.Length; i++)
+        //        Debug.Log(cheese_popularity[i]);
+        //    for (int j = 0; j < cheese_popularity.Length; j++)
+        //        temp += cheese_popularity[j];
+        //    Debug.Log(temp);
+        //}
     }
 
     //The maximum range is limited to prevent any element of the array from having a disproportionate chance of being the maximum number,
