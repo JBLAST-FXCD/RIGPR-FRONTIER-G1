@@ -4,7 +4,6 @@ using UnityEngine;
 
 // Iain Benner 05/12/2025
 
-
 /// <summary>
 /// Designer can set up mesh and data for tiers of buildings.
 /// On start the correct varition of the building is picked.
