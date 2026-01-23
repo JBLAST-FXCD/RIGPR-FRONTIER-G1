@@ -10,7 +10,7 @@ public class MouseTemp : MonoBehaviour
     protected string mouse_id;
     protected Vector2Int postion;
     Vector2Int building_loc;
-    List<BaseNode> path;
+    public List<BaseNode> path;
     float time_elapsed;
     int i;
 

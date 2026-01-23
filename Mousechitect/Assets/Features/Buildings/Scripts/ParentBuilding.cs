@@ -21,6 +21,7 @@ public class ParentBuilding : MonoBehaviour
     protected GameObject building;
     protected List<MouseTemp> mouse_occupants;
     protected int capacity;
+    protected float rotation;
 
     public int Tier { get { return tier; } }
 
@@ -33,6 +34,7 @@ public class ParentBuilding : MonoBehaviour
 
     void Start()
     {
+        rotation = this.transform.eulerAngles.y;
         ConstructTier();
     }
 
@@ -53,7 +55,7 @@ public class ParentBuilding : MonoBehaviour
         }
     }
 
-    protected void TierSelection()
+    protected virtual void TierSelection()
     {
         building_prefab = building_prefabs[tier - 1];
         capacity = capacitys[tier - 1];
@@ -96,27 +98,39 @@ public class ParentBuilding : MonoBehaviour
     protected void MouseLeave(MouseTemp mouse)
     {
         Vector3 new_loc = mouse.transform.localPosition;
+        float angle = this.transform.eulerAngles.y - rotation;
+        angle = Mathf.Repeat(angle, 360.0f);
 
-        switch (this.transform.eulerAngles.y)
-        {
-            case 0:
-                new_loc.z += 1;
-                break;
-            case 90:
-                new_loc.x += 1;
-                break;
-            case 180:
-                new_loc.z -= 1;
-                break;
-            case 270:
-                new_loc.x -= 1;
-                break;
-        }
+        if (angle >= 315 && angle < 45)
+            new_loc.z += 1;
+        else if (angle >= 45 && angle < 135)
+            new_loc.x += 1;
+        else if (angle >= 135 && angle < 225)
+            new_loc.z -= 1;
+        else
+            new_loc.x -= 1;
 
-        mouse_occupants.Remove(mouse);
+        //switch (angle)
+        //{
+        //    case 0:
+        //        new_loc.z += 1;
+        //        break;
+        //    case 90:
+        //        new_loc.x += 1;
+        //        break;
+        //    case 180:
+        //        new_loc.z -= 1;
+        //        break;
+        //    case 270:
+        //        new_loc.x -= 1;
+        //        break;
+        //}
 
+        mouse.path = null;
         mouse.transform.localPosition = new_loc;
         mouse.transform.gameObject.SetActive(true);
+
+        mouse_occupants.Remove(mouse);
     }
 
     public void PopulateInstanceSaveData(ref building_save_data data)
