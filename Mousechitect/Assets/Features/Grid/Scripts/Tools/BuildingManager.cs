@@ -79,6 +79,12 @@ public class BuildingManager : MonoBehaviour, ISaveable
     // Track placed buildings so we can save/load them.
     private readonly List<PlacedObjectData> placed_buildings = new List<PlacedObjectData>();
 
+    // Anthony 22/01/26 
+
+    public event Action<GameObject> building_placed;
+    public event Action<string> building_removed;
+
+
     private void Update()
     {
         /* keyboard entry to build mode
@@ -314,7 +320,7 @@ public class BuildingManager : MonoBehaviour, ISaveable
             base_building_rotation * Quaternion.Euler(0.0f, current_rotation_y, 0.0f);
     }
 
-    // Keeps current_rotation_y within 0–360 range.
+    // Keeps current_rotation_y within 0ï¿½360 range.
     private void NormalizeCurrentRotation()
     {
         current_rotation_y = Mathf.Repeat(current_rotation_y, 360.0f);
@@ -615,6 +621,11 @@ public class BuildingManager : MonoBehaviour, ISaveable
         if (placed_data != null)
         {
             Destroy(placed_data.gameObject);
+        }
+
+        if (building_removed != null)
+        {
+            building_removed.Invoke(unique_id);
         }
 
         return true;

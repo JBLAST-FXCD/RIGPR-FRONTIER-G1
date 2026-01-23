@@ -22,4 +22,5 @@ public class ResidentialBuilding : ParentBuilding
         capacity = capacitys[tier - 1];
         quality = max_quality[tier - 1];
     }
+
 }

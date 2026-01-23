@@ -11,9 +11,10 @@ GameObject:
   - component: {fileID: 7168824547791492975}
   - component: {fileID: 3626138514475166284}
   - component: {fileID: 6619350289366639286}
+  - component: {fileID: 2863757985355364823}
   m_Layer: 7
-  m_Name: Cylinder1
-  m_TagString: Untagged
+  m_Name: Research
+  m_TagString: BuildingTest
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -82,13 +83,28 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2740224371503408878, guid: 08b72c908f5c5fd418a32d80bd4b8258,
         type: 3}
+      propertyPath: m_LocalScale.x
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1855002514467727449, guid: 11d65cab531e84e4889089c2fae2a3ed,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1855002514467727449, guid: 11d65cab531e84e4889089c2fae2a3ed,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1855002514467727449, guid: 11d65cab531e84e4889089c2fae2a3ed,
+        type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2740224371503408878, guid: 08b72c908f5c5fd418a32d80bd4b8258,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 2740224371503408878, guid: 08b72c908f5c5fd418a32d80bd4b8258,
         type: 3}

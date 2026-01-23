@@ -11,8 +11,8 @@ GameObject:
   - component: {fileID: 3744425522659430414}
   - component: {fileID: 2225640615135528235}
   m_Layer: 7
-  m_Name: Cube1
-  m_TagString: Untagged
+  m_Name: Factory
+  m_TagString: BuildingTest
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -55,13 +55,28 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2235729063050720524, guid: 8467af8c4eee29b479382fffa15df79a,
         type: 3}
+      propertyPath: m_LocalScale.x
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6131630549026816104, guid: c8cac1079366c724ebf716540dffb80f,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6131630549026816104, guid: c8cac1079366c724ebf716540dffb80f,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6131630549026816104, guid: c8cac1079366c724ebf716540dffb80f,
+        type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2235729063050720524, guid: 8467af8c4eee29b479382fffa15df79a,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.5
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 2235729063050720524, guid: 8467af8c4eee29b479382fffa15df79a,
         type: 3}
