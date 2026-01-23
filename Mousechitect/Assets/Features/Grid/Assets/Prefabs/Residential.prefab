@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 1882122932072419119}
   - component: {fileID: 6227911627926068500}
   - component: {fileID: 3140221396678080909}
+  - component: {fileID: 7545014498882316361}
   m_Layer: 7
   m_Name: Residential
   m_TagString: BuildingTest
@@ -60,8 +61,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   building_prefabs: []
   capacitys: 020000000400000008000000
-  tier: 1
+  tier: 2
   max_quality: 050000000a00000014000000
+--- !u!114 &7545014498882316361
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 862422936310738579}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: abe1aa6322ad7424da637136e9224032, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  house_count_bonus: 0.02
 --- !u!1 &2132965586226427814
 GameObject:
   m_ObjectHideFlags: 0

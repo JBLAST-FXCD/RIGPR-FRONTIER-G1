@@ -3,57 +3,25 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // Iain Benner 14/12/2025
-// Updated by Anthony - 21/01/2026
 
 /// <summary>
-/// Residential building extends ParentBuilding by adding a quality value.
-/// Quality is derived from tier using max_quality.
+/// only difrence from ResidentialBuilding and ParentBuilding is quality matric  
 /// </summary>
 public class ResidentialBuilding : ParentBuilding
 {
     [SerializeField] protected int[] max_quality;
 
-    protected int quality = 0;
+    protected int quality;
 
-    protected override void Awake()
+    public ResidentialBuilding()
     {
-        base.Awake();
-
-        ApplyQualityFromTier();
+        quality = 0;
     }
 
-    protected override void TierSelection()
+    protected new void TierSelection()
     {
-        base.TierSelection();
-
-        ApplyQualityFromTier();
-    }
-
-    private void ApplyQualityFromTier()
-    {
-        if (max_quality == null || max_quality.Length <= 0)
-        {
-            quality = 0;
-            return;
-        }
-
-        int tier_index = tier - 1;
-
-        if (tier_index < 0)
-        {
-            tier_index = 0;
-        }
-
-        if (tier_index >= max_quality.Length)
-        {
-            tier_index = max_quality.Length - 1;
-        }
-
-        quality = max_quality[tier_index];
-    }
-
-    public int GetQuality()
-    {
-        return quality;
+        building_prefab = building_prefabs[tier - 1];
+        capacity = capacitys[tier - 1];
+        quality = max_quality[tier - 1];
     }
 }

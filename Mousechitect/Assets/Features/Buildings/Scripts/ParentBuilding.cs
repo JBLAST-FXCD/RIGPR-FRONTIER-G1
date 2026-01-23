@@ -23,11 +23,9 @@ public class ParentBuilding : MonoBehaviour
     protected List<MouseTemp> mouse_occupants;
     protected int capacity;
 
-    // Updated by Anthony 22/01/26 (added awake, updated TierSelection, updated ConstructTier ) 
-    protected virtual void Awake()
+    public ParentBuilding()
     {
         building_prefab = null;
-        building = null;
         mouse_occupants = new List<MouseTemp>();
         capacity = 0;
     }
@@ -54,51 +52,24 @@ public class ParentBuilding : MonoBehaviour
         }
     }
 
-    protected virtual void TierSelection()
+    protected void TierSelection()
     {
-        if (capacitys == null || capacitys.Length <= 0)
-        {
-            capacity = 0;
-            return;
-        }
-
-        int tier_index = tier - 1;
-
-        if (tier_index < 0)
-        {
-            tier_index = 0;
-        }
-
-        if (tier_index >= capacitys.Length)
-        {
-            tier_index = capacitys.Length - 1;
-        }
-
-        capacity = capacitys[tier_index];
-
-        // Only assign building_prefab if the array exists
-        if (building_prefabs != null && building_prefabs.Length > tier_index)
-        {
-            building_prefab = building_prefabs[tier_index];
-        }
+        building_prefab = building_prefabs[tier - 1];
+        capacity = capacitys[tier - 1];
     }
 
     //The funtionb allows for diffrent varition depending on the designers choise and can be used for when the player upgrades the building.
     protected void ConstructTier()
     {
-        if (tier > 0 && capacitys != null && tier <= capacitys.Length)
+        if (tier > 0 && tier <= capacitys.Length)
         {
             TierSelection();
-
-            if (building_prefab != null)
-            {
-                building_prefab.transform.localPosition = new Vector3(0, 0, 0);
-                building = Instantiate(building_prefab, gameObject.transform);
-            }
+            building_prefab.transform.localPosition = new Vector3(0, 0, 0);
+            building = Instantiate(building_prefab, gameObject.transform);
         }
     }
 
-    protected virtual void UpdateTier()
+    protected void UpdateTier()
     {
         tier++;
         if (tier > 0 && tier <= capacitys.Length)
