@@ -34,7 +34,7 @@ public class PathFinding: MonoBehaviour, ISaveable
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.P))
+        if (Input.GetKeyDown(KeyCode.Z))
         {
             solutions.Clear();
         }
@@ -127,21 +127,36 @@ public class PathFinding: MonoBehaviour, ISaveable
         {
             return route;
         }
-        
+
+        start = mouse;
+        end = building;
+
+        //Making sure end is lowest point and start is largest.
+        int swap = new int();
+
+        if (end.x > start.x)
+        {
+            swap = end.x;
+            end.x = start.x;
+            start.x = swap;
+        }
+
+        if (end.y > start.y)
+        {
+            swap = end.y;
+            end.y = start.y;
+            start.y = swap;
+        };
+
         //Find grid to search.
-        start = FindChunk(mouse);
-        end   = FindChunk(building);
+        start.x = Mathf.CeilToInt(start.x / chunk) * chunk;
+        start.y = Mathf.CeilToInt(start.y / chunk) * chunk;
+        end.x   = Mathf.FloorToInt(end.x  / chunk) * chunk;
+        end.y   = Mathf.FloorToInt(end.y  / chunk) * chunk;
 
-        //Making sure end is lowest point and start is largest
-        start.x = start.x > end.x ? start.x : end.x;
-        start.y = start.y > end.y ? start.y : end.y;
-
-        end.x = end.x < start.x ? end.x : start.x;
-        end.y = end.y < start.y ? end.y : start.y;
-
-        //Making sure grid is aleast one chunk wide or long.
-        end.x = end.x == start.x ? end.x - chunk: end.x;
-        end.y = end.y == start.y ? end.y - chunk : end.y;
+        //Making sure theres area around the mouse and building.
+        end.x   -= chunk; end.y   -= chunk;
+        start.x += chunk; start.y += chunk;
 
         //Save where nodes begin for initialising array.
         int i = end.x;
@@ -174,7 +189,7 @@ public class PathFinding: MonoBehaviour, ISaveable
             mouse_loc.y += chunk;
             building_loc.y += chunk;
         }
-        while (end.x > 0)
+        while (end.y > 0)
         {
             end.y -= chunk;
             start.y -= chunk;

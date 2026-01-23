@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3347985499343533086}
   m_Layer: 0
   m_Name: Cheese_Factory
-  m_TagString: Untagged
+  m_TagString: BuildingTest
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -55,8 +55,13 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: c44558855aefbab4da2a7047ed063570,
         type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: c44558855aefbab4da2a7047ed063570,
+        type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -7
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c44558855aefbab4da2a7047ed063570,
         type: 3}
@@ -66,7 +71,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: c44558855aefbab4da2a7047ed063570,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -7
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c44558855aefbab4da2a7047ed063570,
         type: 3}
@@ -146,8 +151,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 7, y: 2, z: 0.1}
-  m_Center: {x: 4, y: 1, z: -7.5}
+  m_Size: {x: 25, y: 2, z: 17}
+  m_Center: {x: 0, y: 1, z: -1}
 --- !u!114 &4052649169524891995
 MonoBehaviour:
   m_ObjectHideFlags: 0
