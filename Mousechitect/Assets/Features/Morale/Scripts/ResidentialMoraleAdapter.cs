@@ -28,47 +28,38 @@ public class ResidentialMoraleAdapter : MonoBehaviour, IMoraleContributor
 
     public float GetContributionScore()
     {
-        float quality_normalised = GetQualityNormalised();
-
-        float score = quality_normalised + house_count_bonus;
-
-        return Mathf.Clamp01(score);
-    }
-
-    private float GetQualityNormalised()
-    {
         if (residential_building == null)
         {
             return 0.0f;
         }
 
-        int tier = GetTierValue(residential_building);
-        int[] max_quality = GetMaxQualityArray(residential_building);
+        float quality_normalised = GetQualityNormalised(residential_building);
 
-        if (max_quality == null || max_quality.Length <= 0)
+        // Each building contributes its normalised quality, plus a tiny flat bonus.
+        // MoraleSystem averages across all housing contributors.
+        float score = quality_normalised + house_count_bonus;
+
+        return Mathf.Clamp01(score);
+    }
+
+    private float GetQualityNormalised(ResidentialBuilding building)
+    {
+        int[] max_quality = building.Max_quality;
+
+        if (max_quality == null || max_quality.Length == 0)
         {
             return 0.0f;
         }
 
-        int tier_index = tier - 1;
-
-        if (tier_index < 0)
-        {
-            tier_index = 0;
-        }
-
-        if (tier_index >= max_quality.Length)
-        {
-            tier_index = max_quality.Length - 1;
-        }
-
-        float quality_value = max_quality[tier_index];
         float max_value = GetArrayMax(max_quality);
 
         if (max_value <= 0.0f)
         {
-            max_value = 20.0f;
+            return 0.0f;
         }
+
+        // Quality is already tier-selected in ResidentialBuilding.TierSelection()
+        float quality_value = building.Quality;
 
         return Mathf.Clamp01(quality_value / max_value);
     }
@@ -107,7 +98,7 @@ public class ResidentialMoraleAdapter : MonoBehaviour, IMoraleContributor
     private float GetArrayMax(int[] values)
     {
         int i = 0;
-        int max = 0;
+        int max = int.MinValue;
 
         while (i < values.Length)
         {
@@ -117,6 +108,12 @@ public class ResidentialMoraleAdapter : MonoBehaviour, IMoraleContributor
             }
 
             ++i;
+        }
+
+        // If all values were negative (unlikely), treat as 0.
+        if (max < 0)
+        {
+            max = 0;
         }
 
         return (float)max;

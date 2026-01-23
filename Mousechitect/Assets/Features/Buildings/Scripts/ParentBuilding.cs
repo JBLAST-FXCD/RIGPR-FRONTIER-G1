@@ -53,7 +53,7 @@ public class ParentBuilding : MonoBehaviour
         }
     }
 
-    protected void TierSelection()
+    protected virtual void TierSelection()
     {
         building_prefab = building_prefabs[tier - 1];
         capacity = capacitys[tier - 1];

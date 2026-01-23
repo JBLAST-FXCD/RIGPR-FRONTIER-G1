@@ -59,9 +59,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fc3cb6a994e3c345bf20aaa81b9c895, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  building_prefabs: []
+  building_prefabs:
+  - {fileID: 862422936310738579, guid: ef4801804a8a3bd40b51c0cb1fdd70e9, type: 3}
+  - {fileID: 862422936310738579, guid: ef4801804a8a3bd40b51c0cb1fdd70e9, type: 3}
+  - {fileID: 862422936310738579, guid: ef4801804a8a3bd40b51c0cb1fdd70e9, type: 3}
   capacitys: 020000000400000008000000
-  tier: 2
+  tier: 1
   max_quality: 050000000a00000014000000
 --- !u!114 &7545014498882316361
 MonoBehaviour:

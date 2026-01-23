@@ -16,10 +16,11 @@ public class ResidentialBuilding : ParentBuilding
     public int Quality {  get { return quality; } }
     public int[] Max_quality { get { return max_quality; } }
 
-    protected new void TierSelection()
+    protected override void TierSelection()
     {
         building_prefab = building_prefabs[tier - 1];
         capacity = capacitys[tier - 1];
         quality = max_quality[tier - 1];
     }
+
 }
