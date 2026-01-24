@@ -29,15 +29,34 @@ public class MouseTemp : MonoBehaviour
 
     protected void GetVectors(GameObject building)
     {
-        building_loc = new Vector2Int(0, 0);
-        building_loc.x = (int)building.transform.localPosition.x;
-        building_loc.y = (int)building.transform.localPosition.z;
+        // Try to use the entrance point (preferred for pathfinding)
+        Transform entrance = building.transform.Find("EntrancePoint");
 
-        postion.x = (int)transform.localPosition.x;
-        postion.y = (int)transform.localPosition.z;
+        Vector3 target_world = (entrance != null) ? entrance.position : building.transform.position;
+
+        // Convert world space to grid coordinates
+        building_loc = new Vector2Int(
+            Mathf.RoundToInt(target_world.x),
+            Mathf.RoundToInt(target_world.z)
+        );
+
+        postion = new Vector2Int(
+            Mathf.RoundToInt(transform.position.x),
+            Mathf.RoundToInt(transform.position.z)
+        );
 
         pathfinding.Grid_manager = grid_manager;
-        path = pathfinding.Pathfinding(this.postion, building_loc);
+
+        // Reset path follow state whenever we calculate a new path
+        i = 0;
+        time_elapsed = 0.0f;
+
+        path = pathfinding.Pathfinding(postion, building_loc);
+
+        Debug.Log(path == null
+    ? $"No path from {postion} to {building_loc}. Target speed={grid_manager.GetCellMoveSpeed(building_loc)}"
+    : $"Path found: {path.Count} nodes to {building_loc}. Target speed={grid_manager.GetCellMoveSpeed(building_loc)}");
+
     }
 
     protected void Move(float speed, Vector3 loc)
@@ -62,6 +81,9 @@ public class MouseTemp : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.C))
         {
             GameObject building = GameObject.FindGameObjectWithTag("BuildingTest");
+
+            Debug.Log($"BuildingTest found: {building.name} at {building.transform.position}");
+
 
             if (building != null)
             {

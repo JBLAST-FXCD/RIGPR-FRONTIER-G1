@@ -37,6 +37,13 @@ public class BuildingManager : MonoBehaviour, ISaveable
     private const float COARSE_ROTATION_STEP_DEGREES = 15.0f;
     private const float FINE_ROTATION_STEP_DEGREES = 0.25f;
     private const float ROTATION_HOLD_THRESHOLD_SECONDS = 0.2f;
+    private const float LOGIC_ROTATION_STEP_DEGREES = 90.0f;
+
+    private const int VISUAL_STEP_DEGREES = 15;
+    private const int STEPS_PER_QUARTER_TURN = 90 / VISUAL_STEP_DEGREES; // 6
+
+
+
 
     private const float RMB_CLICK_MAX_DRAG_DISTANCE = 5.0f;      // pixels
     private const float RMB_CLICK_MAX_DURATION = 0.3f;           // seconds
@@ -66,6 +73,9 @@ public class BuildingManager : MonoBehaviour, ISaveable
     private bool has_used_fine_rotation = false;
     private float rotation_key_down_time = 0.0f;
     private Quaternion base_building_rotation = Quaternion.identity;
+    private Quaternion base_visual_local_rotation = Quaternion.identity;
+
+    private int rotation_steps = 0; // counts 15 degree steps (can go negative)
 
     // Remember which prefab index is currently selected (for UI integration)
     private int selected_building_index = 0;
@@ -186,6 +196,9 @@ public class BuildingManager : MonoBehaviour, ISaveable
         current_building = Instantiate(building_prefab);
         current_building_collider = current_building.GetComponentInChildren<Collider>();
         current_preview_visual = current_building.GetComponentInChildren<BuildingPreviewVisual>();
+
+        Transform visual = current_building.transform.Find("Visual");
+        base_visual_local_rotation = (visual != null) ? visual.localRotation : Quaternion.identity;
 
         // reset rotation state for this new preview
         base_building_rotation = current_building.transform.rotation;
@@ -316,8 +329,21 @@ public class BuildingManager : MonoBehaviour, ISaveable
             return;
         }
 
+        // Root ONLY updates when we cross a full 90 degrees (15 * 6).
+        // Using Floor avoids snapping early at 45 degrees (Round would do that).
+        float logic_y = Mathf.Floor(current_rotation_y / LOGIC_ROTATION_STEP_DEGREES) * LOGIC_ROTATION_STEP_DEGREES;
+        logic_y = Mathf.Repeat(logic_y, 360.0f);
+
         current_building.transform.rotation =
-            base_building_rotation * Quaternion.Euler(0.0f, current_rotation_y, 0.0f);
+            base_building_rotation * Quaternion.Euler(0f, logic_y, 0f);
+
+        // Visual rotates smoothly in 15-degree (or fine) steps inside the 90-degree block.
+        Transform visual = current_building.transform.Find("Visual");
+        if (visual != null)
+        {
+            float visual_offset = current_rotation_y - logic_y;
+            visual.localRotation = base_visual_local_rotation * Quaternion.Euler(0f, visual_offset, 0f);
+        }
     }
 
     // Keeps current_rotation_y within 0�360 range.
@@ -365,6 +391,11 @@ public class BuildingManager : MonoBehaviour, ISaveable
 
         // CheckCellSurfaces(cells) - returns new is_valid_build_zone
         is_valid_build_zone = CheckCellSurfaces(covered_cells);
+
+        if (current_preview_visual == null)
+        {
+            current_preview_visual = current_building.GetComponent<BuildingPreviewVisual>();
+        }
 
         if (current_preview_visual != null)
         {
@@ -508,7 +539,8 @@ public class BuildingManager : MonoBehaviour, ISaveable
 
         if (placed_data == null)
         {
-            placed_data = current_building.gameObject.AddComponent<PlacedObjectData>();
+            placed_data = current_building.
+                gameObject.AddComponent<PlacedObjectData>();
         }
 
         placed_data.is_path = false;
@@ -538,6 +570,23 @@ public class BuildingManager : MonoBehaviour, ISaveable
 
         // also write into GridManager to set speed to 0 stopping mice from walking
         grid_manager.SetPathOnCells(placed_data.occupied_cells, placed_data.speed_modifier);
+
+        // Re-open the entrance cell so pathfinding has a reachable target
+        Transform entrance = current_building.transform.Find("EntrancePoint");
+        if (entrance != null)
+        {
+            Vector2Int entrance_cell = new Vector2Int(
+                Mathf.RoundToInt(entrance.position.x),
+                Mathf.RoundToInt(entrance.position.z)
+            );
+
+            // IMPORTANT:
+            // If SetPathOnCells ADDS a modifier to a base speed (common), then:
+            // - building uses -1 to block (1 + -1 = 0)
+            // - entrance should use +1 to undo that block (0 + 1 = 1)
+            grid_manager.SetPathOnCells(new List<Vector2Int> { entrance_cell }, 1.0f);
+            Debug.Log($"Entrance cell {entrance_cell} speed now {grid_manager.GetCellMoveSpeed(entrance_cell)}");
+        }
 
         current_building = null;
         current_building_collider = null;
