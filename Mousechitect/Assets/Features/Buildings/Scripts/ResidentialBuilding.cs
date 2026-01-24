@@ -23,4 +23,9 @@ public class ResidentialBuilding : ParentBuilding
         quality = max_quality[tier - 1];
     }
 
+    public Transform GetVisualRoot()
+    {
+        return transform.Find("Visual");
+    }
+
 }
