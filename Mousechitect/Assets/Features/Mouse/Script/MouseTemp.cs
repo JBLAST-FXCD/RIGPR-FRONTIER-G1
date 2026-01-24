@@ -53,9 +53,6 @@ public class MouseTemp : MonoBehaviour
 
         path = pathfinding.Pathfinding(postion, building_loc);
 
-        Debug.Log(path == null
-    ? $"No path from {postion} to {building_loc}. Target speed={grid_manager.GetCellMoveSpeed(building_loc)}"
-    : $"Path found: {path.Count} nodes to {building_loc}. Target speed={grid_manager.GetCellMoveSpeed(building_loc)}");
 
     }
 
