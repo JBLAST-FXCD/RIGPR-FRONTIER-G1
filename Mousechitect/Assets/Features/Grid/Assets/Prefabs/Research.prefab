@@ -67,7 +67,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 10, y: 20, z: 15}
+  m_Size: {x: 10, y: 20, z: 14.5}
   m_Center: {x: -5.5, y: 10, z: 0}
 --- !u!33 &-1026952941364474196
 MeshFilter:
@@ -76,7 +76,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2212835445630256447}
-  m_Mesh: {fileID: 870556930181619739, guid: 33850a126a5b5be4db036c2d52448902, type: 3}
+  m_Mesh: {fileID: 870556930181619739, guid: e130191f49bca47458f92c398ac5cfa0, type: 3}
 --- !u!1 &3992329232842419984
 GameObject:
   m_ObjectHideFlags: 0
@@ -168,7 +168,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   building_prefabs:
   - {fileID: 8190863958714023708, guid: f6342fb014e077148bfa251aa1582b9d, type: 3}
-  capacitys: 02000000
+  capacitys: 20000000
   tier: 1
 --- !u!65 &2865412012560817843
 BoxCollider:

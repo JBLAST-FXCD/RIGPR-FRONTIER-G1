@@ -91,7 +91,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   building_prefabs:
   - {fileID: 2330073249964640259, guid: 7b72f54670201cd45a541d68903b81e1, type: 3}
-  capacitys: 02000000
+  capacitys: 20000000
   tier: 1
   scrap_costs: 05000000
 --- !u!65 &2824112730333103816

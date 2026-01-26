@@ -13,13 +13,15 @@ public class MouseTemp : MonoBehaviour
     public List<BaseNode> path;
     float time_elapsed;
     int i;
+    int nodes;
 
     public Vector2Int Postion {  get { return postion; } }
 
     public MouseTemp()
     {
-        i = 0;
         time_elapsed = 0;
+        i = 0;
+        nodes = 1;
     }
 
     public string GetMouseID()
@@ -28,7 +30,7 @@ public class MouseTemp : MonoBehaviour
     }
 
     // GetVectors Updated by Anthony 23/01/26 
-    protected void GetVectors(GameObject building)
+    public void GetVectors(ParentBuilding building)
     {
         // Try to use the entrance point (preferred for pathfinding)
         Transform entrance = building.transform.Find("EntrancePoint");
@@ -53,20 +55,46 @@ public class MouseTemp : MonoBehaviour
         time_elapsed = 0.0f;
 
         path = pathfinding.Pathfinding(postion, building_loc);
+    }
+    public void GetVectors(GameObject building)
+    {
+        // Try to use the entrance point (preferred for pathfinding)
+        Transform entrance = building.transform.Find("EntrancePoint");
 
+        Vector3 target_world = (entrance != null) ? entrance.position : building.transform.position;
 
+        // Convert world space to grid coordinates
+        building_loc = new Vector2Int(
+            Mathf.RoundToInt(target_world.x),
+            Mathf.RoundToInt(target_world.z)
+        );
+
+        postion = new Vector2Int(
+            Mathf.RoundToInt(transform.position.x),
+            Mathf.RoundToInt(transform.position.z)
+        );
+
+        pathfinding.Grid_manager = grid_manager;
+
+        // Reset path follow state whenever we calculate a new path
+        i = 0;
+        time_elapsed = 0.0f;
+
+        path = pathfinding.Pathfinding(postion, building_loc);
     }
 
-    protected void Move(float speed, Vector3 loc)
+    protected void LERP(float speed, Vector3 loc)
     {
-        if (time_elapsed < 1)
+        if (this.transform.position != loc)
         {
-            this.transform.position = Vector3.Lerp(this.transform.position, loc, time_elapsed * speed * Time.deltaTime);
             time_elapsed += speed * Time.deltaTime;
+            float x = Mathf.Clamp(time_elapsed, 0, Mathf.PI);
+            float t = 0.5f * Mathf.Sin(x - Mathf.PI / 2) + 0.5f;
+
+            this.transform.position = Vector3.Lerp(this.transform.position, loc, t);
         }
         else
         {
-            this.transform.position = loc;
             time_elapsed = 0;
             i++;
         }
@@ -97,7 +125,7 @@ public class MouseTemp : MonoBehaviour
 
             if (path[i].speed == speed)
             {
-                Move(speed, loc);
+                LERP(speed, loc);
             }
             else
             {

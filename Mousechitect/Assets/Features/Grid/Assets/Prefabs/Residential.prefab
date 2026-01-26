@@ -126,7 +126,7 @@ MonoBehaviour:
   building_prefabs:
   - {fileID: 4294587928434800633, guid: 522b8991fb6ebce49a2699bf3f4ba42a, type: 3}
   - {fileID: 5097389391360059737, guid: a7137e9acdee8c644b9d52efd884ebaf, type: 3}
-  capacitys: 0200000004000000
+  capacitys: 2000000004000000
   tier: 1
   max_quality: 050000000a000000
 --- !u!114 &8254380622077631129
