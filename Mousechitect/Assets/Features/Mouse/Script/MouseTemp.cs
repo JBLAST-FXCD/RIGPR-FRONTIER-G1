@@ -80,6 +80,7 @@ public class MouseTemp : MonoBehaviour
         {
             GameObject building = GameObject.FindGameObjectWithTag("BuildingTest");
 
+            
             Debug.Log($"BuildingTest found: {building.name} at {building.transform.position}");
 
 

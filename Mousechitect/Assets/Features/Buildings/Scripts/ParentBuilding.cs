@@ -21,7 +21,6 @@ public class ParentBuilding : MonoBehaviour
     protected GameObject building;
     protected List<MouseTemp> mouse_occupants;
     protected int capacity;
-    protected float rotation;
 
     public int Tier { get { return tier; } }
 
@@ -34,7 +33,6 @@ public class ParentBuilding : MonoBehaviour
 
     void Start()
     {
-        rotation = this.transform.eulerAngles.y;
         ConstructTier();
     }
 
@@ -98,7 +96,7 @@ public class ParentBuilding : MonoBehaviour
     protected void MouseLeave(MouseTemp mouse)
     {
         Vector3 new_loc = mouse.transform.localPosition;
-        float angle = this.transform.eulerAngles.y - rotation;
+        float angle = this.transform.eulerAngles.y;
         angle = Mathf.Repeat(angle, 360.0f);
 
         if (angle >= 315 && angle < 45)
@@ -107,24 +105,8 @@ public class ParentBuilding : MonoBehaviour
             new_loc.x += 1;
         else if (angle >= 135 && angle < 225)
             new_loc.z -= 1;
-        else
+        else if (angle >= 225 && angle < 315)
             new_loc.x -= 1;
-
-        //switch (angle)
-        //{
-        //    case 0:
-        //        new_loc.z += 1;
-        //        break;
-        //    case 90:
-        //        new_loc.x += 1;
-        //        break;
-        //    case 180:
-        //        new_loc.z -= 1;
-        //        break;
-        //    case 270:
-        //        new_loc.x -= 1;
-        //        break;
-        //}
 
         mouse.path = null;
         mouse.transform.localPosition = new_loc;
