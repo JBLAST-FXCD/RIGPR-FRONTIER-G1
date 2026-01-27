@@ -12,7 +12,7 @@ public class StressTest : MonoBehaviour
 
     StressTest()
     {
-        occupants = 2;
+        occupants = 32;
     }
 
     protected void FirstWave()

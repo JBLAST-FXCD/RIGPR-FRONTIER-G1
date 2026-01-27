@@ -43,15 +43,14 @@ public class PathNode
 
         if (grid_manager.GetCellMoveSpeed(postion) > 0)
         {
-            this.node.speed = grid_manager.GetCellMoveSpeed(postion);
             this.searched = false;
         }
         else
         {
-            this.node.speed = 1;
             this.searched = true;
         }
 
+        this.node.speed = grid_manager.GetCellMoveSpeed(postion);
         this.cost = (int)(1 / node.speed * 100.0f);
         this.total_cost = int.MaxValue;
         this.previous_node = null;

@@ -18,6 +18,8 @@ public class PathFinding: MonoBehaviour, ISaveable
     protected Vector2Int start, end, mouse_loc, building_loc, current_loc;
     protected List<Vector2Int> open_nodes;
     protected PathNode[,] nodes;
+    protected static int uses;
+    protected int max_uses;
 
     //Varible for saving routes.
     protected Dictionary<string, List<BaseNode>> solutions;
@@ -25,6 +27,7 @@ public class PathFinding: MonoBehaviour, ISaveable
     public PathFinding()
     {
         chunk = 16;
+        max_uses = 10;
         open_nodes = new List<Vector2Int>();
 
         solutions = new Dictionary<string, List<BaseNode>>();
@@ -125,7 +128,18 @@ public class PathFinding: MonoBehaviour, ISaveable
         string key = GenKey(mouse, building);
         if (solutions.TryGetValue(key, out route))
         {
-            return route;
+            //If the player makes a faster path it will never be used unless the old paths are deleted.
+            //Making the grid update solution is really exspenive so it removes any route.
+            if(uses >= max_uses)
+            {
+                solutions.Remove(key);
+                uses = 0;
+            }
+            else
+            {
+                uses++;
+                return route;
+            }
         }
 
         start = mouse;

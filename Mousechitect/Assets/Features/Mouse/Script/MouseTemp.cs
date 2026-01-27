@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,27 +9,19 @@ public class MouseTemp : MonoBehaviour
     [SerializeField] protected PathFinding pathfinding;
 
     protected string mouse_id;
+
+    //Varibles for paths and LERP.
     protected Vector2Int postion;
     Vector2Int building_loc;
     public List<BaseNode> path;
-    float time_elapsed;
-    int i;
-    int nodes;
-
     public Vector2Int Postion {  get { return postion; } }
-
-    public MouseTemp()
-    {
-        time_elapsed = 0;
-        i = 0;
-        nodes = 1;
-    }
 
     public string GetMouseID()
     {
         return mouse_id;
     }
 
+    // GetVectors Updated by Iain    27/01/26 
     // GetVectors Updated by Anthony 23/01/26 
     public void GetVectors(ParentBuilding building)
     {
@@ -50,11 +43,10 @@ public class MouseTemp : MonoBehaviour
 
         pathfinding.Grid_manager = grid_manager;
 
-        // Reset path follow state whenever we calculate a new path
-        i = 0;
-        time_elapsed = 0.0f;
-
         path = pathfinding.Pathfinding(postion, building_loc);
+
+        if (path != null)
+            StartCoroutine(FollowPath());
     }
     public void GetVectors(GameObject building)
     {
@@ -76,30 +68,49 @@ public class MouseTemp : MonoBehaviour
 
         pathfinding.Grid_manager = grid_manager;
 
-        // Reset path follow state whenever we calculate a new path
-        i = 0;
-        time_elapsed = 0.0f;
-
         path = pathfinding.Pathfinding(postion, building_loc);
+
+        if(path != null)
+            StartCoroutine(FollowPath());
     }
 
-    protected void LERP(float speed, Vector3 loc)
+    protected IEnumerator FollowPath()
     {
-        if (this.transform.position != loc)
+        for (int i = 0; i < path.Count; i++)
         {
-            time_elapsed += speed * Time.deltaTime;
-            float x = Mathf.Clamp(time_elapsed, 0, Mathf.PI);
-            float t = 0.5f * Mathf.Sin(x - Mathf.PI / 2) + 0.5f;
+            Vector3 loc = new Vector3(path[i].postion.x, 0.5f, path[i].postion.y);
+            float speed = new PathNode(path[i].postion, grid_manager).Speed;
 
-            this.transform.position = Vector3.Lerp(this.transform.position, loc, t);
-        }
-        else
-        {
-            time_elapsed = 0;
-            i++;
+            if (path[i].speed == speed)
+            {
+                float time_elapsed = 0;
+                while (this.transform.position != loc)
+                {
+                    //Smoothing function
+                    time_elapsed += speed * Time.deltaTime;
+                    float x = Mathf.Clamp(time_elapsed, 0, Mathf.PI);
+                    float t = 0.5f * Mathf.Sin(x - Mathf.PI / 2) + 0.5f;
+
+                    this.transform.position = Vector3.Lerp(this.transform.position, loc, t);
+                    yield return new WaitForFixedUpdate();
+                }
+                i++;
+            }
+            else
+            {
+                path = null;
+                i = 0;
+
+                pathfinding.RemoveValue(this.postion, building_loc);
+
+                GameObject building = GameObject.FindGameObjectWithTag("BuildingTest");
+                if (building != null)
+                {
+                    GetVectors(building);
+                }
+            }
         }
     }
-
 
     // Update is called once per frame
     void Update()
@@ -115,30 +126,6 @@ public class MouseTemp : MonoBehaviour
             if (building != null)
             {
                 GetVectors(building);
-            }
-        }
-
-        if (path != null && i < path.Count)
-        {
-            Vector3 loc = new Vector3(path[i].postion.x, 0.5f, path[i].postion.y);
-            float speed = new PathNode(path[i].postion, grid_manager).Speed;
-
-            if (path[i].speed == speed)
-            {
-                LERP(speed, loc);
-            }
-            else
-            {
-                path = null;
-                i = 0;
-
-                pathfinding.RemoveValue(this.postion, building_loc);
-
-                GameObject building = GameObject.FindGameObjectWithTag("BuildingTest");
-                if (building != null)
-                {
-                    GetVectors(building);
-                }
             }
         }
     }
