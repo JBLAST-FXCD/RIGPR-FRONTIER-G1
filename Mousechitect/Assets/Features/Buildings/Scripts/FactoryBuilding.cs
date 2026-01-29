@@ -55,8 +55,22 @@ public class FactoryBuilding : ParentBuilding
         ConstructTier();
     }
 
-    protected new void Update()
+    protected override void Update()
     {
+        //This is for debuging.
+        //Mise will leave when certain conditions are met, depending on the building type.
+        if (Input.GetKeyDown(KeyCode.E) && mouse_occupants.Count > 0)
+        {
+            MouseLeave(mouse_occupants[0]);
+        }
+
+        //This is for debuging.
+        //Buildings will be upgraded when certain conditions are met, depending on the building type.
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            UpdateTier();
+        }
+
         //This is for debuging.
         //Later this will be a bottun in the UI.
         if (Input.GetKeyDown(KeyCode.R))

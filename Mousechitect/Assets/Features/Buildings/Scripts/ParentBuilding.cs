@@ -21,7 +21,6 @@ public class ParentBuilding : MonoBehaviour
     protected GameObject building;
     protected List<MouseTemp> mouse_occupants;
     protected int capacity;
-    protected float rotation;
 
     public int Tier { get { return tier; } }
 
@@ -34,11 +33,10 @@ public class ParentBuilding : MonoBehaviour
 
     void Start()
     {
-        rotation = this.transform.eulerAngles.y;
         ConstructTier();
     }
 
-    protected void Update()
+    protected virtual void Update()
     {
         //This is for debuging.
         //Mise will leave when certain conditions are met, depending on the building type.
@@ -85,7 +83,7 @@ public class ParentBuilding : MonoBehaviour
     }
 
     //Mouse is storded and turned off to make effetivly inside the building.
-    protected void OnTriggerEnter(Collider other)
+    protected void OnTriggerStay(Collider other)
     {
         if (other != null && other.tag == "MouseTemp" && mouse_occupants.Count < capacity)
         {
@@ -95,36 +93,23 @@ public class ParentBuilding : MonoBehaviour
     }
 
     //checks building rotion to place the mice on the right side to stop mice appaering inside building.
-    protected void MouseLeave(MouseTemp mouse)
+    public void MouseLeave(MouseTemp mouse)
     {
-        Vector3 new_loc = mouse.transform.localPosition;
-        float angle = this.transform.eulerAngles.y - rotation;
+        Vector3 new_loc = mouse.transform.position;
+        new_loc.x = Mathf.CeilToInt(new_loc.x);
+        new_loc.z = Mathf.CeilToInt(new_loc.z);
+
+        float angle = this.transform.eulerAngles.y;
         angle = Mathf.Repeat(angle, 360.0f);
 
-        if (angle >= 315 && angle < 45)
-            new_loc.z += 1;
-        else if (angle >= 45 && angle < 135)
+        if (angle >= 315 || angle < 45)
             new_loc.x += 1;
-        else if (angle >= 135 && angle < 225)
+        else if (angle >= 45 || angle < 135)
             new_loc.z -= 1;
-        else
+        else if (angle >= 135 || angle < 225)
             new_loc.x -= 1;
-
-        //switch (angle)
-        //{
-        //    case 0:
-        //        new_loc.z += 1;
-        //        break;
-        //    case 90:
-        //        new_loc.x += 1;
-        //        break;
-        //    case 180:
-        //        new_loc.z -= 1;
-        //        break;
-        //    case 270:
-        //        new_loc.x -= 1;
-        //        break;
-        //}
+        else if (angle >= 225 || angle < 315)
+            new_loc.z += 1;
 
         mouse.path = null;
         mouse.transform.localPosition = new_loc;
@@ -133,6 +118,10 @@ public class ParentBuilding : MonoBehaviour
         mouse_occupants.Remove(mouse);
     }
 
+    public bool CheckOccupants(MouseTemp mouse)
+    {
+        return mouse_occupants.Contains(mouse);
+    }
     public void PopulateInstanceSaveData(ref building_save_data data)
     {
         data.tier = tier;

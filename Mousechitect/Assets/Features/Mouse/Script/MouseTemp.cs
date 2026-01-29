@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,27 +9,21 @@ public class MouseTemp : MonoBehaviour
     [SerializeField] protected PathFinding pathfinding;
 
     protected string mouse_id;
+
+    //Varibles for paths and LERP.
     protected Vector2Int postion;
     Vector2Int building_loc;
     public List<BaseNode> path;
-    float time_elapsed;
-    int i;
-
     public Vector2Int Postion {  get { return postion; } }
-
-    public MouseTemp()
-    {
-        i = 0;
-        time_elapsed = 0;
-    }
 
     public string GetMouseID()
     {
         return mouse_id;
     }
 
+    // GetVectors Updated by Iain    27/01/26 
     // GetVectors Updated by Anthony 23/01/26 
-    protected void GetVectors(GameObject building)
+    public void GetVectors(ParentBuilding building)
     {
         // Try to use the entrance point (preferred for pathfinding)
         Transform entrance = building.transform.Find("EntrancePoint");
@@ -48,55 +43,55 @@ public class MouseTemp : MonoBehaviour
 
         pathfinding.Grid_manager = grid_manager;
 
-        // Reset path follow state whenever we calculate a new path
-        i = 0;
-        time_elapsed = 0.0f;
+        path = pathfinding.Pathfinding(postion, building_loc);
+
+        if (path != null)
+            StartCoroutine(FollowPath());
+    }
+    public void GetVectors(GameObject building)
+    {
+        // Try to use the entrance point (preferred for pathfinding)
+        Transform entrance = building.transform.Find("EntrancePoint");
+
+        Vector3 target_world = (entrance != null) ? entrance.position : building.transform.position;
+
+        // Convert world space to grid coordinates
+        building_loc = new Vector2Int(
+            Mathf.RoundToInt(target_world.x),
+            Mathf.RoundToInt(target_world.z)
+        );
+
+        postion = new Vector2Int(
+            Mathf.RoundToInt(transform.position.x),
+            Mathf.RoundToInt(transform.position.z)
+        );
+
+        pathfinding.Grid_manager = grid_manager;
 
         path = pathfinding.Pathfinding(postion, building_loc);
 
-
+        if(path != null)
+            StartCoroutine(FollowPath());
     }
 
-    protected void Move(float speed, Vector3 loc)
+    protected IEnumerator FollowPath()
     {
-        if (time_elapsed < 1)
+        for (int i = 0; i < path.Count; i++)
         {
-            this.transform.position = Vector3.Lerp(this.transform.position, loc, time_elapsed * speed * Time.deltaTime);
-            time_elapsed += speed * Time.deltaTime;
-        }
-        else
-        {
-            this.transform.position = loc;
-            time_elapsed = 0;
-            i++;
-        }
-    }
-
-
-    // Update is called once per frame
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.C))
-        {
-            GameObject building = GameObject.FindGameObjectWithTag("BuildingTest");
-
-            Debug.Log($"BuildingTest found: {building.name} at {building.transform.position}");
-
-
-            if (building != null)
-            {
-                GetVectors(building);
-            }
-        }
-
-        if (path != null && i < path.Count)
-        {
-            Vector3 loc = new Vector3(path[i].postion.x, 0.5f, path[i].postion.y);
+            Vector3 current_loc = this.transform.position;
+            Vector3 new_loc = new Vector3(path[i].postion.x, 0, path[i].postion.y);
             float speed = new PathNode(path[i].postion, grid_manager).Speed;
 
             if (path[i].speed == speed)
             {
-                Move(speed, loc);
+                float time_elapsed = 0;
+
+                while (this.transform.position != new_loc)
+                {
+                    time_elapsed += Time.deltaTime * speed;
+                    this.transform.position = Vector3.Lerp(current_loc, new_loc, time_elapsed);
+                    yield return new WaitForFixedUpdate();
+                }
             }
             else
             {
@@ -110,6 +105,24 @@ public class MouseTemp : MonoBehaviour
                 {
                     GetVectors(building);
                 }
+            }
+        }
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            GameObject building = GameObject.FindGameObjectWithTag("BuildingTest");
+
+            
+            Debug.Log($"BuildingTest found: {building.name} at {building.transform.position}");
+
+
+            if (building != null)
+            {
+                GetVectors(building);
             }
         }
     }
