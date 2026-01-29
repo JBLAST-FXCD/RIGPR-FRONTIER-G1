@@ -64,18 +64,12 @@ public class StressTest : MonoBehaviour
         Invoke(nameof(SecondWave), 30);
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-
-    }
-
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            FirstWave();
-        }
+        //if (Input.GetKeyDown(KeyCode.Q))
+        //{
+        //    FirstWave();
+        //}
     }
 }

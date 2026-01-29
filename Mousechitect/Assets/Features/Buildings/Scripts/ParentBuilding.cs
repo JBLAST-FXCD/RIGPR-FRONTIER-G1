@@ -36,7 +36,7 @@ public class ParentBuilding : MonoBehaviour
         ConstructTier();
     }
 
-    protected void Update()
+    protected virtual void Update()
     {
         //This is for debuging.
         //Mise will leave when certain conditions are met, depending on the building type.
@@ -47,10 +47,10 @@ public class ParentBuilding : MonoBehaviour
 
         //This is for debuging.
         //Buildings will be upgraded when certain conditions are met, depending on the building type.
-        //if (Input.GetKeyDown(KeyCode.Q))
-        //{
-        //    UpdateTier();
-        //}
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            UpdateTier();
+        }
     }
 
     protected virtual void TierSelection()

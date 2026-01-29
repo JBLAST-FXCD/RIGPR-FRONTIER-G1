@@ -78,23 +78,20 @@ public class MouseTemp : MonoBehaviour
     {
         for (int i = 0; i < path.Count; i++)
         {
-            Vector3 loc = new Vector3(path[i].postion.x, 0.5f, path[i].postion.y);
+            Vector3 current_loc = this.transform.position;
+            Vector3 new_loc = new Vector3(path[i].postion.x, 0, path[i].postion.y);
             float speed = new PathNode(path[i].postion, grid_manager).Speed;
 
             if (path[i].speed == speed)
             {
                 float time_elapsed = 0;
-                while (this.transform.position != loc)
-                {
-                    //Smoothing function
-                    time_elapsed += speed * Time.deltaTime;
-                    float x = Mathf.Clamp(time_elapsed, 0, Mathf.PI);
-                    float t = 0.5f * Mathf.Sin(x - Mathf.PI / 2) + 0.5f;
 
-                    this.transform.position = Vector3.Lerp(this.transform.position, loc, t);
+                while (this.transform.position != new_loc)
+                {
+                    time_elapsed += Time.deltaTime * speed;
+                    this.transform.position = Vector3.Lerp(current_loc, new_loc, time_elapsed);
                     yield return new WaitForFixedUpdate();
                 }
-                i++;
             }
             else
             {
