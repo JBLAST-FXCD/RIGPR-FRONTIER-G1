@@ -70,10 +70,20 @@ public class MoraleSystem : MonoBehaviour
     {
         while (true)
         {
-            float housing_score = CollectAverageContribution(MORALE_CONTRIBUTOR_TYPE.TYPE_HOUSING);
-            float food_score = CollectAverageContribution(MORALE_CONTRIBUTOR_TYPE.TYPE_FOOD);
-            float recreation_score = CollectAverageContribution(MORALE_CONTRIBUTOR_TYPE.TYPE_RECREATION);
-            float aesthetics_score = CollectAverageContribution(MORALE_CONTRIBUTOR_TYPE.TYPE_AESTHETICS);
+            bool has_housing;
+            bool has_food;
+            bool has_recreation;
+            bool has_aesthetics;
+
+            float housing_score = CollectAverageContribution(MORALE_CONTRIBUTOR_TYPE.TYPE_HOUSING, out has_housing);
+            float food_score = CollectAverageContribution(MORALE_CONTRIBUTOR_TYPE.TYPE_FOOD, out has_food);
+            float recreation_score = CollectAverageContribution(MORALE_CONTRIBUTOR_TYPE.TYPE_RECREATION, out has_recreation);
+            float aesthetics_score = CollectAverageContribution(MORALE_CONTRIBUTOR_TYPE.TYPE_AESTHETICS, out has_aesthetics);
+
+            if (!has_food) food_score = DEFAULT_FOOD_SCORE;
+            if (!has_recreation) recreation_score = DEFAULT_RECREATION_SCORE;
+            if (!has_aesthetics) aesthetics_score = DEFAULT_AESTHETICS_SCORE;
+
 
             if (food_score <= 0.0f)
             {
@@ -108,7 +118,7 @@ public class MoraleSystem : MonoBehaviour
         }
     }
 
-    private float CollectAverageContribution(MORALE_CONTRIBUTOR_TYPE contributor_type)
+    private float CollectAverageContribution(MORALE_CONTRIBUTOR_TYPE contributor_type, out bool found_any)
     {
         MonoBehaviour[] behaviours = FindObjectsOfType<MonoBehaviour>();
 
@@ -130,6 +140,8 @@ public class MoraleSystem : MonoBehaviour
             ++i;
         }
 
+        found_any = (count > 0);
+
         if (count <= 0)
         {
             return 0.0f;
@@ -137,6 +149,7 @@ public class MoraleSystem : MonoBehaviour
 
         return Mathf.Clamp01(sum / count);
     }
+
 
     private void UpdateGameplayModifiers(float score)
     {
