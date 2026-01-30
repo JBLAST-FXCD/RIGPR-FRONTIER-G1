@@ -29,11 +29,11 @@ public class CommercialBuilding : ParentBuilding
     //Delay for recalculating popularity values
     [SerializeField] protected float mini_pop_delay;
     [SerializeField] protected float max_pop_delay;
-    protected float pop_delay;
 
     [SerializeField] protected float mini_sell_delay;
     [SerializeField] protected float max_sell_delay;
-    protected float sell_delay;
+
+    public int Enough_Cheese { get { return population / 10 * 100 / mini_percent; } }
     CommercialBuilding() 
     {
         //These number is based off GDD and is hard coded for the algorithm to work. In future [SerializeField] for designers to access easily 
@@ -53,11 +53,9 @@ public class CommercialBuilding : ParentBuilding
         //In seconds
         mini_pop_delay = 300.0f;
         max_pop_delay  = 600.0f;
-        pop_delay      = 0;
 
         mini_sell_delay = 10;
         max_sell_delay  = 20;
-        sell_delay      = 0;
     }
 
     // Start is called before the first frame update
@@ -158,7 +156,7 @@ public class CommercialBuilding : ParentBuilding
     //Recalculates Popularity every 5 to 10 mins as per GDD
     protected void RecalculatePopularity()
     {
-        pop_delay = UnityEngine.Random.Range(mini_pop_delay, max_pop_delay);
+        float pop_delay = UnityEngine.Random.Range(mini_pop_delay, max_pop_delay);
 
         Invoke(nameof(PopularityAlgorithm), pop_delay);
     }
@@ -166,9 +164,9 @@ public class CommercialBuilding : ParentBuilding
     //Sells cheese ever 10 to 20 seconds as per GDD
     protected void SellDelay()
     {
-        sell_delay = UnityEngine.Random.Range(mini_sell_delay, max_sell_delay);
+        float sell_delay = UnityEngine.Random.Range(mini_sell_delay, max_sell_delay);
 
-        Invoke(nameof(Sell), pop_delay);
+        Invoke(nameof(Sell), sell_delay);
     }
 
     protected void Sell()

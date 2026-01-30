@@ -70,7 +70,7 @@ public class ParentBuilding : MonoBehaviour
         }
     }
 
-    protected void UpdateTier()
+    protected virtual void UpdateTier()
     {
         tier++;
         if (tier > 0 && tier <= capacitys.Length)
@@ -111,7 +111,7 @@ public class ParentBuilding : MonoBehaviour
         else if (angle >= 225 || angle < 315)
             new_loc.z += 1;
 
-        mouse.path = null;
+        mouse.Path = null;
         mouse.transform.localPosition = new_loc;
         mouse.transform.gameObject.SetActive(true);
 

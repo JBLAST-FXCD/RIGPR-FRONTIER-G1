@@ -31,6 +31,9 @@ public class FactoryBuilding : ParentBuilding
     protected bool  produce_cheese;
     protected bool  factory_switch;
 
+    public bool IsActive { get { return factory_switch; } }
+    public float Milk { get { return stored_milk; } }
+
     public FactoryBuilding()
     {
         cheese_type = new CheeseTemp();
@@ -89,7 +92,7 @@ public class FactoryBuilding : ParentBuilding
     {
         cheese_type = cheese_amount[tier - 1, input];
     }
-    protected new void TierSelection()
+    protected override void TierSelection()
     {
         building_prefab = building_prefabs[tier - 1];
         capacity        = capacitys[tier - 1];
@@ -109,7 +112,7 @@ public class FactoryBuilding : ParentBuilding
         }
     }
 
-    protected new void UpdateTier()
+    protected override void UpdateTier()
     {
         tier++;
         if (tier > 0 && tier <= capacitys.Length)

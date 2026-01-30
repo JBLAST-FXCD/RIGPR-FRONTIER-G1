@@ -33,7 +33,7 @@ public class PathFinding: MonoBehaviour, ISaveable
         solutions = new Dictionary<string, List<BaseNode>>();
     }
 
-    public GridManager Grid_manager { get { return grid_manager; } set { grid_manager = value; } }
+    public GridManager Grid_manager { set { grid_manager = value; } }
 
     void Update()
     {
@@ -219,7 +219,7 @@ public class PathFinding: MonoBehaviour, ISaveable
             int temp = j;
             for (int y = 0; y < start.y; y++)
             {
-                nodes[x, y] = new PathNode(new Vector2Int(i, j), Grid_manager);
+                nodes[x, y] = new PathNode(new Vector2Int(i, j), grid_manager);
                 j++;
             }
             j = temp;
