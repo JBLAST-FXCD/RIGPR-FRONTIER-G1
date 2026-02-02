@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -14,10 +15,9 @@ using UnityEngine;
 public class FactoryBuilding : ParentBuilding
 {
     //first element is for rarity and second element is for cheese type.
-    [SerializeField] protected CheeseTemp[,] cheese_amount;
     [SerializeField] protected int[] scrap_costs;
 
-    protected CheeseTemp cheese_type;
+    protected CheeseValues cheese_type;
     protected int scrap_cost;
 
     //Delete these varible when script is connect to global variable
@@ -36,7 +36,7 @@ public class FactoryBuilding : ParentBuilding
 
     public FactoryBuilding()
     {
-        cheese_type = new CheeseTemp();
+        cheese_type = new CheeseValues();
 
         //Delete these varible when script is connect to global variable
         population = 20;
@@ -88,10 +88,11 @@ public class FactoryBuilding : ParentBuilding
     }
 
     //for player to select cheese
-    protected void SelectCheese(int input) 
+    protected void SelectCheese(CheeseTypes input) 
     {
-        cheese_type = cheese_amount[tier - 1, input];
+        cheese_type = Cheese.GetCheese(input);
     }
+
     protected override void TierSelection()
     {
         building_prefab = building_prefabs[tier - 1];
@@ -104,9 +105,9 @@ public class FactoryBuilding : ParentBuilding
     {
         ResourceManager resources = ResourceManager.instance;
 
-        if (resources.Scrap >= scrap_cost)
+        if (resources.CanAfford(scrap_cost) == true)
         {
-            resources.SpendResources(scrap_cost,0);
+            resources.SpendResources(scrap_cost);
             factory_switch = false;
             Invoke(nameof(UpdateTier), 60.0f);
         }
@@ -122,6 +123,7 @@ public class FactoryBuilding : ParentBuilding
             building_prefab.transform.localPosition = new Vector3(0, 0, 0);
             building = Instantiate(building_prefab, gameObject.transform);
             factory_switch = true;
+            this.GetComponent<BoxCollider>().center = building.transform.Find("EntrancePoint").localPosition;
         }
     }
 
@@ -131,8 +133,8 @@ public class FactoryBuilding : ParentBuilding
         //Checks if theres enought mise for factory as per GDD. id starts at 0 not 1
         if (id < population / 20)
         {
-            if (cheese_type.GetMilkCost() >= stored_milk && produce_cheese == true)
-                Invoke(nameof(CreateCheese), cheese_type.GetProductionTime());
+            if (cheese_type.milk_cost >= stored_milk && produce_cheese == true)
+                Invoke(nameof(CreateCheese), cheese_type.prodution_time);
         }
         else
             Debug.Log("Not enough mice to operate this factory");
@@ -146,8 +148,8 @@ public class FactoryBuilding : ParentBuilding
         //cheese++
         resources.AddResources(0,1);
 
-        stored_milk -= cheese_type.GetMilkCost();
-        resources.SpendResources(cheese_type.GetScrapCost(),0);
+        stored_milk -= cheese_type.milk_cost;
+        resources.SpendResources(cheese_type.scrap_cost);
 
         //Repeat cheese prodution until milk runs out or player switches produce_cheese to false
         CheeseProduction();

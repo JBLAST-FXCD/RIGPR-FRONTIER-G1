@@ -14,16 +14,16 @@ public class ResearchBuilding : ParentBuilding
     {
         ResourceManager resources = ResourceManager.instance;
 
-        if (tree.CheckIfResearched() == false && tree.GetCheeseCost() >= resources.Cheese && tree.GetScrapCost() >= resources.Scrap)
+        if (tree.Is_researched == false && resources.CanAfford(tree.Scrap_cost, tree.Type, tree.Cheese_amount) == true)
         {
-            resources.SpendResources(tree.GetScrapCost(), tree.GetCheeseCost());
+            resources.SpendResources(tree.Scrap_cost, tree.Type, tree.Cheese_amount);
             StartCoroutine(CompleteResearch(tree));
         }
     }
 
     protected IEnumerator CompleteResearch(ResearchTreeTemp tree)
     {
-        yield return new WaitForSeconds(tree.GetProductionTime());
+        yield return new WaitForSeconds(tree.Production_time);
 
         //Add information thats need updating on research completion before IsResearched().
         tree.IsResearched();

@@ -22,7 +22,7 @@ public class Mouse_AI : MonoBehaviour
     public void GetVectors(ParentBuilding building, MouseTemp mouse)
     {
         //Try to use the entrance point (preferred for pathfinding)
-        Transform entrance = building.transform.Find("EntrancePoint");
+        Transform entrance = building.Building.transform.Find("EntrancePoint");
 
         Vector3 target_world = (entrance != null) ? entrance.position : building.transform.position;
 
@@ -37,8 +37,8 @@ public class Mouse_AI : MonoBehaviour
 
         //Convert world space to grid coordinates
         Vector2Int mouse_loc = new Vector2Int(
-            Mathf.RoundToInt(mouse.Postion.x),
-            Mathf.RoundToInt(mouse.Postion.y)
+            Mathf.RoundToInt(mouse.transform.position.x),
+            Mathf.RoundToInt(mouse.transform.position.z)
         );
 
         //Caculate path.
@@ -87,8 +87,8 @@ public class Mouse_AI : MonoBehaviour
 
             for (int i = 0;i < markets_temp.Length; i++)
             {
-                if (resources.Cheese >= markets[i].Enough_Cheese)
-                    markets.Add(markets[i]);
+                //if (resources.Cheese >= markets[i].Enough_Cheese)
+                //    markets.Add(markets[i]);
             }
         }
     }

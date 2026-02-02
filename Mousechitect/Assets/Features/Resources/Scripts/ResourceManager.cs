@@ -1,7 +1,10 @@
 using UnityEngine;
 using TMPro;
+using System.Collections.Generic;
+using System;
 
-//// Hani Hailston 13/12/2025
+// Updated by Iain Benner 02/02/2026
+// Hani Hailston 13/12/2025
 
 /// <summary>
 /// This script handles the resource count (scrap & cheese) as well as purchase logic.
@@ -15,17 +18,41 @@ public class ResourceManager : MonoBehaviour, ISaveable
 
     [Header("Current Resources")]
     protected static int scrap  = INITIAL_SCRAP;
-    protected static int cheese = 0;
+    protected static int total_cheese = 0;
     protected static int money  = 0; // added temp as forgotten
+    protected static Dictionary<CheeseTypes, int> cheeses;
 
     [Header("UI References")]
     public TextMeshProUGUI scrap_text;
     public TextMeshProUGUI cheese_text;
 
-    // Checks if player can afford a specific purchase.
-    public bool CanAfford(int scrap_cost, int cheese_cost)
+    public ResourceManager()
     {
-        if (scrap >= scrap_cost && cheese >= cheese_cost)
+        cheeses = new Dictionary<CheeseTypes, int>();
+    }
+
+    // Checks if player can afford a specific purchase based on cheese type.
+    public bool CanAfford(int scrap_cost, CheeseTypes key, int cheese_amount)
+    {
+        if (scrap >= scrap_cost && cheeses[key] >= cheese_amount)
+        {
+            return true;
+        }
+
+        return false;
+    }
+    public bool CanAfford(CheeseTypes key, int cheese_amount)
+    {
+        if (cheeses[key] >= cheese_amount)
+        {
+            return true;
+        }
+
+        return false;
+    }
+    public bool CanAfford(int scrap_cost)
+    {
+        if (scrap >= scrap_cost)
         {
             return true;
         }
@@ -33,21 +60,48 @@ public class ResourceManager : MonoBehaviour, ISaveable
         return false;
     }
 
-    public int Scrap {  get { return scrap; } }
-    public int Cheese { get { return cheese; } }
-
-    public void SpendResources(int scrap_cost, int cheese_cost)
+    public void SpendResources(int scrap_cost, CheeseTypes key, int cheese_amount)
     {
         scrap -= scrap_cost;
-        cheese -= cheese_cost;
+
+        cheeses[key] -= cheese_amount;
+        total_cheese -= cheese_amount;
+
+        UpdateUI();
+    }
+    public void SpendResources(int scrap_cost)
+    {
+        scrap -= scrap_cost;
+
+        UpdateUI();
+    }
+    public void SpendResources(CheeseTypes key, int cheese_amount)
+    {
+        cheeses[key] -= cheese_amount;
+        total_cheese -= cheese_amount;
 
         UpdateUI();
     }
 
-    public void AddResources(int scrap_to_add, int cheese_to_add)
+    public void AddResources(int scrap_to_add, CheeseTypes key, int cheese_amount)
     {
         scrap += scrap_to_add;
-        cheese += cheese_to_add;
+
+        cheeses[key] += cheese_amount;
+        total_cheese += cheese_amount;
+
+        UpdateUI();
+    }
+    public void AddResources(int scrap_to_add)
+    {
+        scrap += scrap_to_add;
+
+        UpdateUI();
+    }
+    public void AddResources(CheeseTypes key, int cheese_amount)
+    {
+        cheeses[key] += cheese_amount;
+        total_cheese += cheese_amount;
 
         UpdateUI();
     }
@@ -66,6 +120,9 @@ public class ResourceManager : MonoBehaviour, ISaveable
 
     private void Start()
     {
+        foreach (CheeseTypes c in Enum.GetValues(typeof(CheeseTypes)))
+            cheeses.Add(c, 0);
+
         UpdateUI();
     }
 
@@ -78,17 +135,35 @@ public class ResourceManager : MonoBehaviour, ISaveable
 
         if (cheese_text != null)
         {
-            cheese_text.text = "Cheese: " + cheese;
+            cheese_text.text = "Total Cheese: " + total_cheese;
         }
     }
 
     public void PopulateSaveData(GameData data)
     {
-        data.player_data.money = money;
+        data.player_data.resources.scrap = scrap;
+        data.player_data.resources.total_cheese = total_cheese;
+        data.player_data.resources.money = money;
+
+        int i = 0;
+        foreach (CheeseTypes c in Enum.GetValues(typeof(CheeseTypes)))
+        {
+            data.player_data.resources.cheese_amounts[i] = cheeses[c];
+            i++;
+        }
     }
 
     public void LoadFromSaveData(GameData data)
     {
-        money = data.player_data.money;
+        scrap = data.player_data.resources.scrap;
+        total_cheese = data.player_data.resources.total_cheese;
+        money = data.player_data.resources.money;
+
+        int i = 0;
+        foreach (CheeseTypes c in Enum.GetValues(typeof(CheeseTypes))) 
+        {
+            cheeses[c] = data.player_data.resources.cheese_amounts[i];
+            i++;
+        }
     }
 }

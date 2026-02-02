@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
@@ -12,13 +13,14 @@ using UnityEngine;
 /// </summary>
 public class CommercialBuilding : ParentBuilding
 {
-    protected int[] cheese_prices;
-    protected int cheese_amount;
-
     //Delete these varible when script is connect to global variable
     protected int population;
 
+    //For selling
+    protected CheeseTypes[] keys;
+
     //Numbers for PopularityAlgorithm()
+    protected int cheese_amount;
     protected float[] cheese_popularity;
     protected float remaining_percent;
     protected int max_persent;
@@ -37,8 +39,7 @@ public class CommercialBuilding : ParentBuilding
     CommercialBuilding() 
     {
         //These number is based off GDD and is hard coded for the algorithm to work. In future [SerializeField] for designers to access easily 
-        cheese_prices = new int[7] {10, 15, 25, 40, 60, 85, 100 };
-        cheese_amount = 7;
+        cheese_amount = Enum.GetNames(typeof(CheeseTypes)).Length;
 
         //Delete these varible when script is connect to global variable
         population = 20;
@@ -66,21 +67,6 @@ public class CommercialBuilding : ParentBuilding
         //These funtions are looped infinitely per GDD
         RecalculatePopularity();
         SellDelay();
-    }
-
-    protected new void Update()
-    {
-        //For debuging the popularity numbers
-        //if (Input.GetKeyDown(KeyCode.C))
-        //{
-        //    float temp = 0;
-        //    PopularityAlgorithm();
-        //    for (int i = 0; i < cheese_popularity.Length; i++)
-        //        Debug.Log(cheese_popularity[i]);
-        //    for (int j = 0; j < cheese_popularity.Length; j++)
-        //        temp += cheese_popularity[j];
-        //    Debug.Log(temp);
-        //}
     }
 
     //The maximum range is limited to prevent any element of the array from having a disproportionate chance of being the maximum number,
@@ -173,15 +159,15 @@ public class CommercialBuilding : ParentBuilding
     {
         ResourceManager resources = ResourceManager.instance;
 
-        for (int i = 0; i <= cheese_prices.Length - 1; i++)
+        for (int i = 0; i <= keys.Length - 1; i++)
         {
             int units = population / 10 * (int)cheese_popularity[i] / mini_percent;
 
-            if(resources.Cheese >= units)
+            if(resources.CanAfford(keys[i], units) == true)
             {
                 //Later replace scrap and cheese with global scrap and cheese counter
-                resources.SpendResources(0, units);
-                resources.AddResources(cheese_prices[i] * units, 0);
+                resources.SpendResources(keys[i], units);
+                resources.AddResources(Cheese.GetCheese(keys[i]).scrap_price * units);
             }
 
             //Repeat loop of selling cheese

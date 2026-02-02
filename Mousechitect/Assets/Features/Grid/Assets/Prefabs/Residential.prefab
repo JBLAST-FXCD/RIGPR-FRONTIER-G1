@@ -31,7 +31,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 7571261953739353360}
   - {fileID: 1148476608317515021}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
@@ -125,7 +124,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   building_prefabs:
   - {fileID: 4294587928434800633, guid: 522b8991fb6ebce49a2699bf3f4ba42a, type: 3}
-  - {fileID: 5097389391360059737, guid: a7137e9acdee8c644b9d52efd884ebaf, type: 3}
+  - {fileID: 5097389391360059737, guid: fd44485d8c0bdaf468a9563a15245c20, type: 3}
   capacitys: 2000000004000000
   tier: 1
   max_quality: 050000000a000000
@@ -163,34 +162,3 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 2, z: 1}
   m_Center: {x: 0, y: 1, z: 0}
---- !u!1 &7008080612554600384
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 7571261953739353360}
-  m_Layer: 0
-  m_Name: EntrancePoint
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &7571261953739353360
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7008080612554600384}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1882122932072419119}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
