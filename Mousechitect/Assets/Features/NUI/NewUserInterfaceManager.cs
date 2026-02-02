@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Animations;
 using UnityEngine;
 
 public class NewUserInterfaceManager : MonoBehaviour
@@ -20,8 +21,6 @@ public class NewUserInterfaceManager : MonoBehaviour
         OPEN_PANEL_NONE
     }
     private OPEN_PANEL open_panel = OPEN_PANEL.OPEN_PANEL_NONE;
-
-
 
     public void ClosePanels()
     {
@@ -52,7 +51,7 @@ public class NewUserInterfaceManager : MonoBehaviour
     {
         if (open_panel == OPEN_PANEL.OPEN_PANEL_BUILD)
         {
-            build_panel.transform.localPosition = new Vector3(-900, 20, 0);
+            build_panel.GetComponent<Animator>().SetBool("is_panel_open", false);
             open_panel = OPEN_PANEL.OPEN_PANEL_NONE;
         }
         else
@@ -61,7 +60,7 @@ public class NewUserInterfaceManager : MonoBehaviour
             {
                 ClosePanels();
             }
-            build_panel.transform.localPosition = new Vector3(-475, 20, 0);
+            build_panel.GetComponent<Animator>().SetBool("is_panel_open", true);
             open_panel = OPEN_PANEL.OPEN_PANEL_BUILD;
 
         }
@@ -72,7 +71,7 @@ public class NewUserInterfaceManager : MonoBehaviour
     {
         if (open_panel == OPEN_PANEL.OPEN_PANEL_PATH)
         {
-            path_panel.transform.localPosition = new Vector3(-900, -169, 0);
+            path_panel.GetComponent<Animator>().SetBool("is_panel_open", false);
             open_panel = OPEN_PANEL.OPEN_PANEL_NONE;
         }
         else
@@ -81,7 +80,7 @@ public class NewUserInterfaceManager : MonoBehaviour
             {
                 ClosePanels();
             }
-            path_panel.transform.localPosition = new Vector3(-475, -169, 0);
+            path_panel.GetComponent<Animator>().SetBool("is_panel_open", true);
             open_panel = OPEN_PANEL.OPEN_PANEL_PATH;
         }
     }
