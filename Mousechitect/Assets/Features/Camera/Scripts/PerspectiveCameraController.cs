@@ -13,16 +13,18 @@ public class PerspectiveCameraController : MonoBehaviour, ISaveable
 {
     public Transform target;
 
+    public static PerspectiveCameraController Instance { get; private set; }
+
     [Header("Camera Settings")]
-    [SerializeField] private float orbit_speed = 0.0f;
-    [SerializeField] private float wasd_pan_speed = 0.0f;
-    [SerializeField] private float edge_pan_speed = 0.0f;
-    [SerializeField] private float follow_smoothing = 0.0f;
-    [SerializeField] private float edge_pan_size = 0.0f;
+    [SerializeField] public float orbit_speed = 0.0f;
+    [SerializeField] public float wasd_pan_speed = 0.0f;
+    [SerializeField] public float edge_pan_speed = 0.0f;
+    [SerializeField] public float follow_smoothing = 0.0f;
+    [SerializeField] public float edge_pan_size = 0.0f;
     [SerializeField] private LayerMask ground_layer;
 
     [Header("Camera Zoom Settings")]
-    [SerializeField] private float zoom_speed = 0.0f;
+    [SerializeField] float zoom_speed = 0.0f;
 
 
     private float zoom_distance = 0.0f, zoom_min_distance = 0.0f, zoom_max_distance = 0.0f;
@@ -48,6 +50,18 @@ public class PerspectiveCameraController : MonoBehaviour, ISaveable
     public Transform GetTarget()
     {
                return target;
+    }
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
     private void Start()
