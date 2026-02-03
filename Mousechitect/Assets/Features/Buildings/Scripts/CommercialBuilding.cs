@@ -18,9 +18,10 @@ public class CommercialBuilding : ParentBuilding
 
     //For selling
     protected CheeseTypes[] keys;
+    protected int[] cheese_amounts;
 
     //Numbers for PopularityAlgorithm()
-    protected int cheese_amount;
+    protected int cheese_types;
     protected float[] cheese_popularity;
     protected float remaining_percent;
     protected int max_persent;
@@ -35,16 +36,19 @@ public class CommercialBuilding : ParentBuilding
     [SerializeField] protected float mini_sell_delay;
     [SerializeField] protected float max_sell_delay;
 
-    public int Enough_Cheese { get { return population / 10 * 100 / mini_percent; } }
+    public float[] Cheese_popularity { get { return cheese_popularity; } }
+    public int[] Cheese_amounts { get { return cheese_amounts; } }
+
+
     CommercialBuilding() 
     {
         //These number is based off GDD and is hard coded for the algorithm to work. In future [SerializeField] for designers to access easily 
-        cheese_amount = Enum.GetNames(typeof(CheeseTypes)).Length;
+        cheese_types = Enum.GetNames(typeof(CheeseTypes)).Length;
 
         //Delete these varible when script is connect to global variable
         population = 20;
 
-        cheese_popularity = new float[cheese_amount];
+        cheese_popularity = new float[cheese_types];
         remaining_percent = 100.0f;
         max_persent       = 50;
         mini_percent      = 5;
@@ -89,7 +93,7 @@ public class CommercialBuilding : ParentBuilding
     protected void PopularityAlgorithm()
     {
         //For resetting value when looped
-        cheese_popularity = new float[cheese_amount];
+        cheese_popularity = new float[cheese_types];
         remaining_percent = 100.0f;
         remaining_cheese = 0;
         index = 0;

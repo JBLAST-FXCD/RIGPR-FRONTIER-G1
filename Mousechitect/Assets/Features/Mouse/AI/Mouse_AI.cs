@@ -85,10 +85,12 @@ public class Mouse_AI : MonoBehaviour
         {
             ResourceManager resources = ResourceManager.instance;
 
-            for (int i = 0;i < markets_temp.Length; i++)
+            for (int i = 0; i < markets_temp.Length; i++)
             {
-                //if (resources.Cheese >= markets[i].Enough_Cheese)
-                //    markets.Add(markets[i]);
+                int milk = Cheese.GetCheese(CheeseTypes.AmericanCheese).milk_cost - markets[i].Cheese_amounts[(int)CheeseTypes.AmericanCheese];
+                bool enough = resources.CanAfford(CheeseTypes.AmericanCheese, milk);
+                if (!markets.Contains(markets_temp[i]) && enough == true)
+                    markets.Add(markets[i]);
             }
         }
     }
