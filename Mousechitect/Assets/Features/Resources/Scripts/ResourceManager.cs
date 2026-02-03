@@ -69,7 +69,6 @@ public class ResourceManager : MonoBehaviour, ISaveable
     private void Start()
     {
         UpdateUI();
-        ResourceConsoleCommands();
     }
 
     private void UpdateUI()
