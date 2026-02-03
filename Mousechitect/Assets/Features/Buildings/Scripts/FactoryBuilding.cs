@@ -32,8 +32,8 @@ public class FactoryBuilding : ParentBuilding
     protected bool  factory_switch;
 
     // Added by jess @ 03/02/2026 for linking to the milk production pipeline
-    private bool is_searching_for_milk = false;
-    private const float RETRY_DELAY = 10.0f;
+   // private bool is_searching_for_milk = false;
+   // private const float RETRY_DELAY = 10.0f;
 
     public FactoryBuilding()
     {
@@ -75,43 +75,43 @@ public class FactoryBuilding : ParentBuilding
 
         // added by jess @ 03/02/2026
         // automatically loojk for milk if production is stater and no milk is present, and not waiting for a retry
-        if (produce_cheese && factory_switch && stored_milk < cheese_type.GetMilkCost() && !is_searching_for_milk)
-        {
-            StartCoroutine(AutoAcquireMilk());
-        }
+     //   if (produce_cheese && factory_switch && stored_milk < cheese_type.GetMilkCost() && !is_searching_for_milk)
+    //    {
+     //       StartCoroutine(AutoAcquireMilk());
+     //   }
     }
 
     // added by jess @ 03/02/2026
     // handles auto background transfer outlined in GDD
-    private IEnumerator AutoAcquireMilk()
-    {
-        is_searching_for_milk = true;
+ //   private IEnumerator AutoAcquireMilk()
+   // {
+     //   is_searching_for_milk = true;
 
-        while (produce_cheese && stored_milk < cheese_type.GetMilkCost())
-        {
-            int amount_needed = (int)cheese_type.GetMilkCost();
+       // while (produce_cheese && stored_milk < cheese_type.GetMilkCost())
+        // {
+           // int amount_needed = (int)cheese_type.GetMilkCost();
             
             //gets best milk source from milk manager
-            IMilkContainer milk_source = MilkManager.Instance.RequestMilkSource(amount_needed);
+          //  IMilkContainer milk_source = MilkManager.Instance.RequestMilkSource(amount_needed);
 
-            if (milk_source != null)
-            {
-                milk_source.CURRENT_MILK_AMOUNT -= amount_needed;
-                stored_milk += amount_needed;
+          //  if (milk_source != null)
+           // {
+             //   milk_source.CURRENT_MILK_AMOUNT -= amount_needed;
+              //  stored_milk += amount_needed;
 
                 // visual mouse movement to factory inline with GDD
-                SpawnMiceVisual(milk_source.CONTAINER_GAME_OBJECT.transform.position);
+              //  SpawnMiceVisual(milk_source.CONTAINER_GAME_OBJECT.transform.position);
 
-                CheeseProduction();
-                break; // exit loop if milk acquired
-            }
-            else
-            {
-                yield return new WaitForSeconds(RETRY_DELAY);
-            }
-        }
-        is_searching_for_milk = false;
-    }
+               // CheeseProduction();
+               // break; // exit loop if milk acquired
+           // }
+           // else
+            //{
+             //   yield return new WaitForSeconds(RETRY_DELAY);
+           // }
+       // }
+       // is_searching_for_milk = false;
+   // }
 
     private void SpawnMiceVisual(Vector3 source_position)
     {
@@ -184,10 +184,10 @@ public class FactoryBuilding : ParentBuilding
 
         //Repeat cheese prodution until milk runs out or player switches produce_cheese to false
         //jess - modified to check if enough milk, if not loop in update will trigget automilkacquire
-        if (stored_milk >= cheese_type.GetMilkCost())
-        {
-            CheeseProduction();
-        }
+    //    if (stored_milk >= cheese_type.GetMilkCost())
+    //    {
+    //        CheeseProduction();
+    //    }
     }
 
     //For player to create cheese when factory is running
