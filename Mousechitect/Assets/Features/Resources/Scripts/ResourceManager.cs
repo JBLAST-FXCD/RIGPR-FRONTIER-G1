@@ -85,39 +85,6 @@ public class ResourceManager : MonoBehaviour, ISaveable
         }
     }
 
-    private void ResourceConsoleCommands()
-    {
-        DebugWindow.Instance.RegisterExternalCommand("resources.show", " - Displays the current amount of scrap and cheese the player has.", args =>
-        {
-            DebugWindow.LogToConsole($"Current Resources - Scrap: {scrap}, Cheese: {cheese}");
-        });
-        DebugWindow.Instance.RegisterExternalCommand("scrap.add", " - Adds the specified amount of scrap to the player's resources. (scrap.add <amount>)", args =>
-        {
-            if (args.Length > 0 && int.TryParse(args[0], out int amount))
-            {
-                AddResources(amount, 0);
-                DebugWindow.LogToConsole($"Added {amount} scrap.");
-            }
-            else
-            {
-                DebugWindow.LogToConsole("Invalid amount specified for the command.");
-            }
-        });
-
-        DebugWindow.Instance.RegisterExternalCommand("cheese.add", " - Adds the specified amount of cheese to the player's resources. (cheese.add <amount>)", args =>
-        {
-            if (args.Length > 0 && int.TryParse(args[0], out int amount))
-            {
-                AddResources(0, amount);
-                DebugWindow.LogToConsole($"Added {amount} cheese.");
-            }
-            else
-            {
-                DebugWindow.LogToConsole("Invalid amount specified for the command.");
-            }
-        });
-    }
-
     public void PopulateSaveData(GameData data)
     {
         data.player_data.money = money;
