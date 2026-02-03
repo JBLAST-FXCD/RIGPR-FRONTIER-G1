@@ -18,7 +18,7 @@ public class FactoryBuilding : ParentBuilding
     //first element is for rarity and second element is for cheese type.
     [SerializeField] protected CheeseTemp[,] cheese_amount;
     [SerializeField] protected int[] scrap_costs;
-    [SerializeField] private CheeseType produced_cheese_type = CheeseType.American;
+    /* [SerializeField] private CheeseType produced_cheese_type = CheeseType.American;
 
     // Simple factory allowed set (can expand later)
     [SerializeField]
@@ -27,7 +27,7 @@ public class FactoryBuilding : ParentBuilding
     CheeseType.American,
     CheeseType.Cheddar,
     CheeseType.Mozzarella
-    };
+    }; */
 
 
     protected CheeseTemp cheese_type;
@@ -49,7 +49,7 @@ public class FactoryBuilding : ParentBuilding
         cheese_type = new CheeseTemp();
 
         //Delete these varible when script is connect to global variable
-        population = 999;
+        population = 20;
 
         id = count;
 
@@ -153,10 +153,12 @@ public class FactoryBuilding : ParentBuilding
     {
         ResourceManager resources = ResourceManager.instance;
 
-        // cheese++ (typed)
+        /* cheese++ (typed)
         Debug.Log($"[Factory] {name} produced 1x {produced_cheese_type}");
-        ResourceManager.instance.AddCheese(produced_cheese_type, 1);
-
+        ResourceManager.instance.AddCheese(produced_cheese_type, 1); */
+        
+        //cheese++
+        resources.AddResources(0,1);
 
         stored_milk -= cheese_type.GetMilkCost();
         resources.SpendResources(cheese_type.GetScrapCost(),0);
@@ -185,7 +187,7 @@ public class FactoryBuilding : ParentBuilding
         }
     }
 
-    public CheeseType GetCheeseType()
+    /* public CheeseType GetCheeseType()
     {
         return produced_cheese_type;
     }
@@ -242,6 +244,7 @@ public class FactoryBuilding : ParentBuilding
             case CheeseType.Mozzarella: return 2;
             default: return 0;
         }
-    }
+    } */
+
 
 }
