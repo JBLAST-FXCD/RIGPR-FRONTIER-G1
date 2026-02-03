@@ -25,7 +25,7 @@ public class StressTest : MonoBehaviour
         {
             MouseTemp new_mouse = Instantiate(mouse, new Vector3(0.0f, 0.5f, 0.0f), mouse.transform.rotation);
 
-            new_mouse.GetVectors(buildings[j]);
+            //new_mouse.GetVectors(buildings[j]);
 
             mouses[i] = new_mouse;
 
@@ -53,7 +53,7 @@ public class StressTest : MonoBehaviour
             {
                 buildings[j].MouseLeave(mouses[i]);
 
-                mouses[i].GetVectors(buildings[rand]);
+                //mouses[i].GetVectors(buildings[rand]);
             }
 
             j++;

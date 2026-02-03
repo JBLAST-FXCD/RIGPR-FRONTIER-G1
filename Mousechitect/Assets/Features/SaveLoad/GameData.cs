@@ -35,10 +35,10 @@ public class GameData
 [System.Serializable]
 public class PlayerData
 {
-    public int money;
     public float play_time;
     public string city_name;
 
+    public resource_save_data resources;
     public camera_save_data camera_state;
 }
 
@@ -60,6 +60,24 @@ public class PathData
     public PathData()
     {
         paths = new List<path_save_data>();
+    }
+}
+
+[System.Serializable]
+public class ResearchData
+{
+    public List<string> completed_research = new List<string>();
+
+    public float current_research_progress;
+}
+
+[System.Serializable]
+public class PathMap
+{
+    public List<route_save_data> paths;
+    public PathMap()
+    {
+        paths = new List<route_save_data>();
     }
 }
 
@@ -102,23 +120,14 @@ public struct camera_save_data
     public float zoom_distance;
 }
 
-// to be implemented when research feature is added
 [System.Serializable]
-public class ResearchData
+public struct resource_save_data
 {
-    public List<string> completed_research = new List<string>();
+    public int scrap;
+    public int total_cheese;
+    public int money;
 
-    public float current_research_progress;
-}
-
-[System.Serializable]
-public class PathMap
-{
-    public List<route_save_data> paths;
-    public PathMap() 
-    {
-        paths = new List<route_save_data>();
-    }
+    public int[] cheese_amounts;
 }
 
 [System.Serializable]
