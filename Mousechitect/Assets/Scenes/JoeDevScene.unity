@@ -3201,6 +3201,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   build_panel: {fileID: 1802607901}
   path_panel: {fileID: 776481656}
+  building_manager: {fileID: 1535169109}
 --- !u!4 &2039324769
 Transform:
   m_ObjectHideFlags: 0

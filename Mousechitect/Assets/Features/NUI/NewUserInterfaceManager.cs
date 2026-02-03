@@ -10,6 +10,9 @@ public class NewUserInterfaceManager : MonoBehaviour
     [SerializeField] private GameObject build_panel;
     [SerializeField] private GameObject path_panel;
 
+    [Header("Systems")]
+    [SerializeField] private BuildingManager building_manager;
+
 
     enum OPEN_PANEL
     {
@@ -21,6 +24,11 @@ public class NewUserInterfaceManager : MonoBehaviour
         OPEN_PANEL_NONE
     }
     private OPEN_PANEL open_panel = OPEN_PANEL.OPEN_PANEL_NONE;
+
+    private void Start()
+    {
+        building_manager.UpdateBuildPanel += ClosePanels;
+    }
 
     public void ClosePanels()
     {

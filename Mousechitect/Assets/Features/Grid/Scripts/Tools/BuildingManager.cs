@@ -94,6 +94,13 @@ public class BuildingManager : MonoBehaviour, ISaveable
     public event Action<GameObject> building_placed;
     public event Action<string> building_removed;
 
+    // --- Joe 03/02/2026
+    // Added a broadcast function to communicate to the NUI when is_build_mode_active is false
+    // Broadcasts are independent connections and can fail silently on both ends, keeping this script modular.
+    public delegate void UpdateNUI();
+    public event UpdateNUI UpdateBuildPanel;
+    // ---
+
 
     private void Update()
     {
@@ -606,6 +613,11 @@ public class BuildingManager : MonoBehaviour, ISaveable
         {
             // Leave build mode (this will also hide the build panel via BuildModeUI)
             BuildMode(false);
+            if (UpdateBuildPanel != null)
+            {
+                UpdateBuildPanel(); //Broadcasts to NUI - will not fail if unsuccessful
+            }
+            
         }
     }
 
