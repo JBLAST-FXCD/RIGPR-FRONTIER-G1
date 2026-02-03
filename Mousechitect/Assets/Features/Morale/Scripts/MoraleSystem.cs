@@ -12,6 +12,8 @@ using UnityEngine;
 /// </summary>
 public class MoraleSystem : MonoBehaviour
 {
+    public static MoraleSystem Instance { get; private set; }
+
     private const float DEFAULT_GLOBAL_MORALE = 0.14f;
     private const float DEFAULT_FOOD_SCORE = 0.50f;
     private const float DEFAULT_RECREATION_SCORE = 0.20f;
