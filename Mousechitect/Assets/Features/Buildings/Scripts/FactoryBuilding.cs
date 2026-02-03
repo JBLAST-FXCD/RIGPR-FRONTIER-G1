@@ -4,6 +4,8 @@ using UnityEngine;
 
 // Iain Benner 05/12/2025
 
+//Updated by Anthony 2/2/2026
+
 /// <summary>
 /// select cheese funtion is ready for player input to select cheese.
 /// the scrap cost for building changes depending on tier and upgrading building has delay.
@@ -16,6 +18,17 @@ public class FactoryBuilding : ParentBuilding
     //first element is for rarity and second element is for cheese type.
     [SerializeField] protected CheeseTemp[,] cheese_amount;
     [SerializeField] protected int[] scrap_costs;
+    [SerializeField] private CheeseType produced_cheese_type = CheeseType.American;
+
+    // Simple factory allowed set (can expand later)
+    [SerializeField]
+    private CheeseType[] allowed_cheese_types =
+    {
+    CheeseType.American,
+    CheeseType.Cheddar,
+    CheeseType.Mozzarella
+    };
+
 
     protected CheeseTemp cheese_type;
     protected int scrap_cost;
@@ -36,7 +49,7 @@ public class FactoryBuilding : ParentBuilding
         cheese_type = new CheeseTemp();
 
         //Delete these varible when script is connect to global variable
-        population = 20;
+        population = 999;
 
         id = count;
 
@@ -140,8 +153,10 @@ public class FactoryBuilding : ParentBuilding
     {
         ResourceManager resources = ResourceManager.instance;
 
-        //cheese++
-        resources.AddResources(0,1);
+        // cheese++ (typed)
+        Debug.Log($"[Factory] {name} produced 1x {produced_cheese_type}");
+        ResourceManager.instance.AddCheese(produced_cheese_type, 1);
+
 
         stored_milk -= cheese_type.GetMilkCost();
         resources.SpendResources(cheese_type.GetScrapCost(),0);
@@ -169,4 +184,64 @@ public class FactoryBuilding : ParentBuilding
             CheeseProduction();
         }
     }
+
+    public CheeseType GetCheeseType()
+    {
+        return produced_cheese_type;
+    }
+
+    public void CycleCheeseType()
+    {
+        if (allowed_cheese_types == null || allowed_cheese_types.Length == 0)
+        {
+            Debug.LogWarning("[Factory] No allowed_cheese_types set.");
+            return;
+        }
+
+        CheeseType before = produced_cheese_type;
+
+        int current_index = 0;
+        for (int i = 0; i < allowed_cheese_types.Length; i++)
+            if (allowed_cheese_types[i] == produced_cheese_type) { current_index = i; break; }
+
+        produced_cheese_type = allowed_cheese_types[(current_index + 1) % allowed_cheese_types.Length];
+
+        Debug.Log($"[Factory] {name} switched cheese: {before} -> {produced_cheese_type}");
+
+        if (ResourceManager.instance != null)
+            ResourceManager.instance.RegisterOrUpdateFactoryCheeseType(this, produced_cheese_type);
+
+        Debug.Log($"[Factory] {name} now set to produce: {produced_cheese_type}");
+        
+        SelectCheese(GetCheeseIndexForType(produced_cheese_type));
+        Debug.Log($"[Factory] {name} recipe now: {name} (type={produced_cheese_type})");
+
+    }
+
+    private void OnEnable()
+    {
+        if (ResourceManager.instance != null)
+            ResourceManager.instance.RegisterOrUpdateFactoryCheeseType(this, produced_cheese_type);
+
+        SelectCheese(GetCheeseIndexForType(produced_cheese_type));
+    }
+
+    private void OnDisable()
+    {
+        if (ResourceManager.instance != null)
+            ResourceManager.instance.UnregisterFactory(this);
+    }
+
+    private int GetCheeseIndexForType(CheeseType type)
+    {
+        // Simple factory order
+        switch (type)
+        {
+            case CheeseType.American: return 0;
+            case CheeseType.Cheddar: return 1;
+            case CheeseType.Mozzarella: return 2;
+            default: return 0;
+        }
+    }
+
 }

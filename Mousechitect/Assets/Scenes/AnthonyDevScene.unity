@@ -132,6 +132,7 @@ GameObject:
   m_Component:
   - component: {fileID: 251068877}
   - component: {fileID: 251068876}
+  - component: {fileID: 251068878}
   m_Layer: 0
   m_Name: MoraleSystem
   m_TagString: Untagged
@@ -172,6 +173,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 385788852}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &251068878
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 251068875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5370b8bce83ac2e4a8c3ba30f26e17b5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  main_camera: {fileID: 1478883420}
+  factory_mask:
+    serializedVersion: 2
+    m_Bits: 4294967295
 --- !u!1 &252424582 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1620012198875103581, guid: 572b2e71ff89ab74fa59e699a0a581ae,
