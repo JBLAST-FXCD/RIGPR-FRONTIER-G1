@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using UImGui;
 
 //// Hani Hailston 13/12/2025
 
@@ -62,6 +63,7 @@ public class ResourceManager : MonoBehaviour, ISaveable
         {
             instance = this;
         }
+        
     }
 
     private void Start()

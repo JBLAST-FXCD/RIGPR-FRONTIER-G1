@@ -75,6 +75,11 @@ public struct building_save_data
 
     public int tier;
     public List<string> mouse_ids;
+
+    //for milk buildings
+    public int current_milk;
+    public int max_milk_capacity;
+    public float milk_production_rate;
 }
 
 [System.Serializable]
