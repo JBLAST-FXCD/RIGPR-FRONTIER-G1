@@ -20,7 +20,7 @@ public class ResourceManager : MonoBehaviour, ISaveable
     protected static int scrap  = INITIAL_SCRAP;
     protected static int cheese = 0;
     protected static int money  = 0; // added temp as forgotten
-
+/*
     // Tracks cheese amounts per type for morale plus future economy expansion
     private readonly Dictionary<CheeseType, int> cheese_by_type = new Dictionary<CheeseType, int>();
 
@@ -30,7 +30,7 @@ public class ResourceManager : MonoBehaviour, ISaveable
     // How many factories are currently set to each cheese type
     private readonly Dictionary<CheeseType, int> active_type_counts = new Dictionary<CheeseType, int>();
 
-
+*/
 
     [Header("UI References")]
     public TextMeshProUGUI scrap_text;
@@ -106,7 +106,7 @@ public class ResourceManager : MonoBehaviour, ISaveable
         money = data.player_data.money;
     }
 
-    public void AddCheese(CheeseType type, int amount)
+    /* public void AddCheese(CheeseType type, int amount)
     {
         if (amount <= 0) return;
 
@@ -192,7 +192,8 @@ public class ResourceManager : MonoBehaviour, ISaveable
     public int GetActiveCheeseVarietyCount()
     {
         return active_type_counts.Count;
-    }
+    } */
+
 
 
 }
