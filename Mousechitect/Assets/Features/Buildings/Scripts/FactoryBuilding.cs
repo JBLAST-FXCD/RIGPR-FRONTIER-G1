@@ -31,6 +31,10 @@ public class FactoryBuilding : ParentBuilding
     protected bool  produce_cheese;
     protected bool  factory_switch;
 
+    // Added by jess @ 03/02/2026 for linking to the milk production pipeline
+    private bool is_searching_for_milk = false;
+    private const float RETRY_DELAY = 10.0f;
+
     public FactoryBuilding()
     {
         cheese_type = new CheeseTemp();
@@ -68,6 +72,51 @@ public class FactoryBuilding : ParentBuilding
 
             ProduceCheese(produce_cheese);
         }
+
+        // added by jess @ 03/02/2026
+        // automatically loojk for milk if production is stater and no milk is present, and not waiting for a retry
+        if (produce_cheese && factory_switch && stored_milk < cheese_type.GetMilkCost() && !is_searching_for_milk)
+        {
+            StartCoroutine(AutoAcquireMilk());
+        }
+    }
+
+    // added by jess @ 03/02/2026
+    // handles auto background transfer outlined in GDD
+    private IEnumerator AutoAcquireMilk()
+    {
+        is_searching_for_milk = true;
+
+        while (produce_cheese && stored_milk < cheese_type.GetMilkCost())
+        {
+            int amount_needed = (int)cheese_type.GetMilkCost();
+            
+            //gets best milk source from milk manager
+            IMilkContainer milk_source = MilkManager.Instance.RequestMilkSource(amount_needed);
+
+            if (milk_source != null)
+            {
+                milk_source.CURRENT_MILK_AMOUNT -= amount_needed;
+                stored_milk += amount_needed;
+
+                // visual mouse movement to factory inline with GDD
+                SpawnMiceVisual(milk_source.CONTAINER_GAME_OBJECT.transform.position);
+
+                CheeseProduction();
+                break; // exit loop if milk acquired
+            }
+            else
+            {
+                yield return new WaitForSeconds(RETRY_DELAY);
+            }
+        }
+        is_searching_for_milk = false;
+    }
+
+    private void SpawnMiceVisual(Vector3 source_position)
+    {
+        // spawn mice visual from source to factory
+        // implementation TBD
     }
 
     //for player to select cheese
@@ -114,7 +163,8 @@ public class FactoryBuilding : ParentBuilding
         //Checks if theres enought mise for factory as per GDD. id starts at 0 not 1
         if (id < population / 20)
         {
-            if (cheese_type.GetMilkCost() >= stored_milk && produce_cheese == true)
+            //edited by jess @ 03/02/2026 to use new logic for milk acquisition
+            if (stored_milk >= cheese_type.GetMilkCost() && produce_cheese)
                 Invoke(nameof(CreateCheese), cheese_type.GetProductionTime());
         }
         else
@@ -133,7 +183,11 @@ public class FactoryBuilding : ParentBuilding
         resources.SpendResources(cheese_type.GetScrapCost(),0);
 
         //Repeat cheese prodution until milk runs out or player switches produce_cheese to false
-        CheeseProduction();
+        //jess - modified to check if enough milk, if not loop in update will trigget automilkacquire
+        if (stored_milk >= cheese_type.GetMilkCost())
+        {
+            CheeseProduction();
+        }
     }
 
     //For player to create cheese when factory is running

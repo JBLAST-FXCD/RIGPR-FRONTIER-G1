@@ -124,5 +124,17 @@ public class SaveLoadManager : MonoBehaviour
     {
         DebugWindow.Instance.RegisterExternalCommand("save", " - Executes the save pipeline and displays all items saved.", args => SaveGame());
         DebugWindow.Instance.RegisterExternalCommand("load", " - Executes the load pipeline and displays all items loaded.", args => LoadGame());
+        DebugWindow.Instance.RegisterExternalCommand("save.dump", " - Decrypts and prints the current save file to console.", (args) => {
+            if (File.Exists(save_file_path))
+            {
+                string encrypted = File.ReadAllText(save_file_path);
+                string decrypted = SaveEncryption.DecryptString(encrypted);
+                Debug.Log("<color=yellow>DECRYPTED FILE CONTENT:</color>\n" + decrypted);
+            }
+            else
+            {
+                Debug.Log("No save file found.");
+            }
+        });
     }
 }

@@ -82,7 +82,13 @@ namespace UImGui
                     DrawCameraSection();
                     ImGui.EndTabItem();
                 }
-                
+
+                if (ImGui.BeginTabItem("Milk Logistics"))
+                {
+                    DrawMilkLogisticsTab();
+                    ImGui.EndTabItem();
+                }
+
                 if (ImGui.BeginTabItem("Console"))
                 {
                     DrawConsoleTab();
@@ -201,6 +207,57 @@ namespace UImGui
             if (isReclaimFocus)
             {
                 ImGui.SetKeyboardFocusHere(-1);
+            }
+        }
+
+        private void DrawMilkLogisticsTab()
+        {
+            if (MilkManager.Instance == null)
+            {
+                ImGui.TextColored(new Vector4(1, 0, 0, 1), "Milk Manager instance not found");
+                return;
+            }
+
+            ImGui.Text($"Total milk in system: {MilkManager.Instance.GetTotalMilk()}");
+
+            if (ImGui.Button("Force logistic refresh"))
+            {
+                MilkManager.Instance.RefreshRankings();
+            }
+
+            ImGui.Separator();
+
+            foreach (var container in MilkManager.Instance.all_containers)
+            {
+                ImGui.PushID(container.GetHashCode());
+
+                string container_type = container.IS_TANK ? "[Tank]" : "[Collector]";
+                if (ImGui.CollapsingHeader($"{container_type} {container.CONTAINER_GAME_OBJECT.name}"))
+                {
+                    int current = container.CURRENT_MILK_AMOUNT;
+                    if (ImGui.SliderInt("stored milk", ref current, 0, container.MAX_MILK_CAPACITY))
+                    {
+                        container.CURRENT_MILK_AMOUNT = current;
+                    }
+
+                    int max = container.MAX_MILK_CAPACITY;
+                    if (ImGui.InputInt("Max Capacity", ref max))
+                    {
+                        container.MAX_MILK_CAPACITY = max;
+                    }
+
+                    if (container is MilkCollector collector)
+                    {
+                        float rate = collector.production_interval;
+                        if (ImGui.DragFloat("Production Interval", ref rate, 0.1f, 0.5f, 60.0f))
+                        {
+                            collector.production_interval = rate;
+                        }
+
+                        ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1f), collector.GetStatus());
+                    }
+                }
+                ImGui.PopID();
             }
         }
 
