@@ -1476,9 +1476,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87b43d7d009f5134f8359627eae5f55c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  grid_manager: {fileID: 870189636}
-  pathfinding: {fileID: 578539491}
-  path: []
 --- !u!136 &1790277983
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -1739,6 +1736,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2105789339}
   - component: {fileID: 2105789340}
+  - component: {fileID: 2105789341}
   m_Layer: 0
   m_Name: ResourceManager
   m_TagString: Untagged
@@ -1775,6 +1773,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   scrap_text: {fileID: 0}
   cheese_text: {fileID: 0}
+--- !u!114 &2105789341
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2105789338}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff250cca1ebe7c141be9b906975dfeab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prodution_times:
+  - 2
+  - 5
+  - 8
+  milk_costs: 000000000000000000000000
+  scrap_costs: 000000000000000000000000
+  scrap_price: 000000000000000000000000
 --- !u!1 &2134140546
 GameObject:
   m_ObjectHideFlags: 0
