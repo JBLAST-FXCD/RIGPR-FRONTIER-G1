@@ -26,10 +26,12 @@ public class ResourceManager : MonoBehaviour, ISaveable
     public TextMeshProUGUI scrap_text;
     public TextMeshProUGUI cheese_text;
 
-    public ResourceManager()
-    {
-        cheeses = new Dictionary<CheeseTypes, int>();
-    }
+    // factory instance -> current cheese type
+    private readonly Dictionary<int, CheeseTypes> factory_to_type = new Dictionary<int, CheeseTypes>();
+
+    // cheese type -> how many factories currently set to it
+    private readonly Dictionary<CheeseTypes, int> active_type_counts = new Dictionary<CheeseTypes, int>();
+
 
     // Checks if player can afford a specific purchase based on cheese type.
     public bool CanAfford(int scrap_cost, CheeseTypes key, int cheese_amount)
@@ -111,17 +113,19 @@ public class ResourceManager : MonoBehaviour, ISaveable
         if (instance != null && instance != this)
         {
             Destroy(this);
+            return;
         }
-        else
-        {
-            instance = this;
-        }
+        instance = this;
+
+        if (cheeses == null)
+            cheeses = new Dictionary<CheeseTypes, int>();
     }
 
     private void Start()
     {
         foreach (CheeseTypes c in Enum.GetValues(typeof(CheeseTypes)))
-            cheeses.Add(c, 0);
+            cheeses[c] = 0;
+
 
         UpdateUI();
     }
@@ -166,4 +170,85 @@ public class ResourceManager : MonoBehaviour, ISaveable
             i++;
         }
     }
+
+    // Updates by Anthony - 05/02/2026
+
+    // Returns how many cheese types currently have > 0 in storage.
+    public int GetCheeseVarietyCount()
+    {
+        if (cheeses == null) return 0;
+
+        int count = 0;
+        foreach (KeyValuePair<CheeseTypes, int> kvp in cheeses)
+        {
+            if (kvp.Value > 0) count++;
+        }
+        return count;
+    }
+
+    // Increments active factory count for the given cheese type.
+    private void IncActive(CheeseTypes t)
+    {
+        if (!active_type_counts.ContainsKey(t)) active_type_counts[t] = 0;
+        active_type_counts[t]++;
+    }
+
+    // Decrements active factory count for the given cheese type (and removes the key at 0 to keep Count meaningful).
+    private void DecActive(CheeseTypes t)
+    {
+        if (!active_type_counts.ContainsKey(t)) return;
+
+        active_type_counts[t]--;
+        if (active_type_counts[t] <= 0)
+            active_type_counts.Remove(t);
+    }
+
+    // Registers a factory's current cheese type, or updates it when the factory switches type.
+    // This drives ACTIVE variety used by the morale food variety adapter.
+    public void RegisterOrUpdateFactoryCheeseType(UnityEngine.Object factory, CheeseTypes new_type)
+    {
+        if (factory == null) return;
+
+        int id = factory.GetInstanceID();
+
+        // If factory already registered, remove its old type from counts first.
+        if (factory_to_type.TryGetValue(id, out CheeseTypes old_type))
+        {
+            if (old_type == new_type) return;
+
+            DecActive(old_type);
+            factory_to_type[id] = new_type;
+            IncActive(new_type);
+        }
+        else
+        {
+            // First time seeing this factory instance
+            factory_to_type.Add(id, new_type);
+            IncActive(new_type);
+        }
+
+        Debug.Log($"[ResourceManager] ACTIVE variety={active_type_counts.Count} (factory {factory.name}={new_type})");
+    }
+
+    // Removes a factory from ACTIVE variety tracking (called when a factory is disabled/destroyed).
+    public void UnregisterFactory(UnityEngine.Object factory)
+    {
+        if (factory == null) return;
+
+        int id = factory.GetInstanceID();
+        if (factory_to_type.TryGetValue(id, out CheeseTypes old_type))
+        {
+            factory_to_type.Remove(id);
+            DecActive(old_type);
+
+            Debug.Log($"[ResourceManager] ACTIVE variety={active_type_counts.Count} (factory {factory.name} removed)");
+        }
+    }
+
+    // Returns number of distinct cheese types currently selected across all factories.
+    public int GetActiveCheeseVarietyCount()
+    {
+        return active_type_counts.Count;
+    }
+
 }

@@ -87,20 +87,10 @@ public class MoraleSystem : MonoBehaviour
             if (!has_aesthetics) aesthetics_score = DEFAULT_AESTHETICS_SCORE;
 
 
-            if (food_score <= 0.0f)
-            {
-                food_score = DEFAULT_FOOD_SCORE;
-            }
+            if (!has_food) food_score = DEFAULT_FOOD_SCORE;
+            if (!has_recreation) recreation_score = DEFAULT_RECREATION_SCORE;
+            if (!has_aesthetics) aesthetics_score = DEFAULT_AESTHETICS_SCORE;
 
-            if (recreation_score <= 0.0f)
-            {
-                recreation_score = DEFAULT_RECREATION_SCORE;
-            }
-
-            if (aesthetics_score <= 0.0f)
-            {
-                aesthetics_score = DEFAULT_AESTHETICS_SCORE;
-            }
 
             float target_morale =
                 (housing_score * HOUSING_WEIGHT) +

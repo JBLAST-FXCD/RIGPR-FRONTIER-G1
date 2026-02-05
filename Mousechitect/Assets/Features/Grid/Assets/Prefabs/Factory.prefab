@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 8260932522183064223}
   m_Layer: 0
   m_Name: Visual
-  m_TagString: Untagged
+  m_TagString: BuildingTest
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -65,6 +65,8 @@ MonoBehaviour:
   capacitys: 2000000020000000
   tier: 1
   scrap_costs: 0500000005000000
+  produced_cheese_type: 0
+  allowed_cheese_types: 000000000100000002000000
 --- !u!65 &2824112730333103816
 BoxCollider:
   m_ObjectHideFlags: 0
