@@ -16,6 +16,7 @@ public class FactoryBuilding : ParentBuilding
 {
     //first element is for rarity and second element is for cheese type.
     [SerializeField] protected int[] scrap_costs;
+    [SerializeField] protected int[] milk_capasitys;
     [SerializeField] private CheeseTypes produced_cheese_type = CheeseTypes.AmericanCheese;
 
     [SerializeField]
@@ -37,6 +38,7 @@ public class FactoryBuilding : ParentBuilding
     static protected int count;
     protected int id;
 
+    protected int milk_capasity;
     protected float stored_milk;
     protected bool  produce_cheese;
     protected bool  factory_switch;
@@ -111,6 +113,7 @@ public class FactoryBuilding : ParentBuilding
         building_prefab = building_prefabs[tier - 1];
         capacity        = capacitys[tier - 1];
         scrap_cost      = scrap_costs[tier - 1];
+        milk_capasity   = milk_capasitys[tier - 1];
     }
 
     //Delay is hard coded because theres variation in the GDD
@@ -180,7 +183,7 @@ public class FactoryBuilding : ParentBuilding
     //Fits GDD requirement of making cheese when theres enough milk
     protected void AddMilk(float milk)
     {
-        if (factory_switch == true)
+        if (factory_switch == true && stored_milk + milk <= milk_capasity)
         {
             stored_milk += milk;
             CheeseProduction();
