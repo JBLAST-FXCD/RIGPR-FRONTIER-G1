@@ -148,7 +148,7 @@ namespace UImGui
                     ResourceManager.instance.SpendResources(scrap_input, cheese_input);
                 }
             }
-        }
+        } 
 
         private void DrawCameraSection()
         {

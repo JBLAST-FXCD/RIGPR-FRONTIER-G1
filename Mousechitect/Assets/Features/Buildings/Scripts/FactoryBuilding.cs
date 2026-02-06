@@ -16,6 +16,16 @@ public class FactoryBuilding : ParentBuilding
 {
     //first element is for rarity and second element is for cheese type.
     [SerializeField] protected int[] scrap_costs;
+    [SerializeField] private CheeseTypes produced_cheese_type = CheeseTypes.AmericanCheese;
+
+    [SerializeField]
+    private CheeseTypes[] allowed_cheese_types =
+    {
+    CheeseTypes.AmericanCheese,
+    CheeseTypes.Cheddar,
+    CheeseTypes.Mozzarella
+};
+
 
     protected CheeseValues cheese_type;
     protected int scrap_cost;
@@ -54,7 +64,10 @@ public class FactoryBuilding : ParentBuilding
         if (id >= population / 20)
             Debug.Log("Not enough mice to operate this factory");
 
-        count++;
+        if (ResourceManager.instance != null)
+            ResourceManager.instance.RegisterOrUpdateFactoryCheeseType(this, produced_cheese_type);
+
+    count++;
         ConstructTier();
     }
 
@@ -145,8 +158,7 @@ public class FactoryBuilding : ParentBuilding
     {
         ResourceManager resources = ResourceManager.instance;
 
-        //cheese++
-        resources.AddResources(0,1);
+        ResourceManager.instance.AddResources(produced_cheese_type, 1);
 
         stored_milk -= cheese_type.milk_cost;
         resources.SpendResources(cheese_type.scrap_cost);
@@ -174,4 +186,48 @@ public class FactoryBuilding : ParentBuilding
             CheeseProduction();
         }
     }
+
+    // Updates by Anthony - 05/02/2026
+    // Cycles this factory's currently selected cheese type (per-factory, not global).
+    // Also syncs the internal recipe data and informs ResourceManager so ACTIVE variety updates correctly.
+    public void CycleCheeseType()
+    {
+        // Safety: no allowed types means there's nothing to cycle.
+        if (allowed_cheese_types == null || allowed_cheese_types.Length == 0)
+            return;
+
+        CheeseTypes before = produced_cheese_type;
+
+        // Find current type index in the allowed list.
+        int idx = 0;
+        for (int i = 0; i < allowed_cheese_types.Length; i++)
+        {
+            if (allowed_cheese_types[i] == produced_cheese_type)
+            {
+                idx = i;
+                break;
+            }
+        }
+
+        // Wrap around to the start once we hit the end.
+        produced_cheese_type = allowed_cheese_types[(idx + 1) % allowed_cheese_types.Length];
+
+        // Keep the internal cheese recipe selection in sync with the enum.
+        SelectCheese(produced_cheese_type);
+
+        Debug.Log($"[Factory] {name} switched {before} -> {produced_cheese_type}");
+
+        // Update active cheese variety tracking (used by morale food variety).
+        if (ResourceManager.instance != null)
+            ResourceManager.instance.RegisterOrUpdateFactoryCheeseType(this, produced_cheese_type);
+    }
+
+    private void OnDisable()
+    {
+        // If the factory is removed/destroyed, remove it from active variety tracking.
+        if (ResourceManager.instance != null)
+            ResourceManager.instance.UnregisterFactory(this);
+    }
+
+
 }
