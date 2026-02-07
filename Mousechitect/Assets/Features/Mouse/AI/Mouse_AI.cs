@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class Mouse_AI : MonoBehaviour
@@ -7,6 +9,7 @@ public class Mouse_AI : MonoBehaviour
     //External scripts.
     [SerializeField] protected GridManager grid_manager;
     [SerializeField] protected PathFinding pathfinding;
+    [SerializeField] protected MilkManager milkmanager;
 
     //Varibles for players to choose which resource is more important.
     //Player will select through UI. Value must be between 0 and 1.
@@ -14,8 +17,35 @@ public class Mouse_AI : MonoBehaviour
     protected float cheese_weight;
     protected float milk_weight;
 
-    protected List<FactoryBuilding> factories;
-    protected List<CommercialBuilding> markets;
+    protected float overtime_multiple;
+
+    protected List<Task> tasks;
+    //protected Dictionary<Vector2Int, Task> tasks;
+
+    protected enum Building
+    {
+        factory, market, tank
+    }
+
+    protected struct Task
+    {
+        public Vector2Int position;
+        public float weight;
+        public int[] amounts;
+        public CheeseTypes[] cheese_types;
+        public Building building;
+    }
+
+    public Mouse_AI() 
+    {
+        scrap_weight  = 0.5f;
+        cheese_weight = 0.5f;
+        milk_weight   = 0.5f;
+
+        overtime_multiple = 1.1f;
+
+        tasks = new List<Task>();
+    }
 
     // GetVectors Updated by Iain    30/01/26 
     // GetVectors Updated by Anthony 23/01/26 
@@ -63,35 +93,196 @@ public class Mouse_AI : MonoBehaviour
                 GetVectors(building, mouse);
             }
         }
+
+        if (Input.GetKeyDown(KeyCode.Z))
+        {
+            PickTasks();
+        }
     }
 
-    protected void PickTask()
+    protected Vector2Int GetPosition(Vector3 position)
     {
+        Vector2Int rv = new Vector2Int();
+
+        rv.x = (int)position.x;
+        rv.y = (int)position.z;
+
+        return rv;
+    }
+
+    protected bool TasksContainPosition(Vector2Int position)
+    {
+        for (int i = 0; i < tasks.Count; i++) 
+        {
+            if (tasks[i].position == position)
+            {
+                //Update weight over time
+                Task temp = tasks[i];
+                temp.weight *= overtime_multiple;
+                tasks[i] = temp;
+
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected bool PickTasks()
+    {
+        ResourceManager resources = ResourceManager.instance;
+
+        //Get total cost to find cost of average cheese
+        float total_scrap_cost = 0;
+        foreach (CheeseTypes c in Enum.GetValues(typeof(CheeseTypes)))
+            total_scrap_cost += Cheese.GetCheese(c).scrap_cost;
+
+        float total_milk_cost = 0;
+        foreach (CheeseTypes c in Enum.GetValues(typeof(CheeseTypes)))
+            total_milk_cost += Cheese.GetCheese(c).milk_cost;
+
+        // Jess hasn't impolemted the total milk into resource manager get.
+        int milk = milkmanager.GetTotalMilk();
+
+        //Calculate average cheese for each resource and total cheese.
+        //resource diveided by average cost to find how many average cheese are there in that recourse.
+        float scrap_cheese = resources.Scrap / (total_scrap_cost / Enum.GetValues(typeof(CheeseTypes)).Length);
+        float milk_cheese  = milk / (total_milk_cost / Enum.GetValues(typeof(CheeseTypes)).Length);
+        float total_cheese = resources.Total_cheese;
+
+
+        //Add total and divided to know which resource is effectively greater as desimal
+        float total = scrap_cheese + milk_cheese + total_cheese;
+
+        //make decimal because allows for the weight to be 50/50 player input and current resources,
+        //if input are all equal and resources are all equal.
+        scrap_cheese /= total;
+        milk_cheese  /= total;
+        total_cheese /= total;
+
+        //Circular system to increase weight of next resouce in sycal
+        //If lots of cheese sell for scrap
+        scrap_weight += total_cheese;
+        //If lof of scrap get more milk because cheese must be low
+        milk_weight += scrap_cheese;
+        //If lots of milk make cheese
+        cheese_weight += milk_cheese;
+
         //Making sure theres only has one request and the factory needs milk. 
-        FactoryBuilding[] factories_temp = FindObjectsOfType(typeof(FactoryBuilding)) as FactoryBuilding[];
+        FactoryBuilding[] factories = FindObjectsOfType(typeof(FactoryBuilding)) as FactoryBuilding[];
 
-        if (factories_temp != null)
+        if (factories != null)
         {
-            for (int i = 0; i < factories_temp.Length; i++)
+            for (int i = 0; i < factories.Length; i++)
             {
-                if (!factories.Contains(factories_temp[i]) && factories_temp[i].IsActive == true)
-                    factories.Add(factories_temp[i]);
+                Vector2Int position = GetPosition(factories[i].transform.position);
+
+                //Weight gets upadted if the task exsists else create task
+                if (TasksContainPosition(position) == false)
+                {
+                    if (factories[i].IsActive && factories[i].Stored_milk < factories[i].Milk_capacity)
+                    {
+                        Task new_taks = new Task();
+
+                        new_taks.position = position;
+                        new_taks.weight = 1 * cheese_weight;
+                        new_taks.building = Building.factory;
+                        new_taks.amounts = new int[1];
+                        new_taks.amounts[0] = factories[i].Milk_capacity - factories[i].Stored_milk;
+
+                        tasks.Add(new_taks);
+                    }
+                }
             }
         }
 
-        CommercialBuilding[] markets_temp = FindObjectsOfType(typeof(CommercialBuilding)) as CommercialBuilding[];
+        CommercialBuilding[] markets = FindObjectsOfType(typeof(CommercialBuilding)) as CommercialBuilding[];
 
-        if(markets_temp != null)
+        if (markets != null)
         {
-            ResourceManager resources = ResourceManager.instance;
-
-            for (int i = 0; i < markets_temp.Length; i++)
+            for (int i = 0; i < markets.Length; i++)
             {
-                int milk = Cheese.GetCheese(CheeseTypes.AmericanCheese).milk_cost - markets[i].Cheese_amounts[(int)CheeseTypes.AmericanCheese];
-                bool enough = resources.CanAfford(CheeseTypes.AmericanCheese, milk);
-                if (!markets.Contains(markets_temp[i]) && enough == true)
-                    markets.Add(markets[i]);
+                Vector2Int position = GetPosition(markets[i].transform.position);
+
+                if (TasksContainPosition(position) == false)
+                {
+                    List<CheeseTypes> keys = new List<CheeseTypes>();
+                    List<int> amounts = new List<int>();
+
+                    foreach (CheeseTypes c in Enum.GetValues(typeof(CheeseTypes)))
+                    {
+                        int cheese_amount = markets[i].CheeseAmount(c);
+                        bool enough = resources.CanAfford(c, cheese_amount);
+                        if (enough == true)
+                        {
+                            keys.Add(c);
+                            amounts.Add(cheese_amount);
+                        }
+                    }
+
+                    Task new_taks = new Task();
+
+                    new_taks.position = position;
+                    new_taks.weight = 1 * scrap_weight;
+                    new_taks.building = Building.market;
+                    new_taks.amounts = amounts.ToArray();
+                    new_taks.cheese_types = keys.ToArray();
+
+                    tasks.Add(new_taks);
+                }
             }
         }
+
+        MilkTank[] tanks = FindObjectsOfType(typeof(MilkTank)) as MilkTank[];
+
+        if (tanks != null)
+        {
+            for (int i = 0; i < tanks.Length; i++)
+            {
+                Vector2Int position = GetPosition(tanks[i].gameObject.transform.position);
+
+                if (TasksContainPosition(position) == false)
+                {
+                    if (tanks[i].current_milk_amount < tanks[i].max_capacity)
+                    {
+                        Task new_taks = new Task();
+
+                        new_taks.position = position;
+                        new_taks.weight = 1 * milk_weight;
+                        new_taks.building = Building.tank;
+                        new_taks.amounts = new int[1];
+                        new_taks.amounts[0] = tanks[i].max_capacity - tanks[i].current_milk_amount;
+
+                        tasks.Add(new_taks);
+                    }
+                }
+            }
+        }
+
+        if (tasks.Count > 0) 
+        {
+            //Sort list in wieght order.
+            for (int i = 0; i < tasks.Count - 1; i++)
+            {
+                for (int j = 0; j < tasks.Count - i -1; j++)
+                {
+                    if (tasks[j].weight > tasks[j + 1].weight) 
+                    {
+                        Task temp = tasks[j];
+                        tasks[j] = tasks[j + 1];
+                        tasks[j + 1] = temp;
+                    } 
+                }
+            }
+
+            return true;
+        }
+        return false;
+    }
+
+    protected bool PickMouseInBuilding()
+    {
+
+
+        return false;
     }
 }

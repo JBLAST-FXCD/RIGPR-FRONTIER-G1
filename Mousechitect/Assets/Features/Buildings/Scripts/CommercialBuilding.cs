@@ -1,8 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 // Iain Benner 05/12/2025
@@ -18,7 +16,6 @@ public class CommercialBuilding : ParentBuilding
 
     //For selling
     protected CheeseTypes[] keys;
-    protected int[] cheese_amounts;
 
     //Numbers for PopularityAlgorithm()
     protected int cheese_types;
@@ -35,10 +32,6 @@ public class CommercialBuilding : ParentBuilding
 
     [SerializeField] protected float mini_sell_delay;
     [SerializeField] protected float max_sell_delay;
-
-    public float[] Cheese_popularity { get { return cheese_popularity; } }
-    public int[] Cheese_amounts { get { return cheese_amounts; } }
-
 
     CommercialBuilding() 
     {
@@ -61,6 +54,13 @@ public class CommercialBuilding : ParentBuilding
 
         mini_sell_delay = 10;
         max_sell_delay  = 20;
+    }
+
+    public int CheeseAmount(CheeseTypes cheese)
+    {
+        int rv = population / 10 * (int)cheese_popularity[(int)cheese] / mini_percent;
+
+        return rv;
     }
 
     // Start is called before the first frame update

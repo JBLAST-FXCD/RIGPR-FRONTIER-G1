@@ -22,7 +22,6 @@ namespace UImGui
         [SerializeField] private KeyCode toggle_key = KeyCode.F1;
 
         private int scrap_input = 0;
-        private int cheese_input = 0;
         private string console_command_input = "";
 
         private List<string> console_log = new List<string>();
@@ -129,23 +128,22 @@ namespace UImGui
             if (ImGui.CollapsingHeader("Resource Manager"))
             {
                 ImGui.Text($"Current Scrap: {ResourceManager.instance.Scrap}");
-                ImGui.Text($"Current Cheese: {ResourceManager.instance.Cheese}");
+                ImGui.Text($"Current Cheese: {ResourceManager.instance.Total_cheese}");
 
                 ImGui.Separator();
 
                 ImGui.InputInt("Scrap Amount", ref scrap_input);
-                ImGui.InputInt("Cheese Amount", ref cheese_input);
 
                 if (ImGui.Button("Add Resources"))
                 {
-                    ResourceManager.instance.AddResources(scrap_input, cheese_input);
+                    ResourceManager.instance.AddResources(scrap_input);
                 }
 
                 ImGui.SameLine();
 
                 if (ImGui.Button("Spend Resources"))
                 {
-                    ResourceManager.instance.SpendResources(scrap_input, cheese_input);
+                    ResourceManager.instance.SpendResources(scrap_input);
                 }
             }
         } 

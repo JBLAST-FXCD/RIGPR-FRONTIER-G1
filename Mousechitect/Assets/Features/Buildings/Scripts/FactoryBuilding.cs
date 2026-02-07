@@ -22,10 +22,10 @@ public class FactoryBuilding : ParentBuilding
     [SerializeField]
     private CheeseTypes[] allowed_cheese_types =
     {
-    CheeseTypes.AmericanCheese,
-    CheeseTypes.Cheddar,
-    CheeseTypes.Mozzarella
-};
+        CheeseTypes.AmericanCheese,
+        CheeseTypes.Cheddar,
+        CheeseTypes.Mozzarella
+    };
 
 
     protected CheeseValues cheese_type;
@@ -39,12 +39,13 @@ public class FactoryBuilding : ParentBuilding
     protected int id;
 
     protected int milk_capasity;
-    protected float stored_milk;
+    protected int stored_milk;
     protected bool  produce_cheese;
     protected bool  factory_switch;
 
     public bool IsActive { get { return factory_switch; } }
-    public float Milk { get { return stored_milk; } }
+    public int Stored_milk { get { return stored_milk; } }
+    public int Milk_capacity { get { return milk_capasity; } }
 
     public FactoryBuilding()
     {
@@ -181,7 +182,7 @@ public class FactoryBuilding : ParentBuilding
     }
 
     //Fits GDD requirement of making cheese when theres enough milk
-    protected void AddMilk(float milk)
+    protected void AddMilk(int milk)
     {
         if (factory_switch == true && stored_milk + milk <= milk_capasity)
         {
