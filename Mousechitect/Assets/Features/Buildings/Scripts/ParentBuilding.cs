@@ -32,7 +32,7 @@ public class ParentBuilding : MonoBehaviour
         capacity = 0;
     }
 
-    void Start()
+    protected virtual void Start()
     {
         ConstructTier();
     }

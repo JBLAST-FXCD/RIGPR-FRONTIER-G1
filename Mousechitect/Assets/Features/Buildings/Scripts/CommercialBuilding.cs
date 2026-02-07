@@ -64,13 +64,15 @@ public class CommercialBuilding : ParentBuilding
     }
 
     // Start is called before the first frame update
-    void Start()
+    protected new void Start()
     {
         UnityEngine.Random.InitState((int)DateTime.Now.Ticks);
 
         //These funtions are looped infinitely per GDD
         RecalculatePopularity();
         SellDelay();
+
+        ConstructTier();
     }
 
     //The maximum range is limited to prevent any element of the array from having a disproportionate chance of being the maximum number,
@@ -163,19 +165,21 @@ public class CommercialBuilding : ParentBuilding
     {
         ResourceManager resources = ResourceManager.instance;
 
-        for (int i = 0; i <= keys.Length - 1; i++)
+        if (keys != null)
         {
-            int units = population / 10 * (int)cheese_popularity[i] / mini_percent;
-
-            if(resources.CanAfford(keys[i], units) == true)
+            for (int i = 0; i <= keys.Length - 1; i++)
             {
-                //Later replace scrap and cheese with global scrap and cheese counter
-                resources.SpendResources(keys[i], units);
-                resources.AddResources(Cheese.GetCheese(keys[i]).scrap_price * units);
-            }
+                int units = population / 10 * (int)cheese_popularity[i] / mini_percent;
 
-            //Repeat loop of selling cheese
-            SellDelay();
+                if (resources.CanAfford(keys[i], units) == true)
+                {
+                    //Later replace scrap and cheese with global scrap and cheese counter
+                    resources.SpendResources(keys[i], units);
+                    resources.AddResources(Cheese.GetCheese(keys[i]).scrap_price * units);
+                }
+            }
         }
+        //Repeat loop of selling cheese
+        SellDelay();
     }
 }

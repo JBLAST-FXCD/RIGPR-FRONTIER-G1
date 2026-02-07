@@ -61,7 +61,7 @@ public class FactoryBuilding : ParentBuilding
         factory_switch = true;
     }
 
-    void Start()
+    protected new void Start()
     {
         //Warns the player if cheese can't be produced when the building is constructed
         if (id >= population / 20)
@@ -70,7 +70,7 @@ public class FactoryBuilding : ParentBuilding
         if (ResourceManager.instance != null)
             ResourceManager.instance.RegisterOrUpdateFactoryCheeseType(this, produced_cheese_type);
 
-    count++;
+        count++;
         ConstructTier();
     }
 
