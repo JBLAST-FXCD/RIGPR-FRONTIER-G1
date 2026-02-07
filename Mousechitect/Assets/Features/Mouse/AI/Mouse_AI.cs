@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class Mouse_AI : MonoBehaviour
 {
@@ -18,6 +19,7 @@ public class Mouse_AI : MonoBehaviour
     protected float milk_weight;
 
     protected float overtime_multiple;
+    protected ResourceManager resources;
 
     protected List<Task> tasks;
     //protected Dictionary<Vector2Int, Task> tasks;
@@ -112,7 +114,7 @@ public class Mouse_AI : MonoBehaviour
 
     protected bool TasksContainPosition(Vector2Int position)
     {
-        for (int i = 0; i < tasks.Count; i++) 
+        for (int i = 0; i < tasks.Count; i++)
         {
             if (tasks[i].position == position)
             {
@@ -127,9 +129,93 @@ public class Mouse_AI : MonoBehaviour
         return false;
     }
 
+    protected void FactoryTask(FactoryBuilding factory, Vector2Int position)
+    {
+        if (factory.IsActive && factory.Stored_milk < factory.Milk_capacity)
+        {
+            Task new_taks = new Task();
+
+            new_taks.position = position;
+            new_taks.weight = 1 * cheese_weight;
+            new_taks.building = Building.factory;
+            new_taks.amounts = new int[1];
+            new_taks.amounts[0] = factory.Milk_capacity - factory.Stored_milk;
+
+            tasks.Add(new_taks);
+        }
+    }
+
+    protected void CommercialTask(CommercialBuilding market, Vector2Int position)
+    {
+        List<CheeseTypes> keys = new List<CheeseTypes>();
+        List<int> amounts = new List<int>();
+
+        foreach (CheeseTypes c in Enum.GetValues(typeof(CheeseTypes)))
+        {
+            int cheese_amount = market.CheeseAmount(c);
+            bool enough = resources.CanAfford(c, cheese_amount);
+            if (enough == true)
+            {
+                keys.Add(c);
+                amounts.Add(cheese_amount);
+            }
+        }
+
+        Task new_taks = new Task();
+
+        new_taks.position = position;
+        new_taks.weight = 1 * scrap_weight;
+        new_taks.building = Building.market;
+        new_taks.amounts = amounts.ToArray();
+        new_taks.cheese_types = keys.ToArray();
+
+        tasks.Add(new_taks);
+    }
+
+    protected void TankTask(MilkTank tank, Vector2Int position)
+    {
+        Task new_taks = new Task();
+
+        new_taks.position = position;
+        new_taks.weight = 1 * milk_weight;
+        new_taks.building = Building.tank;
+        new_taks.amounts = new int[1];
+        new_taks.amounts[0] = tank.max_capacity - tank.current_milk_amount;
+
+        tasks.Add(new_taks);
+    }
+
+    protected void CheckTasks(ParentBuilding[] buildings, Building building)
+    {
+        if (buildings != null)
+        {
+            for (int i = 0; i < buildings.Length; i++)
+            {
+                Vector2Int position = GetPosition(buildings[i].transform.position);
+
+                //Weight gets upadted if the task exsists else create task
+                if (TasksContainPosition(position) == false)
+                {
+                    switch (building) 
+                    {
+                        case Building.factory:
+                            FactoryTask((FactoryBuilding)buildings[i], position);
+                            break;
+                        case Building.market:
+                            CommercialTask((CommercialBuilding)buildings[i], position);
+                            break;
+                        case Building.tank:
+                            TankTask((MilkTank)buildings[i], position);
+                            break;
+                    }
+                }
+            }
+        }
+    }
+
     protected bool PickTasks()
     {
-        ResourceManager resources = ResourceManager.instance;
+        resources = ResourceManager.instance;
 
         //Get total cost to find cost of average cheese
         float total_scrap_cost = 0;
@@ -167,96 +253,17 @@ public class Mouse_AI : MonoBehaviour
         //If lots of milk make cheese
         cheese_weight += milk_cheese;
 
-        //Making sure theres only has one request and the factory needs milk. 
         FactoryBuilding[] factories = FindObjectsOfType(typeof(FactoryBuilding)) as FactoryBuilding[];
 
-        if (factories != null)
-        {
-            for (int i = 0; i < factories.Length; i++)
-            {
-                Vector2Int position = GetPosition(factories[i].transform.position);
-
-                //Weight gets upadted if the task exsists else create task
-                if (TasksContainPosition(position) == false)
-                {
-                    if (factories[i].IsActive && factories[i].Stored_milk < factories[i].Milk_capacity)
-                    {
-                        Task new_taks = new Task();
-
-                        new_taks.position = position;
-                        new_taks.weight = 1 * cheese_weight;
-                        new_taks.building = Building.factory;
-                        new_taks.amounts = new int[1];
-                        new_taks.amounts[0] = factories[i].Milk_capacity - factories[i].Stored_milk;
-
-                        tasks.Add(new_taks);
-                    }
-                }
-            }
-        }
+        CheckTasks(factories, Building.factory);
 
         CommercialBuilding[] markets = FindObjectsOfType(typeof(CommercialBuilding)) as CommercialBuilding[];
 
-        if (markets != null)
-        {
-            for (int i = 0; i < markets.Length; i++)
-            {
-                Vector2Int position = GetPosition(markets[i].transform.position);
-
-                if (TasksContainPosition(position) == false)
-                {
-                    List<CheeseTypes> keys = new List<CheeseTypes>();
-                    List<int> amounts = new List<int>();
-
-                    foreach (CheeseTypes c in Enum.GetValues(typeof(CheeseTypes)))
-                    {
-                        int cheese_amount = markets[i].CheeseAmount(c);
-                        bool enough = resources.CanAfford(c, cheese_amount);
-                        if (enough == true)
-                        {
-                            keys.Add(c);
-                            amounts.Add(cheese_amount);
-                        }
-                    }
-
-                    Task new_taks = new Task();
-
-                    new_taks.position = position;
-                    new_taks.weight = 1 * scrap_weight;
-                    new_taks.building = Building.market;
-                    new_taks.amounts = amounts.ToArray();
-                    new_taks.cheese_types = keys.ToArray();
-
-                    tasks.Add(new_taks);
-                }
-            }
-        }
+        CheckTasks(markets, Building.market);
 
         MilkTank[] tanks = FindObjectsOfType(typeof(MilkTank)) as MilkTank[];
 
-        if (tanks != null)
-        {
-            for (int i = 0; i < tanks.Length; i++)
-            {
-                Vector2Int position = GetPosition(tanks[i].gameObject.transform.position);
-
-                if (TasksContainPosition(position) == false)
-                {
-                    if (tanks[i].current_milk_amount < tanks[i].max_capacity)
-                    {
-                        Task new_taks = new Task();
-
-                        new_taks.position = position;
-                        new_taks.weight = 1 * milk_weight;
-                        new_taks.building = Building.tank;
-                        new_taks.amounts = new int[1];
-                        new_taks.amounts[0] = tanks[i].max_capacity - tanks[i].current_milk_amount;
-
-                        tasks.Add(new_taks);
-                    }
-                }
-            }
-        }
+        CheckTasks(tanks, Building.tank);
 
         if (tasks.Count > 0) 
         {
@@ -265,7 +272,7 @@ public class Mouse_AI : MonoBehaviour
             {
                 for (int j = 0; j < tasks.Count - i -1; j++)
                 {
-                    if (tasks[j].weight > tasks[j + 1].weight) 
+                    if (tasks[j].weight < tasks[j + 1].weight) 
                     {
                         Task temp = tasks[j];
                         tasks[j] = tasks[j + 1];

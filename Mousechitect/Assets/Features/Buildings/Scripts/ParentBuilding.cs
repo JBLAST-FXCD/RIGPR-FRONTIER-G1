@@ -85,7 +85,7 @@ public class ParentBuilding : MonoBehaviour
     }
 
     //Mouse is storded and turned off to make effetivly inside the building.
-    protected void OnTriggerStay(Collider other)
+    protected virtual void OnTriggerStay(Collider other)
     {
         if (other != null && other.tag == "MouseTemp" && mouse_occupants.Count < capacity)
         {

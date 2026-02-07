@@ -7,7 +7,7 @@ using UnityEngine;
 // Represents a milk tank that can store milk in the game.
 // This is used for both tanks and collectors as functionally their storage system is the same.
 // </summary>
-public class MilkTank : MonoBehaviour, IMilkContainer
+public class MilkTank : ParentBuilding, IMilkContainer
 {
     public int max_capacity = 50;
     public int current_milk_amount = 0;
@@ -20,9 +20,11 @@ public class MilkTank : MonoBehaviour, IMilkContainer
     public bool is_full => current_milk_amount >= max_capacity;
     public bool is_nearly_full => current_milk_amount >= (max_capacity * 0.8f);
 
-    private void Start()
+    protected new void Start()
     {
         MilkManager.Instance.RegisterContainer(this);
+
+        ConstructTier();
     }
 
     private void OnDestroy()
