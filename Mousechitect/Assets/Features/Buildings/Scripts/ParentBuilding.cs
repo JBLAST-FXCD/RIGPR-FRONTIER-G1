@@ -24,6 +24,7 @@ public class ParentBuilding : MonoBehaviour
 
     public int Tier { get { return tier; } }
     public GameObject Building { get { return building; } }
+    public List<MouseTemp> Mouse_occupants { get { return mouse_occupants; } }
 
     public ParentBuilding()
     {

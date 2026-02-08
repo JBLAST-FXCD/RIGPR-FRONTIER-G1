@@ -41,6 +41,12 @@ public class MilkCollector : ParentBuilding, IMilkContainer
         }
     }
 
+    protected new void OnTriggerStay(Collider other)
+    {
+        if (other != null && other.tag == "MouseTemp" && mouse_occupants.Count < capacity)
+            mouse_occupants.Add(other.gameObject.GetComponent<MouseTemp>());
+    }
+
     private void ProduceMilk()
     {
         if (current_milk_amount < max_milk_capacity)

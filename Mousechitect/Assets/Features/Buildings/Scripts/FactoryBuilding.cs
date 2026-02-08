@@ -232,6 +232,4 @@ public class FactoryBuilding : ParentBuilding
         if (ResourceManager.instance != null)
             ResourceManager.instance.UnregisterFactory(this);
     }
-
-
 }

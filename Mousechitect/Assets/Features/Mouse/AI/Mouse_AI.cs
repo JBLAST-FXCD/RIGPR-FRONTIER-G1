@@ -1,9 +1,6 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class Mouse_AI : MonoBehaviour
 {
@@ -19,14 +16,20 @@ public class Mouse_AI : MonoBehaviour
     protected float milk_weight;
 
     protected float overtime_multiple;
+
+    protected FactoryBuilding[] factories;
+    protected CommercialBuilding[] markets;
+    protected MilkTank[] tanks;
+    protected MilkCollector[] collectors;
+
     protected ResourceManager resources;
 
     protected List<Task> tasks;
-    //protected Dictionary<Vector2Int, Task> tasks;
+    protected List<MouseTask> mouse_tasks;
 
     protected enum Building
     {
-        factory, market, tank
+        factory, market, tank, collector
     }
 
     protected struct Task
@@ -38,6 +41,12 @@ public class Mouse_AI : MonoBehaviour
         public Building building;
     }
 
+    protected struct MouseTask
+    {
+        public MouseTemp mouse;
+        public Vector2Int position;
+    }
+
     public Mouse_AI() 
     {
         scrap_weight  = 0.5f;
@@ -47,6 +56,7 @@ public class Mouse_AI : MonoBehaviour
         overtime_multiple = 1.1f;
 
         tasks = new List<Task>();
+        mouse_tasks = new List<MouseTask>();
     }
 
     // GetVectors Updated by Iain    30/01/26 
@@ -99,6 +109,7 @@ public class Mouse_AI : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Z))
         {
             PickTasks();
+            PickMouseInBuilding();
         }
     }
 
@@ -110,6 +121,14 @@ public class Mouse_AI : MonoBehaviour
         rv.y = (int)position.z;
 
         return rv;
+    }
+
+    protected void FindBuildings()
+    {
+        factories = FindObjectsOfType(typeof(FactoryBuilding)) as FactoryBuilding[];
+        markets = FindObjectsOfType(typeof(CommercialBuilding)) as CommercialBuilding[];
+        tanks = FindObjectsOfType(typeof(MilkTank)) as MilkTank[];
+        collectors = FindObjectsOfType(typeof(MilkCollector)) as MilkCollector[];
     }
 
     protected bool TasksContainPosition(Vector2Int position)
@@ -253,16 +272,10 @@ public class Mouse_AI : MonoBehaviour
         //If lots of milk make cheese
         cheese_weight += milk_cheese;
 
-        FactoryBuilding[] factories = FindObjectsOfType(typeof(FactoryBuilding)) as FactoryBuilding[];
+        FindBuildings();
 
         CheckTasks(factories, Building.factory);
-
-        CommercialBuilding[] markets = FindObjectsOfType(typeof(CommercialBuilding)) as CommercialBuilding[];
-
         CheckTasks(markets, Building.market);
-
-        MilkTank[] tanks = FindObjectsOfType(typeof(MilkTank)) as MilkTank[];
-
         CheckTasks(tanks, Building.tank);
 
         if (tasks.Count > 0) 
@@ -286,10 +299,92 @@ public class Mouse_AI : MonoBehaviour
         return false;
     }
 
+    //Only use this funtion with MilkTanks or MilkCollectors
+    protected MouseTask CheckMilkContainer(Task task, ParentBuilding[] buildings, Building building)
+    {
+        float current_mag = float.MaxValue;
+        int index = 0;
+
+        MouseTask mouse_taks = new MouseTask();
+
+        if (buildings != null && buildings.Length > 0)
+        {
+            for (int i = 0; i < buildings.Length; i++)
+            {
+                IMilkContainer container;
+                switch (building)
+                {
+                    case Building.tank:
+                        container = (MilkTank)buildings[i];
+                        break;
+                    default:
+                        container = (MilkCollector)buildings[i];
+                        break;
+                }
+
+                if (container.CURRENT_MILK_AMOUNT >= task.amounts[0] && buildings[i].Mouse_occupants.Count > 0)
+                {
+                    float new_mag = (task.position - GetPosition(buildings[i].transform.position)).sqrMagnitude;
+                    if (new_mag < current_mag)
+                    {
+                        current_mag = new_mag;
+                        index = i;
+                    }
+                }
+            }
+
+            mouse_taks.mouse = buildings[index].Mouse_occupants[0];
+            mouse_taks.position = GetPosition(buildings[index].transform.position);
+
+            return mouse_taks;
+        }
+
+        mouse_taks.mouse = null;
+        return mouse_taks;
+    }
+    
+    protected MouseTask FindMilk(Task task)
+    {
+        MouseTask tank      = CheckMilkContainer(task, tanks, Building.tank);
+        MouseTask collector = CheckMilkContainer(task, collectors, Building.collector);
+
+        if (tank.mouse == null)
+        {
+            if (collector.mouse == null)
+                return new MouseTask(); //NULL
+            return collector;
+        }
+        else if (collector.mouse == null)
+            return tank;
+        //Checking which building is closser.
+        if ((task.position - tank.position).sqrMagnitude < (task.position - collector.position).sqrMagnitude)
+            return tank;
+        else
+            return collector;
+    }
+
     protected bool PickMouseInBuilding()
     {
+        for (int i = 0; i < tasks.Count; i++) 
+        {
+            switch (tasks[i].building)
+            {
+                case Building.factory:
+                    MouseTask factory_task = FindMilk(tasks[i]);
 
+                    if (factory_task.mouse != null)
+                        mouse_tasks.Add(factory_task);
+                    break;
+                case Building.tank:
+                    MouseTask tank_task = CheckMilkContainer(tasks[i], collectors, Building.collector);
 
+                    if (tank_task.mouse != null)
+                        mouse_tasks.Add(tank_task);
+                    break;
+            }
+        }
+        if (mouse_tasks.Count > 0)
+            return true;
         return false;
     }
 }
