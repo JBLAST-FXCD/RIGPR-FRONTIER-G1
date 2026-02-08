@@ -27,10 +27,10 @@ public class FactoryBuilding : ParentBuilding
     // per-tier sets (tier 1-3)
     private static readonly CheeseTypes[][] cheese_sets_by_tier =
     {
-    new[] { CheeseTypes.AmericanCheese, CheeseTypes.Cheddar, CheeseTypes.Mozzarella }, // Tier 1
-    new[] { CheeseTypes.Brie, CheeseTypes.Gouda },               // Tier 2
-    new[] { CheeseTypes.Parmesan, CheeseTypes.BlueCheese }       // Tier 3
-};
+        new[] { CheeseTypes.AmericanCheese, CheeseTypes.Cheddar, CheeseTypes.Mozzarella }, // Tier 1
+        new[] { CheeseTypes.Brie, CheeseTypes.Gouda },               // Tier 2
+        new[] { CheeseTypes.Parmesan, CheeseTypes.BlueCheese }       // Tier 3
+    };
 
 
 
@@ -74,7 +74,7 @@ public class FactoryBuilding : ParentBuilding
         if (ResourceManager.instance != null)
             ResourceManager.instance.RegisterOrUpdateFactoryCheeseType(this, produced_cheese_type);
 
-    count++;
+        count++;
         ConstructTier();
         RefreshAllowedCheesesForTier();
 
@@ -197,6 +197,8 @@ public class FactoryBuilding : ParentBuilding
             CheeseProduction();
         }
     }
+
+    // Created by Anthony - 08/02/2026
     private void RefreshAllowedCheesesForTier()
     {
         int tier_index = Mathf.Clamp(tier - 1, 0, cheese_sets_by_tier.Length - 1);
