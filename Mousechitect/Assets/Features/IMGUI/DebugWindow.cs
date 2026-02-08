@@ -128,8 +128,8 @@ namespace UImGui
         {
             if (ImGui.CollapsingHeader("Resource Manager"))
             {
-                ImGui.Text($"Current Scrap: {ResourceManager.instance.Scrap}");
-                ImGui.Text($"Current Cheese: {ResourceManager.instance.Cheese}");
+                //ImGui.Text($"Current Scrap: {ResourceManager.instance.Scrap}");
+                //ImGui.Text($"Current Cheese: {ResourceManager.instance.Cheese}");
 
                 ImGui.Separator();
 
@@ -138,14 +138,14 @@ namespace UImGui
 
                 if (ImGui.Button("Add Resources"))
                 {
-                    ResourceManager.instance.AddResources(scrap_input, cheese_input);
+                    //ResourceManager.instance.AddResources(scrap_input, cheese_input);
                 }
 
                 ImGui.SameLine();
 
                 if (ImGui.Button("Spend Resources"))
                 {
-                    ResourceManager.instance.SpendResources(scrap_input, cheese_input);
+                   // ResourceManager.instance.SpendResources(scrap_input, cheese_input);
                 }
             }
         } 

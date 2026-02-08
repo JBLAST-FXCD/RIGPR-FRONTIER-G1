@@ -6,6 +6,7 @@ TagManager:
   tags:
   - BuildingTest
   - MouseTemp
+  - Decoration
   layers:
   - Default
   - TransparentFX

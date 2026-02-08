@@ -18,13 +18,20 @@ public class FactoryBuilding : ParentBuilding
     [SerializeField] protected int[] scrap_costs;
     [SerializeField] private CheeseTypes produced_cheese_type = CheeseTypes.AmericanCheese;
 
-    [SerializeField]
-    private CheeseTypes[] allowed_cheese_types =
+    // Anthony - Tier based cheese selection
+    [SerializeField] private CheeseTypes selected_cheese = CheeseTypes.AmericanCheese;
+
+    // runtime allowed list for this tier
+    private CheeseTypes[] allowed_cheese_types;
+
+    // per-tier sets (tier 1-3)
+    private static readonly CheeseTypes[][] cheese_sets_by_tier =
     {
-    CheeseTypes.AmericanCheese,
-    CheeseTypes.Cheddar,
-    CheeseTypes.Mozzarella
+    new[] { CheeseTypes.AmericanCheese, CheeseTypes.Cheddar, CheeseTypes.Mozzarella }, // Tier 1
+    new[] { CheeseTypes.Brie, CheeseTypes.Gouda },               // Tier 2
+    new[] { CheeseTypes.Parmesan, CheeseTypes.BlueCheese }       // Tier 3
 };
+
 
 
     protected CheeseValues cheese_type;
@@ -69,6 +76,8 @@ public class FactoryBuilding : ParentBuilding
 
     count++;
         ConstructTier();
+        RefreshAllowedCheesesForTier();
+
     }
 
     protected override void Update()
@@ -137,6 +146,8 @@ public class FactoryBuilding : ParentBuilding
             building = Instantiate(building_prefab, gameObject.transform);
             factory_switch = true;
             this.GetComponent<BoxCollider>().center = building.transform.Find("EntrancePoint").localPosition;
+            RefreshAllowedCheesesForTier();
+
         }
     }
 
@@ -186,40 +197,51 @@ public class FactoryBuilding : ParentBuilding
             CheeseProduction();
         }
     }
+    private void RefreshAllowedCheesesForTier()
+    {
+        int tier_index = Mathf.Clamp(tier - 1, 0, cheese_sets_by_tier.Length - 1);
+        allowed_cheese_types = cheese_sets_by_tier[tier_index];
+
+        // Clamp selection if it's not valid for this tier
+        bool valid = false;
+        for (int i = 0; i < allowed_cheese_types.Length; i++)
+        {
+            if (allowed_cheese_types[i] == selected_cheese) { valid = true; break; }
+        }
+
+        if (!valid)
+            selected_cheese = allowed_cheese_types[0];
+
+        // Sync internal recipe values with selected cheese
+        SelectCheese(selected_cheese);
+
+        // If you're using the active variety registry, keep it updated
+        if (ResourceManager.instance != null)
+            ResourceManager.instance.RegisterOrUpdateFactoryCheeseType(this, selected_cheese);
+    }
 
     // Updates by Anthony - 05/02/2026
     // Cycles this factory's currently selected cheese type (per-factory, not global).
     // Also syncs the internal recipe data and informs ResourceManager so ACTIVE variety updates correctly.
     public void CycleCheeseType()
     {
-        // Safety: no allowed types means there's nothing to cycle.
         if (allowed_cheese_types == null || allowed_cheese_types.Length == 0)
-            return;
+            RefreshAllowedCheesesForTier();
 
-        CheeseTypes before = produced_cheese_type;
-
-        // Find current type index in the allowed list.
+        // Find current index
         int idx = 0;
         for (int i = 0; i < allowed_cheese_types.Length; i++)
-        {
-            if (allowed_cheese_types[i] == produced_cheese_type)
-            {
-                idx = i;
-                break;
-            }
-        }
+            if (allowed_cheese_types[i] == selected_cheese) { idx = i; break; }
 
-        // Wrap around to the start once we hit the end.
-        produced_cheese_type = allowed_cheese_types[(idx + 1) % allowed_cheese_types.Length];
+        CheeseTypes before = selected_cheese;
+        selected_cheese = allowed_cheese_types[(idx + 1) % allowed_cheese_types.Length];
 
-        // Keep the internal cheese recipe selection in sync with the enum.
-        SelectCheese(produced_cheese_type);
+        SelectCheese(selected_cheese);
 
-        Debug.Log($"[Factory] {name} switched {before} -> {produced_cheese_type}");
+        Debug.Log($"[Factory] {name} switched {before} -> {selected_cheese}");
 
-        // Update active cheese variety tracking (used by morale food variety).
         if (ResourceManager.instance != null)
-            ResourceManager.instance.RegisterOrUpdateFactoryCheeseType(this, produced_cheese_type);
+            ResourceManager.instance.RegisterOrUpdateFactoryCheeseType(this, selected_cheese);
     }
 
     private void OnDisable()

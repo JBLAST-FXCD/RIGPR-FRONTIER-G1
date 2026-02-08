@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 7325929844063357201}
   - component: {fileID: 1585414506169690146}
   - component: {fileID: 2824112730333103816}
-  - component: {fileID: 8260932522183064223}
   m_Layer: 0
   m_Name: Visual
   m_TagString: BuildingTest
@@ -66,7 +65,7 @@ MonoBehaviour:
   tier: 1
   scrap_costs: 0500000005000000
   produced_cheese_type: 0
-  allowed_cheese_types: 000000000100000002000000
+  selected_cheese: 0
 --- !u!65 &2824112730333103816
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -88,19 +87,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 2, z: 1}
   m_Center: {x: 0, y: 1, z: 0}
---- !u!114 &8260932522183064223
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5237173748113084862}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c8a1c56b5088c2a4590265abcf623543, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  types_for_max_score: 3
 --- !u!1 &6884297326217601079
 GameObject:
   m_ObjectHideFlags: 0
