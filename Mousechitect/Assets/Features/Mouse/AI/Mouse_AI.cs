@@ -45,6 +45,7 @@ public class Mouse_AI : MonoBehaviour
     {
         public MouseTemp mouse;
         public Vector2Int position;
+        public int task_index;
     }
 
     public Mouse_AI() 
@@ -63,16 +64,8 @@ public class Mouse_AI : MonoBehaviour
     // GetVectors Updated by Anthony 23/01/26 
     public void GetVectors(ParentBuilding building, MouseTemp mouse)
     {
-        //Try to use the entrance point (preferred for pathfinding)
-        Transform entrance = building.Building.transform.Find("EntrancePoint");
-
-        Vector3 target_world = (entrance != null) ? entrance.position : building.transform.position;
-
         //Convert world space to grid coordinates
-        Vector2Int building_loc = new Vector2Int(
-            Mathf.RoundToInt(target_world.x),
-            Mathf.RoundToInt(target_world.z)
-        );
+        Vector2Int building_loc = GetPosition(building);
 
         //Allows mice to check caculated speed against current grid.
         mouse.Grid_manager = grid_manager;
@@ -85,11 +78,11 @@ public class Mouse_AI : MonoBehaviour
 
         //Caculate path.
         pathfinding.Grid_manager = grid_manager;
-        mouse.Path = pathfinding.Pathfinding(mouse_loc, building_loc);
+        mouse.Path = pathfinding.CreatePath(mouse_loc, building_loc);
 
         //LERP mouse if fail start pathfinding again.
         if (mouse.Path != null)
-            StartCoroutine(mouse.FollowPath( (success) => { if (success == false) { mouse.Path = pathfinding.Pathfinding(mouse_loc, building_loc); } }));
+            StartCoroutine(mouse.FollowPath( (success) => { if (success == false) { mouse.Path = pathfinding.CreatePath(mouse_loc, building_loc); } }));
     }
 
     // Update is called once per frame
@@ -110,17 +103,24 @@ public class Mouse_AI : MonoBehaviour
         {
             PickTasks();
             PickMouseInBuilding();
+            MoveSingleRoute();
         }
     }
 
-    protected Vector2Int GetPosition(Vector3 position)
+    protected Vector2Int GetPosition(ParentBuilding building)
     {
-        Vector2Int rv = new Vector2Int();
+        //Try to use the entrance point (preferred for pathfinding)
+        Transform entrance = building.Building.transform.Find("EntrancePoint");
 
-        rv.x = (int)position.x;
-        rv.y = (int)position.z;
+        Vector3 target_world = (entrance != null) ? entrance.position : building.transform.position;
 
-        return rv;
+        //Convert world space to grid coordinates
+        Vector2Int building_loc = new Vector2Int(
+            Mathf.RoundToInt(target_world.x),
+            Mathf.RoundToInt(target_world.z)
+        );
+
+        return building_loc;
     }
 
     protected void FindBuildings()
@@ -210,7 +210,7 @@ public class Mouse_AI : MonoBehaviour
         {
             for (int i = 0; i < buildings.Length; i++)
             {
-                Vector2Int position = GetPosition(buildings[i].transform.position);
+                Vector2Int position = GetPosition(buildings[i]);
 
                 //Weight gets upadted if the task exsists else create task
                 if (TasksContainPosition(position) == false)
@@ -324,7 +324,7 @@ public class Mouse_AI : MonoBehaviour
 
                 if (container.CURRENT_MILK_AMOUNT >= task.amounts[0] && buildings[i].Mouse_occupants.Count > 0)
                 {
-                    float new_mag = (task.position - GetPosition(buildings[i].transform.position)).sqrMagnitude;
+                    float new_mag = (task.position - GetPosition(buildings[i])).sqrMagnitude;
                     if (new_mag < current_mag)
                     {
                         current_mag = new_mag;
@@ -334,7 +334,7 @@ public class Mouse_AI : MonoBehaviour
             }
 
             mouse_taks.mouse = buildings[index].Mouse_occupants[0];
-            mouse_taks.position = GetPosition(buildings[index].transform.position);
+            mouse_taks.position = GetPosition(buildings[index]);
 
             return mouse_taks;
         }
@@ -373,18 +373,61 @@ public class Mouse_AI : MonoBehaviour
                     MouseTask factory_task = FindMilk(tasks[i]);
 
                     if (factory_task.mouse != null)
+                    {
+                        factory_task.task_index = i;
                         mouse_tasks.Add(factory_task);
+                    }
                     break;
                 case Building.tank:
                     MouseTask tank_task = CheckMilkContainer(tasks[i], collectors, Building.collector);
 
                     if (tank_task.mouse != null)
+                    {
+                        tank_task.task_index = i;
                         mouse_tasks.Add(tank_task);
+                    }
                     break;
             }
         }
         if (mouse_tasks.Count > 0)
             return true;
+        return false;
+    }
+
+    protected bool MoveSingleRoute()
+    {
+        for (int i = mouse_tasks.Count - 1; i >= 0; i--)
+        {
+            MouseTemp mouse = mouse_tasks[i].mouse;
+            mouse.Path = null;
+
+            //Convert world space to grid coordinates
+            Vector2Int mouse_loc = new Vector2Int(
+                Mathf.RoundToInt(mouse.transform.position.x),
+                Mathf.RoundToInt(mouse.transform.position.z)
+            );
+
+            Vector2Int building_loc = tasks[mouse_tasks[i].task_index].position;
+
+            mouse.Path = pathfinding.FindPath(mouse_tasks[i].position, building_loc);
+
+            if (mouse.Path == null)
+                mouse.Path = pathfinding.CreatePath(mouse_loc, building_loc);
+
+            //LERP mouse if fail start pathfinding again.
+            if (mouse.Path != null)
+                StartCoroutine(mouse.FollowPath((success) => { 
+                    if (success == false)
+                    { 
+                        mouse.Path = pathfinding.CreatePath(mouse_loc, building_loc); 
+                    }
+                    else 
+                    {
+                        pathfinding.SavePath(mouse_loc, building_loc, mouse.Path);
+                    }
+                }));
+        }
+
         return false;
     }
 }
