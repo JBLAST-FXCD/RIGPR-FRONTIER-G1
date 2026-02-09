@@ -16,13 +16,12 @@ public class ResourceManager : MonoBehaviour, ISaveable
     [Header("Current Resources")]
     protected static int scrap  = INITIAL_SCRAP;
     protected static int cheese = 0;
-    protected static int money  = 0; // added temp as forgotten
+    protected static int money  = 0;
 
     [Header("UI References")]
     public TextMeshProUGUI scrap_text;
     public TextMeshProUGUI cheese_text;
 
-    // Checks if player can afford a specific purchase.
     public bool CanAfford(int scrap_cost, int cheese_cost)
     {
         if (scrap >= scrap_cost && cheese >= cheese_cost)
