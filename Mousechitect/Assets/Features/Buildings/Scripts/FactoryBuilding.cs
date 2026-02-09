@@ -146,6 +146,8 @@ public class FactoryBuilding : ParentBuilding
             building = Instantiate(building_prefab, gameObject.transform);
             factory_switch = true;
             this.GetComponent<BoxCollider>().center = building.transform.Find("EntrancePoint").localPosition;
+            RefreshAllowedCheesesForTier();
+
         }
     }
 
