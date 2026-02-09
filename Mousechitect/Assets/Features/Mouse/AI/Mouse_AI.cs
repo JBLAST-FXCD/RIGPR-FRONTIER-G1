@@ -25,7 +25,7 @@ public class Mouse_AI : MonoBehaviour
     protected ResourceManager resources;
 
     protected List<Task> tasks;
-    protected List<MouseTask> mouse_tasks;
+    protected Dictionary<int, MouseTemp> mice;
 
     protected enum Building
     {
@@ -41,13 +41,6 @@ public class Mouse_AI : MonoBehaviour
         public Building building;
     }
 
-    protected struct MouseTask
-    {
-        public MouseTemp mouse;
-        public Vector2Int position;
-        public int task_index;
-    }
-
     public Mouse_AI() 
     {
         scrap_weight  = 0.5f;
@@ -57,7 +50,7 @@ public class Mouse_AI : MonoBehaviour
         overtime_multiple = 1.1f;
 
         tasks = new List<Task>();
-        mouse_tasks = new List<MouseTask>();
+        mice = new Dictionary<int, MouseTemp>();
     }
 
     // GetVectors Updated by Iain    30/01/26 
@@ -104,6 +97,7 @@ public class Mouse_AI : MonoBehaviour
             PickTasks();
             PickMouseInBuilding();
             MoveSingleRoute();
+            Pathfinding();
         }
     }
 
@@ -285,7 +279,7 @@ public class Mouse_AI : MonoBehaviour
             {
                 for (int j = 0; j < tasks.Count - i -1; j++)
                 {
-                    if (tasks[j].weight < tasks[j + 1].weight) 
+                    if (tasks[j].weight > tasks[j + 1].weight) 
                     {
                         Task temp = tasks[j];
                         tasks[j] = tasks[j + 1];
@@ -300,12 +294,12 @@ public class Mouse_AI : MonoBehaviour
     }
 
     //Only use this funtion with MilkTanks or MilkCollectors
-    protected MouseTask CheckMilkContainer(Task task, ParentBuilding[] buildings, Building building)
+    protected MouseTemp CheckMilkContainer(Task task, ParentBuilding[] buildings, Building building)
     {
         float current_mag = float.MaxValue;
         int index = 0;
 
-        MouseTask mouse_taks = new MouseTask();
+        MouseTemp mouse_taks = new MouseTemp();
 
         if (buildings != null && buildings.Length > 0)
         {
@@ -333,101 +327,93 @@ public class Mouse_AI : MonoBehaviour
                 }
             }
 
-            mouse_taks.mouse = buildings[index].Mouse_occupants[0];
-            mouse_taks.position = GetPosition(buildings[index]);
-
+            mouse_taks = buildings[index].Mouse_occupants[0];
             return mouse_taks;
         }
 
-        mouse_taks.mouse = null;
+        mouse_taks = null;
         return mouse_taks;
     }
     
-    protected MouseTask FindMilk(Task task)
+    protected MouseTemp FindMilk(Task task)
     {
-        MouseTask tank      = CheckMilkContainer(task, tanks, Building.tank);
-        MouseTask collector = CheckMilkContainer(task, collectors, Building.collector);
+        MouseTemp mouse_tank      = CheckMilkContainer(task, tanks, Building.tank);
+        MouseTemp mouse_collector = CheckMilkContainer(task, collectors, Building.collector);
 
-        if (tank.mouse == null)
+        if (mouse_tank == null)
         {
-            if (collector.mouse == null)
-                return new MouseTask(); //NULL
-            return collector;
+            if (mouse_collector == null)
+                return null;
+            return mouse_collector;
         }
-        else if (collector.mouse == null)
-            return tank;
+        else if (mouse_collector == null)
+            return mouse_tank;
         //Checking which building is closser.
-        if ((task.position - tank.position).sqrMagnitude < (task.position - collector.position).sqrMagnitude)
-            return tank;
+        if ((task.position - mouse_tank.Position).sqrMagnitude < (task.position - mouse_collector.Position).sqrMagnitude)
+            return mouse_tank;
         else
-            return collector;
+            return mouse_collector;
     }
 
     protected bool PickMouseInBuilding()
     {
-        for (int i = 0; i < tasks.Count; i++) 
+        for (int i = tasks.Count - 1; i >= 0; i--) 
         {
             switch (tasks[i].building)
             {
                 case Building.factory:
-                    MouseTask factory_task = FindMilk(tasks[i]);
+                    MouseTemp factory_mouse = FindMilk(tasks[i]);
 
-                    if (factory_task.mouse != null)
-                    {
-                        factory_task.task_index = i;
-                        mouse_tasks.Add(factory_task);
-                    }
+                    if (factory_mouse != null)
+                        mice.Add(i, factory_mouse);
                     break;
                 case Building.tank:
-                    MouseTask tank_task = CheckMilkContainer(tasks[i], collectors, Building.collector);
+                    MouseTemp tank_mouse = CheckMilkContainer(tasks[i], collectors, Building.collector);
 
-                    if (tank_task.mouse != null)
-                    {
-                        tank_task.task_index = i;
-                        mouse_tasks.Add(tank_task);
-                    }
+                    if (tank_mouse != null)
+                        mice.Add(i, tank_mouse);
                     break;
             }
         }
-        if (mouse_tasks.Count > 0)
+        if (mice.Count > 0)
             return true;
         return false;
     }
 
     protected bool MoveSingleRoute()
     {
-        for (int i = mouse_tasks.Count - 1; i >= 0; i--)
+        foreach (var (key, value) in mice)
         {
-            MouseTemp mouse = mouse_tasks[i].mouse;
-            mouse.Path = null;
+            value.Path = null;
 
-            //Convert world space to grid coordinates
-            Vector2Int mouse_loc = new Vector2Int(
-                Mathf.RoundToInt(mouse.transform.position.x),
-                Mathf.RoundToInt(mouse.transform.position.z)
-            );
+            value.Path = pathfinding.FindPath(value.Position, tasks[key].position);
 
-            Vector2Int building_loc = tasks[mouse_tasks[i].task_index].position;
-
-            mouse.Path = pathfinding.FindPath(mouse_tasks[i].position, building_loc);
-
-            if (mouse.Path == null)
-                mouse.Path = pathfinding.CreatePath(mouse_loc, building_loc);
-
-            //LERP mouse if fail start pathfinding again.
-            if (mouse.Path != null)
-                StartCoroutine(mouse.FollowPath((success) => { 
-                    if (success == false)
-                    { 
-                        mouse.Path = pathfinding.CreatePath(mouse_loc, building_loc); 
-                    }
-                    else 
-                    {
-                        pathfinding.SavePath(mouse_loc, building_loc, mouse.Path);
-                    }
-                }));
+            if (value.Path == null)
+                value.Path = pathfinding.CreatePath(value.Position, tasks[key].position);
         }
 
         return false;
+    } 
+
+    protected void Pathfinding()
+    {
+        foreach (var (key, value) in mice) 
+        {
+            MouseTemp mouse = value;
+            Vector2Int building_loc = mouse.Path[mouse.Path.Count - 1].postion;
+
+            if (mouse.Path != null)
+                StartCoroutine(mouse.FollowPath((success) =>
+                {
+                    if (success == false)
+                    {
+                        mouse.Path = pathfinding.CreatePath(mouse.Position, building_loc);
+                    }
+                    else
+                    {
+                        pathfinding.SavePath(mouse.Position, building_loc, mouse.Path);
+                    }
+                }));
+        }
     }
 }

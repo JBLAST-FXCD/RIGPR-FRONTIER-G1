@@ -15,6 +15,7 @@ public class MouseTemp : MonoBehaviour
 
     public string Mouse_id { get { return mouse_id; } }
 
+    public Vector2Int Position { get { return new Vector2Int((int)this.transform.position.x, (int)this.transform.position.z); } }
     public List<BaseNode> Path { get { return path; } set { path = value; } }
     public GridManager Grid_manager { set { grid_manager = value; } }
 
