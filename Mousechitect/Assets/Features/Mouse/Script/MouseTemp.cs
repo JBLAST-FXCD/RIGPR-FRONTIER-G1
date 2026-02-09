@@ -9,15 +9,25 @@ public class MouseTemp : MonoBehaviour
 
     //Varibles for paths and LERP.
     protected List<BaseNode> path;
+    protected bool moving;
 
     //Grind manager is for checking calulated speed vs current speed.
-    protected GridManager grid_manager;
+    protected static GridManager grid_manager;
+
+    protected ParentBuilding home;
 
     public string Mouse_id { get { return mouse_id; } }
 
     public Vector2Int Position { get { return new Vector2Int((int)this.transform.position.x, (int)this.transform.position.z); } }
+    public bool Moving { get { return moving; } set { moving = value; } }
     public List<BaseNode> Path { get { return path; } set { path = value; } }
-    public GridManager Grid_manager { set { grid_manager = value; } }
+    public static GridManager Grid_manager { set { grid_manager = value; } }
+    public ParentBuilding Home { get { return home; } set { home = value; } }
+
+    public MouseTemp() 
+    {
+        moving = false;
+    }
 
     protected int SetRotation(Vector3 current_loc, Vector3 new_loc)
     {
@@ -45,6 +55,9 @@ public class MouseTemp : MonoBehaviour
 
             if (path[i].speed == speed)
             {
+                if(speed == 0)
+                    speed = 1;
+
                 float time_elapsed = 0;
 
                 while (this.transform.position != new_loc)

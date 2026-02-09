@@ -91,7 +91,9 @@ public class ParentBuilding : MonoBehaviour
         if (other != null && other.tag == "MouseTemp" && mouse_occupants.Count < capacity)
         {
             other.transform.gameObject.SetActive(false);
-            mouse_occupants.Add(other.gameObject.GetComponent<MouseTemp>());
+            MouseTemp mouse = other.gameObject.GetComponent<MouseTemp>();
+            mouse_occupants.Add(mouse);
+            mouse.Home = this;
         }
     }
 
