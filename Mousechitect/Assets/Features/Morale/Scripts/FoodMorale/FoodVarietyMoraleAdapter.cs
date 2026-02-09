@@ -7,7 +7,7 @@ using UnityEngine;
 // ACTIVE variety = number of distinct cheese types currently selected across all factories.
 public class FoodVarietyMoraleAdapter : MonoBehaviour, IMoraleContributor
 {
-    [SerializeField] private int types_for_max_score = 3; // Simple factory era (American/Cheddar/Mozzarella)
+    [SerializeField] private int types_for_max_score = 7; // total CheeseTypes
 
     public MORALE_CONTRIBUTOR_TYPE GetContributorType()
     {
