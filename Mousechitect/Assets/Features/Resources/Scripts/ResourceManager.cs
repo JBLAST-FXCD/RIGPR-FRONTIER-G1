@@ -17,9 +17,9 @@ public class ResourceManager : MonoBehaviour, ISaveable
     public static ResourceManager instance;
 
     [Header("Current Resources")]
-    protected static int scrap  = INITIAL_SCRAP;
-    protected static int total_cheese = 0;
-    protected static int money  = 0; // added temp as forgotten
+    protected static int scrap = INITIAL_SCRAP;
+    protected static int total_cheese = 1;
+    protected static int money = 0; // added temp as forgotten
     protected static Dictionary<CheeseTypes, int> cheeses;
 
     [Header("UI References")]
@@ -32,6 +32,8 @@ public class ResourceManager : MonoBehaviour, ISaveable
     // cheese type -> how many factories currently set to it
     private readonly Dictionary<CheeseTypes, int> active_type_counts = new Dictionary<CheeseTypes, int>();
 
+    public int Scrap { get { return scrap; } }
+    public int Total_cheese { get {return total_cheese; } }
 
     // Checks if player can afford a specific purchase based on cheese type.
     public bool CanAfford(int scrap_cost, CheeseTypes key, int cheese_amount)
@@ -250,5 +252,4 @@ public class ResourceManager : MonoBehaviour, ISaveable
     {
         return active_type_counts.Count;
     }
-
 }

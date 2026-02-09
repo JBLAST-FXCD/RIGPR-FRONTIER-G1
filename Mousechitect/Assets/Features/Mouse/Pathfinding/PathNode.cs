@@ -43,7 +43,7 @@ public class PathNode
 
         this.node.postion = postion;
         this.searched = cell_speed > 0 ? false : true;
-        this.node.speed = cell_speed > 0 ? cell_speed : 1;
+        this.node.speed = cell_speed;
         this.cost = (int)(1 / node.speed * 100.0f);
         this.total_cost = int.MaxValue;
         this.previous_node = null;

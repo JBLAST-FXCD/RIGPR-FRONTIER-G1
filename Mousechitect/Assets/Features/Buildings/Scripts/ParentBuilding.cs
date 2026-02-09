@@ -24,6 +24,7 @@ public class ParentBuilding : MonoBehaviour
 
     public int Tier { get { return tier; } }
     public GameObject Building { get { return building; } }
+    public List<MouseTemp> Mouse_occupants { get { return mouse_occupants; } }
 
     public ParentBuilding()
     {
@@ -32,7 +33,7 @@ public class ParentBuilding : MonoBehaviour
         capacity = 0;
     }
 
-    void Start()
+    protected virtual void Start()
     {
         ConstructTier();
     }
@@ -85,12 +86,14 @@ public class ParentBuilding : MonoBehaviour
     }
 
     //Mouse is storded and turned off to make effetivly inside the building.
-    protected void OnTriggerStay(Collider other)
+    protected virtual void OnTriggerStay(Collider other)
     {
         if (other != null && other.tag == "MouseTemp" && mouse_occupants.Count < capacity)
         {
             other.transform.gameObject.SetActive(false);
-            mouse_occupants.Add(other.gameObject.GetComponent<MouseTemp>());
+            MouseTemp mouse = other.gameObject.GetComponent<MouseTemp>();
+            mouse_occupants.Add(mouse);
+            mouse.Home = this;
         }
     }
 

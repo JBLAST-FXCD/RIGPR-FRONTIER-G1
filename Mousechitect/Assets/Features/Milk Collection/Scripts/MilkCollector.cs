@@ -9,7 +9,7 @@ using UnityEngine;
 // handles milk production and overflow to tanks when full.
 // logic for placement constraints still needs to be added.
 // </summary>
-public class MilkCollector : MonoBehaviour, IMilkContainer
+public class MilkCollector : ParentBuilding, IMilkContainer
 {
     public float production_interval = 10.0f;
     public int max_milk_capacity = 20;
@@ -23,13 +23,15 @@ public class MilkCollector : MonoBehaviour, IMilkContainer
     public int MAX_MILK_CAPACITY { get => max_milk_capacity; set => max_milk_capacity = value; }
     public bool IS_TANK => false;
 
-    private void Start()
+    protected new void Start()
     {
         // register with milk manager
         MilkManager.Instance.RegisterContainer(this);
+
+        ConstructTier();
     }
 
-    private void Update()
+    protected new void Update()
     {
         timer += Time.deltaTime;
         if (timer >= production_interval)
@@ -37,6 +39,12 @@ public class MilkCollector : MonoBehaviour, IMilkContainer
             ProduceMilk();
             timer = 0f;
         }
+    }
+
+    protected new void OnTriggerStay(Collider other)
+    {
+        if (other != null && other.tag == "MouseTemp" && mouse_occupants.Count < capacity)
+            mouse_occupants.Add(other.gameObject.GetComponent<MouseTemp>());
     }
 
     private void ProduceMilk()

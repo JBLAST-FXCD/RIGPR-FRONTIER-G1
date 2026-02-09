@@ -1,8 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 // Iain Benner 05/12/2025
@@ -18,7 +16,6 @@ public class CommercialBuilding : ParentBuilding
 
     //For selling
     protected CheeseTypes[] keys;
-    protected int[] cheese_amounts;
 
     //Numbers for PopularityAlgorithm()
     protected int cheese_types;
@@ -35,10 +32,6 @@ public class CommercialBuilding : ParentBuilding
 
     [SerializeField] protected float mini_sell_delay;
     [SerializeField] protected float max_sell_delay;
-
-    public float[] Cheese_popularity { get { return cheese_popularity; } }
-    public int[] Cheese_amounts { get { return cheese_amounts; } }
-
 
     CommercialBuilding() 
     {
@@ -63,14 +56,23 @@ public class CommercialBuilding : ParentBuilding
         max_sell_delay  = 20;
     }
 
+    public int CheeseAmount(CheeseTypes cheese)
+    {
+        int rv = population / 10 * (int)cheese_popularity[(int)cheese] / mini_percent;
+
+        return rv;
+    }
+
     // Start is called before the first frame update
-    void Start()
+    protected new void Start()
     {
         UnityEngine.Random.InitState((int)DateTime.Now.Ticks);
 
         //These funtions are looped infinitely per GDD
         RecalculatePopularity();
         SellDelay();
+
+        ConstructTier();
     }
 
     //The maximum range is limited to prevent any element of the array from having a disproportionate chance of being the maximum number,
@@ -163,19 +165,21 @@ public class CommercialBuilding : ParentBuilding
     {
         ResourceManager resources = ResourceManager.instance;
 
-        for (int i = 0; i <= keys.Length - 1; i++)
+        if (keys != null)
         {
-            int units = population / 10 * (int)cheese_popularity[i] / mini_percent;
-
-            if(resources.CanAfford(keys[i], units) == true)
+            for (int i = 0; i <= keys.Length - 1; i++)
             {
-                //Later replace scrap and cheese with global scrap and cheese counter
-                resources.SpendResources(keys[i], units);
-                resources.AddResources(Cheese.GetCheese(keys[i]).scrap_price * units);
-            }
+                int units = population / 10 * (int)cheese_popularity[i] / mini_percent;
 
-            //Repeat loop of selling cheese
-            SellDelay();
+                if (resources.CanAfford(keys[i], units) == true)
+                {
+                    //Later replace scrap and cheese with global scrap and cheese counter
+                    resources.SpendResources(keys[i], units);
+                    resources.AddResources(Cheese.GetCheese(keys[i]).scrap_price * units);
+                }
+            }
         }
+        //Repeat loop of selling cheese
+        SellDelay();
     }
 }

@@ -113,35 +113,11 @@ public class PathFinding: MonoBehaviour, ISaveable
             route.Add(new BaseNode(current_node.Previous_node.Postion, current_node.Previous_node.Speed));
             current_node = current_node.Previous_node;
         }
-
-        //Save
-        string key = GenKey(mouse, building);
-        solutions.Add(key, route);
-
         return route;
     }
 
-    public List<BaseNode> Pathfinding(Vector2Int mouse, Vector2Int building)
+    public List<BaseNode> CreatePath(Vector2Int mouse, Vector2Int building)
     {
-        //Load route if it been calculated before.
-        List<BaseNode> route;
-        string key = GenKey(mouse, building);
-        if (solutions.TryGetValue(key, out route))
-        {
-            //If the player makes a faster path it will never be used unless the old paths are deleted.
-            //Making the grid update solution is really exspenive so it removes any route.
-            if(uses >= max_uses)
-            {
-                solutions.Remove(key);
-                uses = 0;
-            }
-            else
-            {
-                uses++;
-                return route;
-            }
-        }
-
         start = mouse;
         end = building;
 
@@ -284,6 +260,36 @@ public class PathFinding: MonoBehaviour, ISaveable
         //If route can't be found mouse need to sleep as per GDD.
         else
             return null;
+    }
+
+    public List<BaseNode> FindPath(Vector2Int mouse, Vector2Int building)
+    {
+        //Load route if it been calculated before.
+        List<BaseNode> route;
+        string key = GenKey(mouse, building);
+        if (solutions.TryGetValue(key, out route))
+        {
+            //If the player makes a faster path it will never be used unless the old paths are deleted.
+            //Making the grid update solution is really exspenive so it removes any route.
+            if (uses >= max_uses)
+            {
+                solutions.Remove(key);
+                uses = 0;
+            }
+            else
+            {
+                uses++;
+                return route;
+            }
+        }
+        return null;
+    }
+
+    public void SavePath(Vector2Int mouse, Vector2Int building, List<BaseNode> route)
+    {
+        //Save
+        string key = GenKey(mouse, building);
+        solutions.Add(key, route);
     }
 
     public void PopulateSaveData(GameData data)

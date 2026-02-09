@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 6619350289366639286}
   - component: {fileID: -1026952941364474196}
   m_Layer: 7
-  m_Name: Research
+  m_Name: Milk_Tank
   m_TagString: BuildingTest
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -73,7 +73,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1168417078644091933}
   - component: {fileID: 6161857000941117472}
-  - component: {fileID: 2874309724266305907}
+  - component: {fileID: 4547657291178316864}
   - component: {fileID: 2865412012560817843}
   m_Layer: 0
   m_Name: Visual
@@ -109,7 +109,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16e22c5c2d6f8da43943441c74c5da29, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &2874309724266305907
+--- !u!114 &4547657291178316864
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -118,13 +118,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 5524697949827919020}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 268fffade4c462740a2506d4bda7c6c6, type: 3}
+  m_Script: {fileID: 11500000, guid: f33aeeff351516e4295861087724b8ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   building_prefabs:
   - {fileID: 8190863958714023708, guid: f6342fb014e077148bfa251aa1582b9d, type: 3}
-  capacitys: 20000000
+  capacitys: 01000000
   tier: 1
+  max_capacity: 50
+  current_milk_amount: 0
 --- !u!65 &2865412012560817843
 BoxCollider:
   m_ObjectHideFlags: 0
