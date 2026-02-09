@@ -8,6 +8,7 @@ using UnityEngine;
 public class NewUserInterfaceManager : MonoBehaviour
 {
     // Manager for the NUI (New User Interface)
+    // <-- Joe, 09/02/2005
 
     // --- References ---
     
@@ -215,5 +216,5 @@ public class NewUserInterfaceManager : MonoBehaviour
         UpdateCategory(previous_category);
     }
 
-    // <-- Joe, 09/02/2005
+   
 }
