@@ -77,6 +77,8 @@ public class FactoryBuilding : ParentBuilding
 
         count++;
         ConstructTier();
+        RefreshAllowedCheesesForTier();
+
     }
 
     protected override void Update()
@@ -109,7 +111,7 @@ public class FactoryBuilding : ParentBuilding
     }
 
     //for player to select cheese
-    protected void SelectCheese(CheeseTypes input) 
+    protected void SelectCheese(CheeseTypes input)
     {
         cheese_type = Cheese.GetCheese(input);
     }
@@ -117,9 +119,8 @@ public class FactoryBuilding : ParentBuilding
     protected override void TierSelection()
     {
         building_prefab = building_prefabs[tier - 1];
-        capacity        = capacitys[tier - 1];
-        scrap_cost      = scrap_costs[tier - 1];
-        milk_capasity   = milk_capasitys[tier - 1];
+        capacity = capacitys[tier - 1];
+        scrap_cost = scrap_costs[tier - 1];
     }
 
     //Delay is hard coded because theres variation in the GDD
