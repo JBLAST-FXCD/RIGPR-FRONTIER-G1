@@ -8,7 +8,7 @@ using UnityEngine;
 public class NewUserInterfaceManager : MonoBehaviour
 {
     // Manager for the NUI (New User Interface)
-    // <-- Joe, 09/02/2005
+    // Created by Joe Mcdonnell, 09/02/2026
 
     // --- References ---
     
