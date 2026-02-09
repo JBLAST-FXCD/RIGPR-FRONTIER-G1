@@ -1,7 +1,8 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-//// Hani Hailston 14/12/2025
+// Updated by Iain Benner 02/02/2026
+// Hani Hailston 14/12/2025
 
 /// <summary>
 /// Abstract Base Class for the upgrade system, so attach ResidentialUpgradeHandler, CommercialUpgradeHandler etc. to buildings instead.
@@ -34,9 +35,9 @@ public abstract class BuildingUpgradeHandler : MonoBehaviour, ISaveable
             return false;
         }
 
-        if (ResourceManager.instance.CanAfford(upgrade.scrap_cost, upgrade.cheese_cost))
+        if (ResourceManager.instance.CanAfford(upgrade.scrap_cost, upgrade.type, upgrade.cheese_amount))
         {
-            ResourceManager.instance.SpendResources(upgrade.scrap_cost, upgrade.cheese_cost);
+            ResourceManager.instance.SpendResources(upgrade.scrap_cost, upgrade.type, upgrade.cheese_amount);
 
             UnlockedUpgradeIDs.Add(upgrade.upgrade_id);
 

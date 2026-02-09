@@ -94,6 +94,13 @@ public class BuildingManager : MonoBehaviour, ISaveable
     public event Action<GameObject> building_placed;
     public event Action<string> building_removed;
 
+    // --- Joe 03/02/2026
+    // Added a broadcast function to communicate to the NUI when is_build_mode_active is false
+    // Broadcasts are independent connections and can fail silently on both ends, keeping this script modular.
+    public delegate void UpdateNUI();
+    public event UpdateNUI UpdateBuildPanel;
+    // ---
+
 
     private void Update()
     {
@@ -588,6 +595,15 @@ public class BuildingManager : MonoBehaviour, ISaveable
             Debug.Log($"Entrance cell {entrance_cell} speed now {grid_manager.GetCellMoveSpeed(entrance_cell)}");
         }
 
+        // If this placed object is a decoration, register its grid cell for synergy checks
+        Decoration decor = current_building.GetComponentInChildren<Decoration>();
+        if (decor != null && placed_data.occupied_cells.Count > 0 && DecorRegistry.Instance != null)
+        {
+            // Use first occupied cell as the decor “anchor”
+            DecorRegistry.Instance.UpdateCell(decor, placed_data.occupied_cells[0]);
+        }
+
+
         current_building = null;
         current_building_collider = null;
         covered_cells.Clear();
@@ -606,6 +622,11 @@ public class BuildingManager : MonoBehaviour, ISaveable
         {
             // Leave build mode (this will also hide the build panel via BuildModeUI)
             BuildMode(false);
+            if (UpdateBuildPanel != null)
+            {
+                UpdateBuildPanel(); //Broadcasts to NUI - will not fail if unsuccessful
+            }
+            
         }
     }
 
@@ -786,6 +807,13 @@ public class BuildingManager : MonoBehaviour, ISaveable
 
             // Restore speed modifiers for pathfinding
             grid_manager.SetPathOnCells(placed.occupied_cells, placed.speed_modifier);
+
+            Decoration decor = new_building.GetComponentInChildren<Decoration>();
+            if (decor != null && placed.occupied_cells.Count > 0 && DecorRegistry.Instance != null)
+            {
+                DecorRegistry.Instance.UpdateCell(decor, placed.occupied_cells[0]);
+            }
+
 
             placed_buildings_by_id[placed.unique_id] = placed;
 

@@ -39,18 +39,11 @@ public class PathNode
 
     public PathNode(Vector2Int postion, GridManager grid_manager)
     {
+        float cell_speed = grid_manager.GetCellMoveSpeed(postion);
+
         this.node.postion = postion;
-
-        if (grid_manager.GetCellMoveSpeed(postion) > 0)
-        {
-            this.searched = false;
-        }
-        else
-        {
-            this.searched = true;
-        }
-
-        this.node.speed = grid_manager.GetCellMoveSpeed(postion);
+        this.searched = cell_speed > 0 ? false : true;
+        this.node.speed = cell_speed;
         this.cost = (int)(1 / node.speed * 100.0f);
         this.total_cost = int.MaxValue;
         this.previous_node = null;

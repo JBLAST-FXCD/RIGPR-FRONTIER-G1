@@ -23,6 +23,8 @@ public class ParentBuilding : MonoBehaviour
     protected int capacity;
 
     public int Tier { get { return tier; } }
+    public GameObject Building { get { return building; } }
+    public List<MouseTemp> Mouse_occupants { get { return mouse_occupants; } }
 
     public ParentBuilding()
     {
@@ -31,7 +33,7 @@ public class ParentBuilding : MonoBehaviour
         capacity = 0;
     }
 
-    void Start()
+    protected virtual void Start()
     {
         ConstructTier();
     }
@@ -70,7 +72,7 @@ public class ParentBuilding : MonoBehaviour
         }
     }
 
-    protected void UpdateTier()
+    protected virtual void UpdateTier()
     {
         tier++;
         if (tier > 0 && tier <= capacitys.Length)
@@ -79,16 +81,19 @@ public class ParentBuilding : MonoBehaviour
             TierSelection();
             building_prefab.transform.localPosition = new Vector3(0, 0, 0);
             building = Instantiate(building_prefab, gameObject.transform);
+            this.GetComponent<BoxCollider>().center = building.transform.Find("EntrancePoint").localPosition;
         }
     }
 
     //Mouse is storded and turned off to make effetivly inside the building.
-    protected void OnTriggerStay(Collider other)
+    protected virtual void OnTriggerStay(Collider other)
     {
         if (other != null && other.tag == "MouseTemp" && mouse_occupants.Count < capacity)
         {
             other.transform.gameObject.SetActive(false);
-            mouse_occupants.Add(other.gameObject.GetComponent<MouseTemp>());
+            MouseTemp mouse = other.gameObject.GetComponent<MouseTemp>();
+            mouse_occupants.Add(mouse);
+            mouse.Home = this;
         }
     }
 
@@ -103,16 +108,17 @@ public class ParentBuilding : MonoBehaviour
         angle = Mathf.Repeat(angle, 360.0f);
 
         if (angle >= 315 || angle < 45)
-            new_loc.x += 1;
+            new_loc.x += 2;
         else if (angle >= 45 || angle < 135)
-            new_loc.z -= 1;
+            new_loc.z -= 2;
         else if (angle >= 135 || angle < 225)
-            new_loc.x -= 1;
+            new_loc.x -= 2;
         else if (angle >= 225 || angle < 315)
-            new_loc.z += 1;
+            new_loc.z += 2;
 
-        mouse.path = null;
+        mouse.Path = null;
         mouse.transform.localPosition = new_loc;
+        mouse.transform.eulerAngles = new Vector3(0, angle - 90, 0);
         mouse.transform.gameObject.SetActive(true);
 
         mouse_occupants.Remove(mouse);
@@ -129,7 +135,7 @@ public class ParentBuilding : MonoBehaviour
 
         for (int i = 0; i < mouse_occupants.Count; i++)
         {
-            data.mouse_ids.Add(mouse_occupants[i].GetMouseID());
+            data.mouse_ids.Add(mouse_occupants[i].Mouse_id);
         }
     }
 }

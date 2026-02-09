@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using UnityEngine;
+using UImGui;
 
 // jess @ 12/12/2025
 
@@ -36,7 +37,12 @@ public class SaveLoadManager : MonoBehaviour
         {
             // ensure only one instance exists
             Destroy(gameObject);
-        }
+        }   
+    }
+
+    private void Start()
+    {
+        SaveLoadConsoleCommands();
     }
 
     //<summary>
@@ -66,6 +72,7 @@ public class SaveLoadManager : MonoBehaviour
         try
         {
             File.WriteAllText(save_file_path, encrypted_text);
+            DebugWindow.LogToConsole("Items Saved:" + json_text);
         }
         catch (IOException e)
         {
@@ -110,5 +117,24 @@ public class SaveLoadManager : MonoBehaviour
         {
             saveable.LoadFromSaveData(data);
         }
+        DebugWindow.LogToConsole("Items Loaded:" + json_text);
+    }
+
+    private void SaveLoadConsoleCommands()
+    {
+        DebugWindow.Instance.RegisterExternalCommand("save", " - Executes the save pipeline and displays all items saved.", args => SaveGame());
+        DebugWindow.Instance.RegisterExternalCommand("load", " - Executes the load pipeline and displays all items loaded.", args => LoadGame());
+        DebugWindow.Instance.RegisterExternalCommand("save.dump", " - Decrypts and prints the current save file to console.", (args) => {
+            if (File.Exists(save_file_path))
+            {
+                string encrypted = File.ReadAllText(save_file_path);
+                string decrypted = SaveEncryption.DecryptString(encrypted);
+                Debug.Log("<color=yellow>DECRYPTED FILE CONTENT:</color>\n" + decrypted);
+            }
+            else
+            {
+                Debug.Log("No save file found.");
+            }
+        });
     }
 }
