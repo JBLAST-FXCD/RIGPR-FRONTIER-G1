@@ -7,9 +7,11 @@ using UnityEngine;
 
 public class NewUserInterfaceManager : MonoBehaviour
 {
+    // Manager for the NUI (New User Interface)
 
-    [Header("Panels")]
+    // --- References ---
     
+    [Header("General")]
     [SerializeField] private GameObject path_panel;
 
     [Header("Build Panel")]
@@ -20,9 +22,11 @@ public class NewUserInterfaceManager : MonoBehaviour
     [SerializeField] private GameObject[] commercial_rows;
     [SerializeField] private GameObject[] research_rows;
 
-
     [Header("Systems")]
     [SerializeField] private BuildingManager building_manager;
+
+
+    // --- Internal Variables ---
 
     enum CATEGORY
     {
@@ -44,12 +48,53 @@ public class NewUserInterfaceManager : MonoBehaviour
     }
     private OPEN_PANEL open_panel = OPEN_PANEL.OPEN_PANEL_NONE;
 
+
+    // --- Private Functions ---
+
     private void Start()
     {
         building_manager.UpdateBuildPanel += ClosePanels;
     }
 
-    public void ClosePanels()
+    private GameObject[] LoadBuildArray(CATEGORY load_category)
+    {
+        switch (load_category)
+        {
+            case CATEGORY.CATEGORY_RESIDENTIAL:
+                return residential_rows;
+            case CATEGORY.CATEGORY_INDUSTRIAL:
+                return industrial_rows;
+            case CATEGORY.CATEGORY_COMMERCIAL:
+                return commercial_rows;
+            case CATEGORY.CATEGORY_RESEARCH:
+                return research_rows;
+            default:
+                return residential_rows;
+        }
+    }
+
+    private void UpdateCategory(CATEGORY previous)
+    {
+        GameObject[] selected_rows = LoadBuildArray(previous);
+
+        for (int i = 0; i < selected_rows.Length; i++)
+        {
+            selected_rows[i].SetActive(false);
+        }
+
+        selected_rows = LoadBuildArray(current_category);
+
+        for (int i = 0; i < selected_rows.Length; i++)
+        {
+            selected_rows[i].SetActive(true);
+        }
+
+    }
+
+
+    // --- Public Functions ---
+
+    public void ClosePanels() // Contains cases for panels that have not been implemented yet
     {
         switch (open_panel)
         {
@@ -170,38 +215,5 @@ public class NewUserInterfaceManager : MonoBehaviour
         UpdateCategory(previous_category);
     }
 
-    private GameObject[] LoadBuildArray(CATEGORY load_category)
-    {
-        switch(load_category)
-        {
-            case CATEGORY.CATEGORY_RESIDENTIAL:
-                return residential_rows;
-            case CATEGORY.CATEGORY_INDUSTRIAL:
-                return industrial_rows;
-            case CATEGORY.CATEGORY_COMMERCIAL:
-                return commercial_rows;
-            case CATEGORY.CATEGORY_RESEARCH:
-                return research_rows;
-            default:
-                return residential_rows;
-        }
-    }
-
-    private void UpdateCategory(CATEGORY previous)
-    {
-        GameObject[] selected_rows = LoadBuildArray(previous);
-
-        for (int i = 0; i < selected_rows.Length; i++)
-        {
-            selected_rows[i].SetActive(false);
-        }
-
-        selected_rows = LoadBuildArray(current_category);
-
-        for (int i = 0; i < selected_rows.Length; i++)
-        {
-            selected_rows[i].SetActive(true);
-        }
-
-    }
+    // <-- Joe, 09/02/2005
 }
