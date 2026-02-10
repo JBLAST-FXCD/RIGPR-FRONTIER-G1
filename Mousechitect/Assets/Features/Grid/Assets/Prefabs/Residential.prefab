@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 1882122932072419119}
   - component: {fileID: 3333815547317747283}
   - component: {fileID: 7285469575365254690}
+  - component: {fileID: 7734961722568915558}
   m_Layer: 7
   m_Name: Residential
   m_TagString: BuildingTest
@@ -63,6 +64,20 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 862422936310738579}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &7734961722568915558
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 862422936310738579}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fabd6613a2b3e674fb60f07051561aea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  official_capacity: 6
+  visual_capacity: 3
 --- !u!1 &1363470457801451185
 GameObject:
   m_ObjectHideFlags: 0

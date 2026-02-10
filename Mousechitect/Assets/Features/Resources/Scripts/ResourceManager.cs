@@ -20,9 +20,7 @@ public class ResourceManager : MonoBehaviour, ISaveable
     protected static int scrap  = INITIAL_SCRAP;
     protected static int cheese = 0;
     protected static int money  = 0;
-    protected static int scrap = INITIAL_SCRAP;
     protected static int total_cheese = 1;
-    protected static int money = 0; // added temp as forgotten
     protected static Dictionary<CheeseTypes, int> cheeses;
 
     [Header("UI References")]
@@ -46,7 +44,9 @@ public class ResourceManager : MonoBehaviour, ISaveable
             return true;
         }
 
-    public bool CanAfford(int scrap_cost, int cheese_cost)
+        return false;
+    }
+    public bool CanAfford(CheeseTypes key, int cheese_amount)
     {
         if (cheeses[key] >= cheese_amount)
         {
@@ -151,13 +151,13 @@ public class ResourceManager : MonoBehaviour, ISaveable
         data.player_data.resources.scrap = scrap;
         data.player_data.resources.total_cheese = total_cheese;
         data.player_data.resources.money = money;
-
+/*
         int i = 0;
         foreach (CheeseTypes c in Enum.GetValues(typeof(CheeseTypes)))
         {
             data.player_data.resources.cheese_amounts[i] = cheeses[c];
             i++;
-        }
+        }*/
     }
 
     public void LoadFromSaveData(GameData data)
@@ -165,13 +165,13 @@ public class ResourceManager : MonoBehaviour, ISaveable
         scrap = data.player_data.resources.scrap;
         total_cheese = data.player_data.resources.total_cheese;
         money = data.player_data.resources.money;
-
+/*
         int i = 0;
         foreach (CheeseTypes c in Enum.GetValues(typeof(CheeseTypes))) 
         {
             cheeses[c] = data.player_data.resources.cheese_amounts[i];
             i++;
-        }
+        }*/
     }
 
     // Updates by Anthony - 05/02/2026

@@ -38,6 +38,26 @@ public class MoraleSystem : MonoBehaviour
     [SerializeField] private float retention_modifier = 1.0f;
     [SerializeField] private float arrival_chance_modifier = 1.0f;
 
+    [Header("Debug")]
+    [SerializeField]
+    public bool is_debug_override = false;
+
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this) Destroy(this);
+        else Instance = this;
+    }
+
+    public void SetMoraleScore(float value) => morale_score = value;
+
+    public void SetProductivityModifier(float value) => productivity_modifier = value;
+
+    public void SetRetentionModifier(float value) => retention_modifier = value;
+
+    public void SetArrivalChanceModifier(float value) => arrival_chance_modifier = value;
+
+
     public float GetGlobalMorale()
     {
         return global_morale;
@@ -72,41 +92,47 @@ public class MoraleSystem : MonoBehaviour
     {
         while (true)
         {
-            bool has_housing;
-            bool has_food;
-            bool has_recreation;
-            bool has_aesthetics;
+            if (!is_debug_override)
+            {
+                bool has_housing;
+                bool has_food;
+                bool has_recreation;
+                bool has_aesthetics;
 
-            float housing_score = CollectAverageContribution(MORALE_CONTRIBUTOR_TYPE.TYPE_HOUSING, out has_housing);
-            float food_score = CollectAverageContribution(MORALE_CONTRIBUTOR_TYPE.TYPE_FOOD, out has_food);
-            float recreation_score = CollectAverageContribution(MORALE_CONTRIBUTOR_TYPE.TYPE_RECREATION, out has_recreation);
-            float aesthetics_score = CollectAverageContribution(MORALE_CONTRIBUTOR_TYPE.TYPE_AESTHETICS, out has_aesthetics);
+                float housing_score = CollectAverageContribution(MORALE_CONTRIBUTOR_TYPE.TYPE_HOUSING, out has_housing);
+                float food_score = CollectAverageContribution(MORALE_CONTRIBUTOR_TYPE.TYPE_FOOD, out has_food);
+                float recreation_score = CollectAverageContribution(MORALE_CONTRIBUTOR_TYPE.TYPE_RECREATION, out has_recreation);
+                float aesthetics_score = CollectAverageContribution(MORALE_CONTRIBUTOR_TYPE.TYPE_AESTHETICS, out has_aesthetics);
 
-            if (!has_food) food_score = DEFAULT_FOOD_SCORE;
-            if (!has_recreation) recreation_score = DEFAULT_RECREATION_SCORE;
-            if (!has_aesthetics) aesthetics_score = DEFAULT_AESTHETICS_SCORE;
+                if (!has_food) food_score = DEFAULT_FOOD_SCORE;
+                if (!has_recreation) recreation_score = DEFAULT_RECREATION_SCORE;
+                if (!has_aesthetics) aesthetics_score = DEFAULT_AESTHETICS_SCORE;
 
+                /*
+                            if (!has_food) food_score = DEFAULT_FOOD_SCORE;
+                            if (!has_recreation) recreation_score = DEFAULT_RECREATION_SCORE;
+                            if (!has_aesthetics) aesthetics_score = DEFAULT_AESTHETICS_SCORE;
+                */
 
-            if (!has_food) food_score = DEFAULT_FOOD_SCORE;
-            if (!has_recreation) recreation_score = DEFAULT_RECREATION_SCORE;
-            if (!has_aesthetics) aesthetics_score = DEFAULT_AESTHETICS_SCORE;
+                float target_morale =
+                    (housing_score * HOUSING_WEIGHT) +
+                    (food_score * FOOD_WEIGHT) +
+                    (recreation_score * RECREATION_WEIGHT) +
+                    (aesthetics_score * AESTHETICS_WEIGHT);
 
+                global_morale = Mathf.Lerp(global_morale, target_morale, morale_smoothing);
 
-            float target_morale =
-                (housing_score * HOUSING_WEIGHT) +
-                (food_score * FOOD_WEIGHT) +
-                (recreation_score * RECREATION_WEIGHT) +
-                (aesthetics_score * AESTHETICS_WEIGHT);
+                global_morale = Mathf.Clamp01(global_morale);
 
-            global_morale = Mathf.Lerp(global_morale, target_morale, morale_smoothing);
+                morale_score = (global_morale * 2.0f) - 1.0f;
 
-            global_morale = Mathf.Clamp01(global_morale);
+                UpdateGameplayModifiers(morale_score);
 
-            morale_score = (global_morale * 2.0f) - 1.0f;
-
+                yield return new WaitForSeconds(MORALE_UPDATE_INTERVAL);
+            }
             UpdateGameplayModifiers(morale_score);
-
             yield return new WaitForSeconds(MORALE_UPDATE_INTERVAL);
+
         }
     }
 

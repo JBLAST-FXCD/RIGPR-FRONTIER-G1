@@ -68,6 +68,7 @@ public class Mouse_AI : MonoBehaviour
         );
 
         //Caculate path.
+        MouseTemp.Grid_manager = grid_manager;
         pathfinding.Grid_manager = grid_manager;
         mouse.Path = pathfinding.CreatePath(mouse_loc, building_loc);
 
