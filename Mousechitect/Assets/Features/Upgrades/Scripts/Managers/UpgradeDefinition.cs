@@ -6,7 +6,7 @@ using UnityEngine;
 /// <summary>
 /// Allows for the creation of new building upgrades from the Unity Editor right-click menu.
 /// </summary>
-/// 
+
 [CreateAssetMenu(fileName = "NewUpgrade", menuName = "NewUpgrade")]
 
 public class UpgradeDefinition : ScriptableObject

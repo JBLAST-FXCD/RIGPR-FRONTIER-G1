@@ -38,6 +38,9 @@ public class PlayerData
     public float play_time;
     public string city_name;
 
+    public int cheese;
+    public int population;
+
     public resource_save_data resources;
     public camera_save_data camera_state;
 }

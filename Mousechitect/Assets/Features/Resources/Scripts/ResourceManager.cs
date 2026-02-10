@@ -17,6 +17,9 @@ public class ResourceManager : MonoBehaviour, ISaveable
     public static ResourceManager instance;
 
     [Header("Current Resources")]
+    protected static int scrap  = INITIAL_SCRAP;
+    protected static int cheese = 0;
+    protected static int money  = 0;
     protected static int scrap = INITIAL_SCRAP;
     protected static int total_cheese = 1;
     protected static int money = 0; // added temp as forgotten
@@ -43,9 +46,7 @@ public class ResourceManager : MonoBehaviour, ISaveable
             return true;
         }
 
-        return false;
-    }
-    public bool CanAfford(CheeseTypes key, int cheese_amount)
+    public bool CanAfford(int scrap_cost, int cheese_cost)
     {
         if (cheeses[key] >= cheese_amount)
         {
