@@ -331,6 +331,7 @@ namespace UImGui
         // This is to register default commands that arent directly tied to another function
         private void RegisterCommands()
         {
+            command_registry.Add("quit", ( (args) => Application.Quit(), " - Quits the game"));
             command_registry.Add("clear", ( (args) => console_log.Clear(), " - Clears the console screen"));
             command_registry.Add("help", ( (args) =>
             {
