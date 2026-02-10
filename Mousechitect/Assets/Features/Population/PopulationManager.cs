@@ -1,5 +1,7 @@
 using UnityEngine;
 using System.Collections;
+using ImGuiNET;
+using UImGui;
 
 //// Hani - 09/02/2026
 
@@ -22,6 +24,11 @@ public class PopulationManager : MonoBehaviour, ISaveable
     public float base_arrival_interval = 10.0f;
     private float arrival_timer = 0f;
 
+    private float morale;
+    private float arrival_chance_modifier;
+    private float retention_chance_modifier;
+
+
     private void Awake()
     {
         if (instance != null && instance != this) Destroy(this);
@@ -30,27 +37,34 @@ public class PopulationManager : MonoBehaviour, ISaveable
 
     private void Update()
     {
-        HandlePopulationGrowth();
+        if (MoraleSystem.Instance != null)
+        {
+            morale = MoraleSystem.Instance.GetGlobalMorale();
+            arrival_chance_modifier = MoraleSystem.Instance.GetArrivalChanceModifier();
+            retention_chance_modifier = MoraleSystem.Instance.GetRetentionModifier();
+
+            HandlePopulationGrowth();
+        }
     }
 
     private void HandlePopulationGrowth()
     {
-        float morale = 1.0f;
-
+        /*
         if (ResidentialUpgradeHandler.instance != null)
         {
-            morale = ResidentialUpgradeHandler.instance.current_morale_multiplier;
+            morale = ResidentialUpgradeHandler.instance.current_morale_multiplier * morale;
         }
+        */
 
         if (morale <= 0)
         {
             arrival_timer += Time.deltaTime;
-            if (arrival_timer >= 2.0f)
+            if (arrival_timer >= 2.0f * retention_chance_modifier)
             {
                 if (current_population > 0)
                 {
                     current_population--;
-                    Debug.Log("Morale is 0! A mouse has left the city.");
+                    DebugWindow.LogToConsole($"Mice leaving due to low morale.", true);
                 }
                 arrival_timer = 0;
             }
@@ -59,14 +73,16 @@ public class PopulationManager : MonoBehaviour, ISaveable
 
         if (current_population < total_housing_capacity)
         {
-            float growth_speed = (Time.deltaTime / base_arrival_interval) * morale;
+            float growth_speed = ((Time.deltaTime / base_arrival_interval) * morale) * arrival_chance_modifier;
             arrival_timer += growth_speed;
+
+            //DebugWindow.LogToConsole($"Morale: {morale:F2}, Arrival Chance Modifier: {arrival_chance_modifier:F2}, Retention Chance Modifier: {retention_chance_modifier:F2}, Growth Speed: {growth_speed:F4}, Arrival Timer: {arrival_timer:F4}", true);
 
             if (arrival_timer >= 1.0f)
             {
                 current_population++;
                 arrival_timer = 0;
-                Debug.Log($"A new mouse moved in! Pop: {current_population}/{total_housing_capacity}");
+                DebugWindow.LogToConsole($"A new mouse has arrived! Current population: {current_population}/{total_housing_capacity}", true);
             }
         }
     }

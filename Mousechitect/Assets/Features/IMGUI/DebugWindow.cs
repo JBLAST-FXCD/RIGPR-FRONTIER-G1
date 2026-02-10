@@ -79,6 +79,8 @@ namespace UImGui
                     DrawVariablesSection();
                     ImGui.Separator();
                     DrawCameraSection();
+                    ImGui.Separator();
+                    DrawMoraleTab();
                     ImGui.EndTabItem();
                 }
 
@@ -256,6 +258,48 @@ namespace UImGui
                     }
                 }
                 ImGui.PopID();
+            }
+        }
+
+        private void DrawMoraleTab()
+        {
+            
+            bool is_overidden = MoraleSystem.Instance.is_debug_override;
+
+            
+            float morale = MoraleSystem.Instance.GetMoraleScore();
+            float productivity = MoraleSystem.Instance.GetProductivityModifier();
+            float retention = MoraleSystem.Instance.GetRetentionModifier();
+            float arrival = MoraleSystem.Instance.GetArrivalChanceModifier();
+
+            if (ImGui.CollapsingHeader("Morale Debug"))
+            {
+                if (ImGui.Checkbox("Override Morale Values", ref is_overidden))
+                {
+                    MoraleSystem.Instance.is_debug_override = is_overidden;
+                }
+
+                ImGui.Separator();
+
+                if (ImGui.SliderFloat("Global Morale", ref morale, -1f, 1f))
+                {
+                    MoraleSystem.Instance.SetMoraleScore(morale);
+                }
+
+                if (ImGui.SliderFloat("Productivity Modifier", ref productivity, 0.5f, 2f))
+                {
+                    MoraleSystem.Instance.SetProductivityModifier(productivity);
+                }
+
+                if (ImGui.SliderFloat("Retention Modifier", ref retention, 0.5f, 2f))
+                {
+                    MoraleSystem.Instance.SetRetentionModifier(retention);
+                }
+
+                if (ImGui.SliderFloat("Arrival Chance Modifier", ref arrival, 0.5f, 2f))
+                {
+                    MoraleSystem.Instance.SetArrivalChanceModifier(arrival);
+                }
             }
         }
 

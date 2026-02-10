@@ -151,7 +151,7 @@ public class FactoryBuilding : ParentBuilding
 
         }
     }
-
+/*
     //Each cheese has production time
     protected void CheeseProduction()
     {
@@ -177,7 +177,7 @@ public class FactoryBuilding : ParentBuilding
             Invoke(nameof(UpdateTier), 60.0f);
         }
     }
-
+  
     protected override void UpdateTier()
     {
         tier++;
@@ -193,7 +193,7 @@ public class FactoryBuilding : ParentBuilding
 
         }
     }
-
+*/
     //Each cheese has production time
     protected void CheeseProduction()
     {
@@ -265,6 +265,7 @@ public class FactoryBuilding : ParentBuilding
             ResourceManager.instance.RegisterOrUpdateFactoryCheeseType(this, selected_cheese);
     }
 
+    /*
     // Created by Anthony - 08/02/2026
     private void RefreshAllowedCheesesForTier()
     {
@@ -288,7 +289,7 @@ public class FactoryBuilding : ParentBuilding
         if (ResourceManager.instance != null)
             ResourceManager.instance.RegisterOrUpdateFactoryCheeseType(this, selected_cheese);
     }
-
+    */
     // Updates by Anthony - 05/02/2026
     // Cycles this factory's currently selected cheese type (per-factory, not global).
     // Also syncs the internal recipe data and informs ResourceManager so ACTIVE variety updates correctly.

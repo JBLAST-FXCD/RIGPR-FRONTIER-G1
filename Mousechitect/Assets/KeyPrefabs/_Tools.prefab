@@ -1,0 +1,144 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &7371916266237598632
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2700727421322117837}
+  - component: {fileID: 4873993085859753060}
+  - component: {fileID: 3072447796328210637}
+  - component: {fileID: 6907196582077796193}
+  - component: {fileID: 4226888250966910632}
+  - component: {fileID: 2678787204238611463}
+  - component: {fileID: 340000207267174587}
+  m_Layer: 0
+  m_Name: _Tools
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2700727421322117837
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7371916266237598632}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4873993085859753060
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7371916266237598632}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 79a46f0052d85a9499dc802ff59f45aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  main_camera: {fileID: 0}
+  grid_manager: {fileID: 0}
+  path_surface_mask:
+    serializedVersion: 2
+    m_Bits: 8
+  path_types:
+  - path_name: basic_path
+    path_prefab: {fileID: 7061826317574675358, guid: ef1c283b94e5c914f960ffdb40a6e8b8,
+      type: 3}
+    speed_modifier: 1
+--- !u!114 &3072447796328210637
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7371916266237598632}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c263761ae272c47449f24d4e1fdbe2ca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  main_camera: {fileID: 0}
+  destroy_target_mask:
+    serializedVersion: 2
+    m_Bits: 8
+  building_manager: {fileID: 0}
+  path_tool: {fileID: 4873993085859753060}
+--- !u!114 &6907196582077796193
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7371916266237598632}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f554aa2e1157ef74094f27417fc620fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  building_tool: {fileID: 0}
+  path_tool: {fileID: 4873993085859753060}
+  destroy_tool: {fileID: 3072447796328210637}
+--- !u!114 &4226888250966910632
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7371916266237598632}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff250cca1ebe7c141be9b906975dfeab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prodution_times:
+  - 6
+  - 8
+  - 10
+  - 15
+  - 20
+  - 25
+  - 30
+  milk_costs: 02000000030000000400000006000000080000000a0000000c000000
+  scrap_costs: 04000000070000000f00000019000000280000003200000046000000
+  scrap_price: 0a0000000f00000019000000280000003c0000005500000078000000
+--- !u!114 &2678787204238611463
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7371916266237598632}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 661dc56311d254e4d8d5bfd43b050676, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &340000207267174587
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7371916266237598632}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ae98783def6aa34bbb4c12086b5a880, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  grid_manager: {fileID: 0}
+  pathfinding: {fileID: 2678787204238611463}
+  milkmanager: {fileID: 0}

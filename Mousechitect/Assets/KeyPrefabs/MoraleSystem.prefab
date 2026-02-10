@@ -1,0 +1,113 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &6671231641257166951
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 9177850857513136528}
+  - component: {fileID: 8661726582326715646}
+  - component: {fileID: 6648038686643826911}
+  - component: {fileID: 3427031667074580927}
+  - component: {fileID: 1543367795797364207}
+  - component: {fileID: 2235036525003581574}
+  m_Layer: 0
+  m_Name: MoraleSystem
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &9177850857513136528
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6671231641257166951}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -1288.1349, y: -2168.877, z: -3159.7617}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8661726582326715646
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6671231641257166951}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f51f344eb1bf0434a9793527e9ac9252, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  global_morale: 0.14
+  morale_score: 0
+  morale_smoothing: 0.15
+  productivity_modifier: 1
+  retention_modifier: 1
+  arrival_chance_modifier: 1
+--- !u!114 &6648038686643826911
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6671231641257166951}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5370b8bce83ac2e4a8c3ba30f26e17b5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  main_camera: {fileID: 0}
+  factory_mask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+--- !u!114 &3427031667074580927
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6671231641257166951}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8a1c56b5088c2a4590265abcf623543, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  types_for_max_score: 7
+--- !u!114 &1543367795797364207
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6671231641257166951}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e3def82ae4f4c14aa32fdf10d82196d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  synergy_radius_tiles: 4
+  base_points_per_decor: 0.05
+  synergy_bonus_points: 0.1
+  points_for_max_score: 2
+--- !u!114 &2235036525003581574
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6671231641257166951}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01dad689b5434a44ca4dbcda09cb2572, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
