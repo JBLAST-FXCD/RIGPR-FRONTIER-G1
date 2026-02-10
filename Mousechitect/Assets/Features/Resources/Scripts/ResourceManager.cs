@@ -253,4 +253,13 @@ public class ResourceManager : MonoBehaviour, ISaveable
     {
         return active_type_counts.Count;
     }
+
+    // Anthony - 10/2/2026
+    
+    // Returns true if at least one active factory is currently producing this cheese type.
+    public bool IsCheeseTypeActive(CheeseTypes type)
+    {
+        return active_type_counts != null && active_type_counts.ContainsKey(type);
+    }
+
 }
