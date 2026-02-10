@@ -111,4 +111,17 @@ public class StressTest : MonoBehaviour
             FirstWave();
         }
     }
+
+    // added by jess 
+    private void Start()
+    {
+        if (UImGui.DebugWindow.Instance != null)
+        {
+            UImGui.DebugWindow.Instance.RegisterExternalCommand("stresstest", " - Spawns waves of mice to test pathfinding performance.", args =>
+            {
+                UImGui.DebugWindow.LogToConsole("Starting Stress Test:");
+                FirstWave();
+            });
+        }
+    }
 }
