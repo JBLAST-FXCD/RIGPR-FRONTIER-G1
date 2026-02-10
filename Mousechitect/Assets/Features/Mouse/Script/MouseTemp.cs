@@ -46,7 +46,7 @@ public class MouseTemp : MonoBehaviour
         for (int i = 0; i < path.Count; i++)
         {
             Vector3 current_loc = this.transform.position;
-            Vector3 new_loc = new Vector3(path[i].postion.x, 0, path[i].postion.y);
+            Vector3 new_loc = new Vector3(path[i].postion.x, -2.16f, path[i].postion.y);
             float speed = new PathNode(path[i].postion, grid_manager).Speed;
 
             this.transform.eulerAngles = new Vector3(0, SetRotation(current_loc, new_loc), 0);

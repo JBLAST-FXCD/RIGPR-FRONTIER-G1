@@ -151,7 +151,7 @@ public class FactoryBuilding : ParentBuilding
 
         }
     }
-/*
+
     //Each cheese has production time
     protected void CheeseProduction()
     {
@@ -176,49 +176,6 @@ public class FactoryBuilding : ParentBuilding
             factory_switch = false;
             Invoke(nameof(UpdateTier), 60.0f);
         }
-    }
-  
-    protected override void UpdateTier()
-    {
-        tier++;
-        if (tier > 0 && tier <= capacitys.Length)
-        {
-            Destroy(building);
-            TierSelection();
-            building_prefab.transform.localPosition = new Vector3(0, 0, 0);
-            building = Instantiate(building_prefab, gameObject.transform);
-            factory_switch = true;
-            this.GetComponent<BoxCollider>().center = building.transform.Find("EntrancePoint").localPosition;
-            RefreshAllowedCheesesForTier();
-
-        }
-    }
-*/
-    //Each cheese has production time
-    protected void CheeseProduction()
-    {
-        //Checks if theres enought mise for factory as per GDD. id starts at 0 not 1
-        if (id < population / 20)
-        {
-            if (cheese_type.milk_cost >= stored_milk && produce_cheese == true)
-                Invoke(nameof(CreateCheese), cheese_type.prodution_time);
-        }
-        else
-            Debug.Log("Not enough mice to operate this factory");
-    }
-
-    //This is apart of CheeseProduction() and is called when its invoked.
-    protected void CreateCheese()
-    {
-        ResourceManager resources = ResourceManager.instance;
-
-        ResourceManager.instance.AddResources(produced_cheese_type, 1);
-
-        stored_milk -= cheese_type.milk_cost;
-        resources.SpendResources(cheese_type.scrap_cost);
-
-        //Repeat cheese prodution until milk runs out or player switches produce_cheese to false
-        CheeseProduction();
     }
 
     //For player to create cheese when factory is running
@@ -264,32 +221,7 @@ public class FactoryBuilding : ParentBuilding
         if (ResourceManager.instance != null)
             ResourceManager.instance.RegisterOrUpdateFactoryCheeseType(this, selected_cheese);
     }
-
-    /*
-    // Created by Anthony - 08/02/2026
-    private void RefreshAllowedCheesesForTier()
-    {
-        int tier_index = Mathf.Clamp(tier - 1, 0, cheese_sets_by_tier.Length - 1);
-        allowed_cheese_types = cheese_sets_by_tier[tier_index];
-
-        // Clamp selection if it's not valid for this tier
-        bool valid = false;
-        for (int i = 0; i < allowed_cheese_types.Length; i++)
-        {
-            if (allowed_cheese_types[i] == selected_cheese) { valid = true; break; }
-        }
-
-        if (!valid)
-            selected_cheese = allowed_cheese_types[0];
-
-        // Sync internal recipe values with selected cheese
-        SelectCheese(selected_cheese);
-
-        // If you're using the active variety registry, keep it updated
-        if (ResourceManager.instance != null)
-            ResourceManager.instance.RegisterOrUpdateFactoryCheeseType(this, selected_cheese);
-    }
-    */
+    
     // Updates by Anthony - 05/02/2026
     // Cycles this factory's currently selected cheese type (per-factory, not global).
     // Also syncs the internal recipe data and informs ResourceManager so ACTIVE variety updates correctly.
@@ -320,6 +252,4 @@ public class FactoryBuilding : ParentBuilding
         if (ResourceManager.instance != null)
             ResourceManager.instance.UnregisterFactory(this);
     }
-
-
 }
