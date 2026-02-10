@@ -80,6 +80,8 @@ namespace UImGui
                     ImGui.Separator();
                     DrawCameraSection();
                     ImGui.Separator();
+                    DrawPopulationTab();
+                    ImGui.Separator();
                     DrawMoraleTab();
                     ImGui.EndTabItem();
                 }
@@ -258,6 +260,29 @@ namespace UImGui
                     }
                 }
                 ImGui.PopID();
+            }
+        }
+
+        private void DrawPopulationTab()
+        {
+            if (ImGui.CollapsingHeader("Population Manager"))
+            {
+                int population = PopulationManager.instance.current_population;
+                float arrival_interval = PopulationManager.instance.base_arrival_interval;
+                if (ImGui.SliderInt("Current Population", ref population, 0, 100))
+                {
+                    PopulationManager.instance.current_population = population;
+                }
+
+                if (ImGui.DragFloat("Base Arrival Interval", ref arrival_interval, 0.1f, 1f, 60f))
+                {
+                    PopulationManager.instance.base_arrival_interval = arrival_interval;
+                }
+
+                ImGui.Separator();
+
+                ImGui.Text($"Total Housing Capacity: {PopulationManager.instance.total_housing_capacity}");
+                ImGui.Text($"Current Visual Capacity: {PopulationManager.instance.current_visual_capacity}");
             }
         }
 
