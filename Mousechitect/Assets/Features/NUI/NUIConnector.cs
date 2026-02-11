@@ -7,7 +7,9 @@ public class NUIConnector : MonoBehaviour
     [Header("Exernal Connections")]
     [SerializeField] private BuildingManager build_tool;
     [SerializeField] private PathTool path_tool;
+    [SerializeField] private DestroyTool destroy_tool;
     private bool path_enabled = false;
+    private bool destroy_enabled = false;
 
     [Header("Internal Connections")]
     [SerializeField] private NewUserInterfaceManager nui_manager;
@@ -26,7 +28,10 @@ public class NUIConnector : MonoBehaviour
 
     public void NUIToggleBuildTool()
     {
-        build_tool.ToggleBuildMode();
+        if (build_tool != null)
+        {
+            build_tool.ToggleBuildMode();
+        }
     }
 
     public void NUITogglePathTool()
@@ -44,6 +49,24 @@ public class NUIConnector : MonoBehaviour
                 path_enabled = false;
             }
         }
+    }
+
+    public void NUIToggleDestroyTool()
+    {
+        if (destroy_tool != null)
+        {
+            if (!destroy_enabled)
+            {
+               destroy_tool.SetToolEnabled(true);
+               destroy_enabled = true;
+            }
+            else
+            {
+                destroy_tool.SetToolEnabled(false);
+                destroy_enabled = false;
+            }
+        }
+
     }
 
     public void NUIPlaceBuilding(int building_index)
