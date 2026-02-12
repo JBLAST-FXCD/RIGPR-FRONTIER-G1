@@ -42,6 +42,8 @@ public class MoraleSystem : MonoBehaviour
     [SerializeField]
     public bool is_debug_override = false;
 
+    // Anthony - 10/2/2026
+    [SerializeField] private float baseline_morale = DEFAULT_GLOBAL_MORALE;
 
     private void Awake()
     {
@@ -83,6 +85,11 @@ public class MoraleSystem : MonoBehaviour
         return arrival_chance_modifier;
     }
 
+    public float GetBaselineMorale()
+    {
+        return baseline_morale;
+    }
+
     private void Start()
     {
         StartCoroutine(MoraleUpdateLoop());
@@ -120,13 +127,36 @@ public class MoraleSystem : MonoBehaviour
                     (recreation_score * RECREATION_WEIGHT) +
                     (aesthetics_score * AESTHETICS_WEIGHT);
 
-                global_morale = Mathf.Lerp(global_morale, target_morale, morale_smoothing);
+                baseline_morale = Mathf.Clamp01(target_morale);
 
+                // Update each mouse morale toward the baseline + preference delta
+                MouseTemp[] mice = FindObjectsOfType<MouseTemp>();
+
+                float avg_mouse_morale = baseline_morale;
+
+                if (mice.Length > 0)
+                {
+                    float sum = 0.0f;
+
+                    for (int i = 0; i < mice.Length; i++)
+                    {
+                        if (mice[i] == null) continue;
+
+                        mice[i].UpdatePerMouseMorale(baseline_morale);
+                        sum += mice[i].MouseMorale;
+                    }
+
+                    avg_mouse_morale = sum / mice.Length;
+                }
+
+                // Global morale now becomes average mouse morale (GDD behaviour)
+                global_morale = Mathf.Lerp(global_morale, avg_mouse_morale, morale_smoothing);
                 global_morale = Mathf.Clamp01(global_morale);
 
                 morale_score = (global_morale * 2.0f) - 1.0f;
 
                 UpdateGameplayModifiers(morale_score);
+
 
                 yield return new WaitForSeconds(MORALE_UPDATE_INTERVAL);
             }

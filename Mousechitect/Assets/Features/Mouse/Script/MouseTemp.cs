@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class MouseTemp : MonoBehaviour
 {
@@ -23,6 +24,27 @@ public class MouseTemp : MonoBehaviour
     public List<BaseNode> Path { get { return path; } set { path = value; } }
     public static GridManager Grid_manager { set { grid_manager = value; } }
     public ParentBuilding Home { get { return home; } set { home = value; } }
+
+    // updated by Anthony - 10/2/2026
+    [Header("Per-mouse Morale")]
+    [SerializeField, Range(0f, 1f)] private float mouse_morale = 0.5f;
+
+    // How much the mouse morale can change per morale tick
+    [SerializeField] private float morale_step_per_tick = 0.05f;
+
+    [Header("Cheese Preferences")]
+    [SerializeField] private CheeseTypes favourite_cheese;
+    [SerializeField] private CheeseTypes least_favourite_cheese;
+
+    [SerializeField] private float favourite_bonus = 0.10f;
+    [SerializeField] private float least_penalty = 0.10f;
+
+    private bool preferences_initialised = false;
+
+    // Public read-only access for averaging in MoraleSystem
+    public float MouseMorale { get { return mouse_morale; } }
+    public CheeseTypes FavouriteCheese { get { return favourite_cheese; } }
+    public CheeseTypes LeastFavouriteCheese { get { return least_favourite_cheese; } }
 
     public MouseTemp() 
     {
@@ -71,5 +93,45 @@ public class MouseTemp : MonoBehaviour
                 callback(false);
         }
         callback(true);
+    }
+
+    // Anthony - 10/2/2026 (Per-mouse morale)
+
+    // Assigns random cheese preferences. Called once after spawn (or first morale tick).
+    public void InitialisePreferencesIfNeeded()
+    {
+        if (preferences_initialised) return;
+
+        CheeseTypes[] values = (CheeseTypes[])System.Enum.GetValues(typeof(CheeseTypes));
+
+        favourite_cheese = values[UnityEngine.Random.Range(0, values.Length)];
+
+        do
+        {
+            least_favourite_cheese = values[UnityEngine.Random.Range(0, values.Length)];
+        }
+        while (least_favourite_cheese == favourite_cheese);
+
+        preferences_initialised = true;
+    }
+
+    // Updates this mouse's morale toward a target based on city baseline + cheese preference delta.
+    public void UpdatePerMouseMorale(float city_baseline)
+    {
+        InitialisePreferencesIfNeeded();
+
+        float delta = 0.0f;
+
+        ResourceManager rm = ResourceManager.instance;
+        if (rm != null)
+        {
+            if (rm.IsCheeseTypeActive(favourite_cheese)) delta += favourite_bonus;
+            if (rm.IsCheeseTypeActive(least_favourite_cheese)) delta -= least_penalty;
+        }
+
+        float target = Mathf.Clamp01(city_baseline + delta);
+
+        // Tick-based smoothing: moves a small amount each MoraleSystem update
+        mouse_morale = Mathf.MoveTowards(mouse_morale, target, morale_step_per_tick);
     }
 }

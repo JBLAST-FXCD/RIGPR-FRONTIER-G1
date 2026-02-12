@@ -70,6 +70,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87b43d7d009f5134f8359627eae5f55c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mouse_morale: 0.5
+  morale_step_per_tick: 0.05
+  favourite_cheese: 1
+  least_favourite_cheese: 2
+  favourite_bonus: 0.1
+  least_penalty: 0.1
 --- !u!54 &7852265028682417493
 Rigidbody:
   m_ObjectHideFlags: 0

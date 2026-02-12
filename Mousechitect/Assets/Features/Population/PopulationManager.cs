@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using ImGuiNET;
 using UImGui;
+using System.Collections.Generic;
 
 //// Hani - 09/02/2026
 
@@ -27,6 +28,12 @@ public class PopulationManager : MonoBehaviour, ISaveable
     private float morale;
     private float arrival_chance_modifier;
     private float retention_chance_modifier;
+
+    [SerializeField] private GameObject mouse_prefab;
+    [SerializeField] private Transform[] mouse_spawn_points;
+
+    private readonly List<GameObject> spawned_mice = new List<GameObject>();
+
 
 
     private void Awake()
@@ -65,6 +72,7 @@ public class PopulationManager : MonoBehaviour, ISaveable
                 {
                     current_population--;
                     DebugWindow.LogToConsole($"Mice leaving due to low morale.", true);
+                    SyncVisualMiceToPopulation();
                 }
                 arrival_timer = 0;
             }
@@ -83,6 +91,7 @@ public class PopulationManager : MonoBehaviour, ISaveable
                 current_population++;
                 arrival_timer = 0;
                 DebugWindow.LogToConsole($"A new mouse has arrived! Current population: {current_population}/{total_housing_capacity}", true);
+                SyncVisualMiceToPopulation();
             }
         }
     }
@@ -96,12 +105,15 @@ public class PopulationManager : MonoBehaviour, ISaveable
         {
             total_housing_capacity += ResidentialUpgradeHandler.instance.global_population_cap_bonus;
         }
+
+        SyncVisualMiceToPopulation();
     }
 
     public void UnregisterHousing(int official_cap, int visual_cap)
     {
         total_housing_capacity -= official_cap;
         current_visual_capacity -= visual_cap;
+        SyncVisualMiceToPopulation();
     }
 
     public void PopulateSaveData(GameData data)
@@ -112,5 +124,62 @@ public class PopulationManager : MonoBehaviour, ISaveable
     public void LoadFromSaveData(GameData data)
     {
         this.current_population = data.player_data.population;
+        SyncVisualMiceToPopulation();
     }
+
+    //Updated by Anthony - 10/2/2026
+    // Determines how many mouse GameObjects should be spawned visually.
+    private int GetTargetVisualPopulation()
+    {
+        return Mathf.Min(current_population, current_visual_capacity);
+    }
+
+    //Spawns or despawns mice as needed whenever population or visual capacity changes.
+    private void SyncVisualMiceToPopulation()
+    {
+        int target = GetTargetVisualPopulation();
+
+        if (mouse_prefab == null)
+        {
+            Debug.LogWarning("[Population] mouse_prefab not set, cannot spawn visual mice.");
+            return;
+        }
+
+        // Spawn mice until the target visual population
+        while (spawned_mice.Count < target)
+            SpawnOneMouse();
+
+        // Despawn mice if exceed the target visual population
+        while (spawned_mice.Count > target)
+            DespawnOneMouse();
+    }
+
+    // Spawns a single mouse GameObject at a valid spawn location
+    private void SpawnOneMouse()
+    {
+        Vector3 pos = transform.position;
+
+        // Prefer defined spawn points
+        if (mouse_spawn_points != null && mouse_spawn_points.Length > 0)
+            pos = mouse_spawn_points[Random.Range(0, mouse_spawn_points.Length)].position;
+
+        GameObject mouse = Instantiate(mouse_prefab, pos, Quaternion.identity);
+        spawned_mice.Add(mouse);
+
+        MouseTemp mt = mouse.GetComponent<MouseTemp>();
+        if (mt != null) mt.InitialisePreferencesIfNeeded();
+    }
+
+    // Removes the most recently spawned mouse GameObject
+    private void DespawnOneMouse()
+    {
+        int last = spawned_mice.Count - 1;
+        if (last < 0) return;
+
+        GameObject mouse = spawned_mice[last];
+        spawned_mice.RemoveAt(last);
+
+        if (mouse != null) Destroy(mouse);
+    }
+
 }
