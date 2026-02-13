@@ -74,7 +74,10 @@ public class Mouse_AI : MonoBehaviour
 
         //LERP mouse if fail start pathfinding again.
         if (mouse.Path != null)
-            StartCoroutine(mouse.FollowPath( (success) => { if (success == false) { mouse.Path = pathfinding.CreatePath(mouse_loc, building_loc); } }));
+        {
+            mouse.Moving = true;
+            StartCoroutine(mouse.FollowPath((success) => { if (success == false) { mouse.Path = pathfinding.CreatePath(mouse_loc, building_loc); } }));
+        }
     }
 
     // Update is called once per frame

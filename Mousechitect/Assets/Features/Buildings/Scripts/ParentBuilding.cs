@@ -100,28 +100,16 @@ public class ParentBuilding : MonoBehaviour
     //checks building rotion to place the mice on the right side to stop mice appaering inside building.
     public void MouseLeave(MouseTemp mouse)
     {
-        Vector3 new_loc = mouse.transform.position;
-        new_loc.x = Mathf.CeilToInt(new_loc.x);
-        new_loc.z = Mathf.CeilToInt(new_loc.z);
+        if (!mouse.Moving)
+        {
+            float angle = this.transform.eulerAngles.y;
 
-        float angle = this.transform.eulerAngles.y;
-        angle = Mathf.Repeat(angle, 360.0f);
+            mouse.Rigidbody = false;
+            mouse.transform.eulerAngles = new Vector3(0, angle - 90, 0);
+            mouse.transform.gameObject.SetActive(true);
 
-        if (angle >= 315 || angle < 45)
-            new_loc.x += 2;
-        else if (angle >= 45 || angle < 135)
-            new_loc.z -= 2;
-        else if (angle >= 135 || angle < 225)
-            new_loc.x -= 2;
-        else if (angle >= 225 || angle < 315)
-            new_loc.z += 2;
-
-        mouse.Path = null;
-        mouse.transform.localPosition = new_loc;
-        mouse.transform.eulerAngles = new Vector3(0, angle - 90, 0);
-        mouse.transform.gameObject.SetActive(true);
-
-        mouse_occupants.Remove(mouse);
+            mouse_occupants.Remove(mouse);
+        }
     }
 
     public bool CheckOccupants(MouseTemp mouse)
