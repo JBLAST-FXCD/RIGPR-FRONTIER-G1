@@ -61,9 +61,10 @@ MonoBehaviour:
   building_prefabs:
   - {fileID: 2330073249964640259, guid: 12e95f9bb2cb5cc4bb22f45793f14218, type: 3}
   - {fileID: 2338851394216969829, guid: 09a555275ea756e458ee57d3fde0bdd2, type: 3}
-  capacitys: 2000000020000000
+  - {fileID: 4914234091039009975, guid: 3246ac95aa51dde429e7bce8da2f0847, type: 3}
+  capacitys: 200000002000000020000000
   tier: 1
-  scrap_costs: 0500000005000000
+  scrap_costs: 050000000500000005000000
   milk_capasitys: 0300000003000000
   produced_cheese_type: 0
   selected_cheese: 0
@@ -141,8 +142,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 11, y: 15, z: 12.5}
-  m_Center: {x: -6, y: 7.5, z: 3.5}
+  m_Size: {x: 12, y: 15, z: 15}
+  m_Center: {x: -6.5, y: 7.5, z: 2}
 --- !u!33 &-61368153984321835
 MeshFilter:
   m_ObjectHideFlags: 0
