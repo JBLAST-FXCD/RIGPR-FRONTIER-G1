@@ -92,6 +92,12 @@ namespace UImGui
                     ImGui.EndTabItem();
                 }
 
+                if (ImGui.BeginTabItem("Buildings"))
+                {
+                    DrawBuildingsLogisticsTab();
+                    ImGui.EndTabItem();
+                }
+
                 if (ImGui.BeginTabItem("Console"))
                 {
                     DrawConsoleTab();
@@ -260,6 +266,75 @@ namespace UImGui
                     }
                 }
                 ImGui.PopID();
+            }
+        }
+
+        private void DrawBuildingsLogisticsTab()
+        {
+            ParentBuilding[] buildings = FindObjectsOfType(typeof(ParentBuilding)) as ParentBuilding[];
+
+            ImGui.Text($"Total buildings in system: {buildings.Length}");
+
+            ImGui.Separator();
+
+            foreach (var building in buildings)
+            {
+                ImGui.PushID(building.GetHashCode());
+
+                string building_type = string.Empty;
+
+                switch (building.Building_type)
+                {
+                    case BuildingType.residental:
+                        building_type = "[Residental]";
+                        break;
+                    case BuildingType.factory:
+                        building_type = "[Factory]";
+                        break;
+                    case BuildingType.market:
+                        building_type = "[Commercial]";
+                        break;
+                    case BuildingType.research:
+                        building_type = "[Research]";
+                        break;
+                    case BuildingType.tank:
+                        building_type = "[Tank]";
+                        break;
+                    case BuildingType.collector:
+                        building_type = "[Collector]";
+                        break;
+                }
+
+                if (ImGui.CollapsingHeader($"{building_type} {building.name}"))
+                {
+                    if (ImGui.Button("Upgrade building"))
+                    {
+                        building.UpdateTier();
+                    }
+
+                    if (ImGui.Button("Kick mouse"))
+                    {
+                        building.MouseLeave(building.Mouse_occupants[0]);
+                    }
+
+                    if(building_type == "[Factory]")
+                    {
+                        FactoryBuilding factory = (FactoryBuilding)building;
+
+                        ImGui.Text($"Producing cheese: {factory.Produce_cheese}");
+
+                        if (ImGui.Button("Turn factory On/Off"))
+                        {
+                            if (factory.Produce_cheese)
+                                factory.Produce_cheese = false;
+                            else
+                                factory.Produce_cheese = true;
+
+
+                            factory.ProduceCheese(factory.Produce_cheese);
+                        }
+                    }
+                }
             }
         }
 

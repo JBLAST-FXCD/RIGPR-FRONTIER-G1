@@ -9,6 +9,12 @@ using UnityEngine;
 /// On start the correct varition of the building is picked.
 /// Mice can enter and leave the building.
 /// </summary>
+
+public enum BuildingType
+{
+    residental, factory, market, research, tank, collector
+}
+
 public class ParentBuilding : MonoBehaviour
 {
     //Varibles for designers to create tiers.
@@ -25,6 +31,7 @@ public class ParentBuilding : MonoBehaviour
     public int Tier { get { return tier; } }
     public GameObject Building { get { return building; } }
     public List<MouseTemp> Mouse_occupants { get { return mouse_occupants; } }
+    public virtual BuildingType Building_type { get; }
 
     public ParentBuilding()
     {
@@ -36,23 +43,6 @@ public class ParentBuilding : MonoBehaviour
     protected virtual void Start()
     {
         ConstructTier();
-    }
-
-    protected virtual void Update()
-    {
-        //This is for debuging.
-        //Mise will leave when certain conditions are met, depending on the building type.
-        if (Input.GetKeyDown(KeyCode.E) && mouse_occupants.Count > 0)
-        {
-            MouseLeave(mouse_occupants[0]);
-        }
-
-        //This is for debuging.
-        //Buildings will be upgraded when certain conditions are met, depending on the building type.
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            UpdateTier();
-        }
     }
 
     protected virtual void TierSelection()
@@ -72,7 +62,7 @@ public class ParentBuilding : MonoBehaviour
         }
     }
 
-    protected virtual void UpdateTier()
+    public virtual void UpdateTier()
     {
         tier++;
         if (tier > 0 && tier <= capacitys.Length)

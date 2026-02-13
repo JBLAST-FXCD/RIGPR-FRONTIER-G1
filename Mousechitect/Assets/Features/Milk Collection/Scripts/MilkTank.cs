@@ -16,6 +16,7 @@ public class MilkTank : ParentBuilding, IMilkContainer
     public int CURRENT_MILK_AMOUNT {get => current_milk_amount; set => current_milk_amount = value; }
     public int MAX_MILK_CAPACITY { get => max_capacity; set => max_capacity = value; }
     public bool IS_TANK => true;
+    public override BuildingType Building_type => BuildingType.tank;
 
     public bool is_full => current_milk_amount >= max_capacity;
     public bool is_nearly_full => current_milk_amount >= (max_capacity * 0.8f);

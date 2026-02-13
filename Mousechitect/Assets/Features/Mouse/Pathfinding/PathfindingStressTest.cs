@@ -51,7 +51,27 @@ public class StressTest : MonoBehaviour
 
         //LERP mouse if fail start pathfinding again.
         if (mouse.Path != null)
-            StartCoroutine(mouse.FollowPath((success) => { if (success == false) { mouse.Path = pathfinding.CreatePath(mouse_loc, building_loc); } }));
+        {
+            mouse.Moving = true;
+            mouse.Rigidbody = false;
+            StartCoroutine(mouse.FollowPath((success) =>
+            {
+                if (success == false)
+                {
+                    mouse.Path = pathfinding.CreatePath(mouse_loc, building_loc);
+                }
+                else
+                {
+                    Vector2Int temp = building_loc;
+                    building_loc = GetPosition(building);
+
+                    if (temp == building_loc)
+                        mouse.Rigidbody = true;
+                    else
+                        GetVectors(building, mouse);
+                }
+            }));
+        }
     }
 
     protected void FirstWave()
@@ -76,40 +96,35 @@ public class StressTest : MonoBehaviour
         Invoke(nameof(SecondWave), 30);
     }
 
-    protected void SecondWave(MouseTemp mouse, ParentBuilding building)
+    protected void Move(MouseTemp mouse)
     {
-        building.MouseLeave(mouse);
+        int rand = UnityEngine.Random.Range(0, buildings.Length);
+
+        if (GetPosition(buildings[rand]) == mouse.Position)
+        {
+            Move(mouse);
+        }
+        else
+        {
+            if (mouse.Home != null)
+                mouse.Home.MouseLeave(mouse);
+
+            GetVectors(buildings[rand], mouse);
+        }
     }
 
     protected void SecondWave()
     {
-        int j = 0;
         UnityEngine.Random.InitState((int)DateTime.Now.Ticks);
         for (int i = 0; i < mouses.Length; i++)
         {
-            int rand = UnityEngine.Random.Range(0, buildings.Length);
-            if (buildings[j].CheckOccupants(mouses[i]))
+            if (!mouses[i].Moving)
             {
-                buildings[j].MouseLeave(mouses[i]);
-
-                GetVectors(buildings[rand], mouses[i]);
+                Move(mouses[i]);
             }
-
-            j++;
-            if (j == buildings.Length)
-                j = 0;
         }
 
         Invoke(nameof(SecondWave), 30);
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            FirstWave();
-        }
     }
 
     // added by jess 
