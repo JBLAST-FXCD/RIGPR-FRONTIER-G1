@@ -466,23 +466,15 @@ public class Mouse_AI : MonoBehaviour
             mouse.Rigidbody = false;
             StartCoroutine(mouse.FollowPath((success) =>
             {
-                if (success == false)
+                if (!success)
                 {
-                    mouse.Path = pathfinding.CreatePath(mouse_loc, building_loc);
+                    MoveMouse(mouse, building, next_building);
                 }
                 else
                 {
-                    Vector2Int temp = building_loc;
-                    building_loc = building.GetPosition();
-
-                    if (temp == building_loc)
-                    {
-                        mouse.Rigidbody = true;
-                        GetRoute(mouse, next_building.GetPosition());
-                        mice.TryAdd(next_building, mouse);
-                    }
-                    else
-                        MoveMouse(mouse, building, next_building);
+                    mouse.Moving = false;
+                    GetRoute(mouse, next_building.GetPosition());
+                    mice.TryAdd(next_building, mouse);
                 }
             }));
         }
@@ -506,19 +498,14 @@ public class Mouse_AI : MonoBehaviour
             mouse.Rigidbody = false;
             StartCoroutine(mouse.FollowPath((success) =>
             {
-                if (success == false)
+                if (!success)
                 {
-                    mouse.Path = pathfinding.CreatePath(mouse_loc, building_loc);
+                    MoveMouse(mouse, building);
                 }
                 else
                 {
-                    Vector2Int temp = building_loc;
-                    building_loc = building.GetPosition();
-
-                    if (temp == building_loc)
-                        mouse.Rigidbody = true;
-                    else
-                        MoveMouse(mouse, building);
+                    mouse.Moving = false;
+                    mouse.Rigidbody = true;
                 }
             }));
         }
@@ -597,34 +584,27 @@ public class Mouse_AI : MonoBehaviour
     {
         foreach (var (key, value) in mice) 
         {
-            MouseTemp mouse = value;
-            Vector2Int building_loc = key.GetPosition();
+            value.Moving = false;
+            value.Home.MouseLeave(value);
 
             //LERP mouse if fail start pathfinding again.
-            if (mouse.Path != null)
+            if (value.Path != null)
             {
-                mouse.Moving = true;
-                mouse.Rigidbody = false;
-                StartCoroutine(mouse.FollowPath((success) =>
+                value.Moving = true;
+                value.Rigidbody = false;
+                StartCoroutine(value.FollowPath((success) =>
                 {
-                    if (success == false)
+                    if (!success)
                     {
-                        mouse.Path = pathfinding.CreatePath(mouse.Position, building_loc);
+                        MoveMouse(value, key);
                     }
                     else
                     {
-                        Vector2Int temp = building_loc;
-                        building_loc = key.GetPosition();
-
-                        if (temp == building_loc)
-                        {
-                            mouse.Rigidbody = true;
-                            mice.Remove(key);
-                            mouse.Moving = false;
-                            pathfinding.SavePath(mouse.Position, building_loc, mouse.Path);
-                        }
-                        else
-                            MoveMouse(mouse, key);
+                        value.Moving = false;
+                        value.Rigidbody = true;
+                        mice.Remove(key);
+                        value.Moving = false;
+                        pathfinding.SavePath(value.Position, key.GetPosition(), value.Path);
                     }
                 }));
             }
@@ -647,7 +627,5 @@ public class Mouse_AI : MonoBehaviour
                     Pathfinding();
             }
         }
-
-        Invoke(nameof(BehaviourTree), 15f);
     }
 }

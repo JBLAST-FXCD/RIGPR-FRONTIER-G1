@@ -317,7 +317,8 @@ namespace UImGui
 
                     if (ImGui.Button("Kick mouse"))
                     {
-                        building.MouseLeave(building.Mouse_occupants[0]);
+                        if(building.Mouse_occupants.Count > 0)
+                            building.MouseLeave(building.Mouse_occupants[0]);
                     }
 
                     switch (building.Building_type)

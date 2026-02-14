@@ -36,6 +36,10 @@ public class MilkTank : ParentBuilding, IMilkContainer
     protected new void OnTriggerStay(Collider other)
     {
         if (other != null && other.tag == "MouseTemp" && mouse_occupants.Count < capacity)
-            mouse_occupants.Add(other.gameObject.GetComponent<MouseTemp>());
+        {
+            MouseTemp mouse = other.gameObject.GetComponent<MouseTemp>();
+            mouse_occupants.Add(mouse);
+            mouse.Home = this;
+        }
     }
 }

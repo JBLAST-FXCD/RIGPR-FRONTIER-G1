@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(CapsuleCollider))]
 
 public class MouseTemp : MonoBehaviour
 {
@@ -25,7 +25,7 @@ public class MouseTemp : MonoBehaviour
     public List<BaseNode> Path { get { return path; } set { path = value; } }
     public static GridManager Grid_manager { set { grid_manager = value; } }
     public ParentBuilding Home { get { return home; } set { home = value; } }
-    public bool Rigidbody {  set { GetComponent<CapsuleCollider>().enabled = value; } }
+    public bool Rigidbody { set { GetComponent<CapsuleCollider>().enabled = value; } }
 
     // updated by Anthony - 10/2/2026
     [Header("Per-mouse Morale")]
@@ -79,7 +79,7 @@ public class MouseTemp : MonoBehaviour
 
             if (path[i].speed == speed)
             {
-                if(speed == 0)
+                if (speed == 0)
                     speed = 1;
 
                 float time_elapsed = 0;
@@ -92,11 +92,17 @@ public class MouseTemp : MonoBehaviour
                 }
             }
             else
-                callback(false);
+                break;
         }
+
         path = null;
-        moving = false;
-        callback(true);
+        Rigidbody = true;
+        yield return new WaitForFixedUpdate();
+
+        if (home == null)
+            callback(false);
+        else
+            callback(true);
     }
 
     // Anthony - 10/2/2026 (Per-mouse morale)
