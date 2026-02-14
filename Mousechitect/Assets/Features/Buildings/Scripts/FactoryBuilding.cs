@@ -121,8 +121,9 @@ public class FactoryBuilding : ParentBuilding
             factory_switch = true;
             this.GetComponent<BoxCollider>().center = building.transform.Find("EntrancePoint").localPosition;
             RefreshAllowedCheesesForTier();
-
         }
+        else
+            tier = capacitys.Length;
     }
 
     //Each cheese has production time
@@ -152,13 +153,15 @@ public class FactoryBuilding : ParentBuilding
     }
 
     //For player to create cheese when factory is running
-    public void ProduceCheese(bool input)
+    public void ProduceCheeseSwitch()
     {
-        if (factory_switch == true)
-        {
-            produce_cheese = input;
+        if (produce_cheese)
+            produce_cheese = false;
+        else
+            produce_cheese = true;
+
+        if (produce_cheese)
             CheeseProduction();
-        }
     }
 
     //Fits GDD requirement of making cheese when theres enough milk

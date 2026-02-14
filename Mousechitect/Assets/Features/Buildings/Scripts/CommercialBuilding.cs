@@ -72,7 +72,7 @@ public class CommercialBuilding : ParentBuilding
         UnityEngine.Random.InitState((int)DateTime.Now.Ticks);
 
         //These funtions are looped infinitely per GDD
-        RecalculatePopularity();
+        PopularityAlgorithm();
         SellDelay();
 
         ConstructTier();

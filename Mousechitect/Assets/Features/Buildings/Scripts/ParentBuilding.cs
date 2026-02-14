@@ -73,6 +73,8 @@ public class ParentBuilding : MonoBehaviour
             building = Instantiate(building_prefab, gameObject.transform);
             this.GetComponent<BoxCollider>().center = building.transform.Find("EntrancePoint").localPosition;
         }
+        else
+            tier = capacitys.Length;
     }
 
     //Mouse is storded and turned off to make effetivly inside the building.

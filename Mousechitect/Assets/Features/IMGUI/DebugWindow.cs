@@ -307,6 +307,9 @@ namespace UImGui
 
                 if (ImGui.CollapsingHeader($"{building_type} {building.name}"))
                 {
+                    ImGui.Text($"Tier: {building.Tier}");
+                    ImGui.Text($"Mice in building: {building.Mouse_occupants.Count}");
+
                     if (ImGui.Button("Upgrade building"))
                     {
                         building.UpdateTier();
@@ -317,22 +320,30 @@ namespace UImGui
                         building.MouseLeave(building.Mouse_occupants[0]);
                     }
 
-                    if(building_type == "[Factory]")
+                    switch (building.Building_type)
                     {
-                        FactoryBuilding factory = (FactoryBuilding)building;
+                        case BuildingType.residental:
+                            ResidentialBuilding home = (ResidentialBuilding)building;
+                            ImGui.Text($"Building quality: {home.Quality}");
+                            break;
+                        case BuildingType.factory:
+                            FactoryBuilding factory = (FactoryBuilding)building;
 
-                        ImGui.Text($"Producing cheese: {factory.Produce_cheese}");
+                            ImGui.Text($"Producing cheese: {factory.Produce_cheese}");
 
-                        if (ImGui.Button("Turn factory On/Off"))
-                        {
-                            if (factory.Produce_cheese)
-                                factory.Produce_cheese = false;
-                            else
-                                factory.Produce_cheese = true;
-
-
-                            factory.ProduceCheese(factory.Produce_cheese);
-                        }
+                            if (ImGui.Button("Turn factory On/Off"))
+                                factory.ProduceCheeseSwitch();
+                            break;
+                        case BuildingType.market:
+                            CommercialBuilding market = (CommercialBuilding)building;
+                            ImGui.Text($"AmericanCheese popularity: {market.Cheese_popularity[(int)CheeseTypes.AmericanCheese]}");
+                            ImGui.Text($"Cheddar popularity:        {market.Cheese_popularity[(int)CheeseTypes.Cheddar]}");
+                            ImGui.Text($"Mozzarella popularity:     {market.Cheese_popularity[(int)CheeseTypes.Mozzarella]}");
+                            ImGui.Text($"Brie popularity:           {market.Cheese_popularity[(int)CheeseTypes.Brie]}");
+                            ImGui.Text($"Gouda popularity:          {market.Cheese_popularity[(int)CheeseTypes.Gouda]}");
+                            ImGui.Text($"Parmesan popularity:       {market.Cheese_popularity[(int)CheeseTypes.Parmesan]}");
+                            ImGui.Text($"BlueCheese popularity:     {market.Cheese_popularity[(int)CheeseTypes.BlueCheese]}");
+                            break;
                     }
                 }
             }
