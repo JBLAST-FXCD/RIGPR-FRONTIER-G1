@@ -65,7 +65,7 @@ MonoBehaviour:
   capacitys: 200000002000000020000000
   tier: 1
   scrap_costs: 050000000500000005000000
-  milk_capasitys: 0300000003000000
+  milk_capasitys: 140000003200000064000000
   produced_cheese_type: 0
   selected_cheese: 0
 --- !u!65 &2824112730333103816

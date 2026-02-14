@@ -96,7 +96,6 @@ public class MouseTemp : MonoBehaviour
         }
         path = null;
         moving = false;
-        Rigidbody = true;
         callback(true);
     }
 

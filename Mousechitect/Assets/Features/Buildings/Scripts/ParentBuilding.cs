@@ -118,4 +118,21 @@ public class ParentBuilding : MonoBehaviour
             data.mouse_ids.Add(mouse_occupants[i].Mouse_id);
         }
     }
+
+    // GetVectors Updated by Anthony 23/01/26 
+    public Vector2Int GetPosition()
+    {
+        //Try to use the entrance point (preferred for pathfinding)
+        Transform entrance = this.Building.transform.Find("EntrancePoint");
+
+        Vector3 target_world = (entrance != null) ? entrance.position : building.transform.position;
+
+        //Convert world space to grid coordinates
+        Vector2Int building_loc = new Vector2Int(
+            Mathf.RoundToInt(target_world.x),
+            Mathf.RoundToInt(target_world.z)
+        );
+
+        return building_loc;
+    }
 }

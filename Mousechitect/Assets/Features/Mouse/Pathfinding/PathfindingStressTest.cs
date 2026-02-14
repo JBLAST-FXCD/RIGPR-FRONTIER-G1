@@ -17,32 +17,11 @@ public class StressTest : MonoBehaviour
         occupants = 32;
     }
 
-    protected Vector2Int GetPosition(ParentBuilding building)
-    {
-        //Try to use the entrance point (preferred for pathfinding)
-        Transform entrance = building.Building.transform.Find("EntrancePoint");
-
-        Vector3 target_world = (entrance != null) ? entrance.position : building.transform.position;
-
-        //Convert world space to grid coordinates
-        Vector2Int building_loc = new Vector2Int(
-            Mathf.RoundToInt(target_world.x),
-            Mathf.RoundToInt(target_world.z)
-        );
-
-        return building_loc;
-    }
-
     protected void GetVectors(ParentBuilding building, MouseTemp mouse)
     {
         //Convert world space to grid coordinates
-        Vector2Int building_loc = GetPosition(building);
-
-        //Convert world space to grid coordinates
-        Vector2Int mouse_loc = new Vector2Int(
-            Mathf.RoundToInt(mouse.transform.position.x),
-            Mathf.RoundToInt(mouse.transform.position.z)
-        );
+        Vector2Int building_loc = building.GetPosition();
+        Vector2Int mouse_loc = mouse.Position;
 
         //Caculate path.
         MouseTemp.Grid_manager = grid_manager;
@@ -63,7 +42,7 @@ public class StressTest : MonoBehaviour
                 else
                 {
                     Vector2Int temp = building_loc;
-                    building_loc = GetPosition(building);
+                    building_loc = building.GetPosition();
 
                     if (temp == building_loc)
                         mouse.Rigidbody = true;
@@ -100,7 +79,7 @@ public class StressTest : MonoBehaviour
     {
         int rand = UnityEngine.Random.Range(0, buildings.Length);
 
-        if (GetPosition(buildings[rand]) == mouse.Position)
+        if (buildings[rand].GetPosition() == mouse.Position)
         {
             Move(mouse);
         }
