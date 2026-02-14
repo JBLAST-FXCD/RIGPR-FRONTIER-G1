@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
 
 // Iain Benner 05/12/2025
@@ -123,16 +125,9 @@ public class ParentBuilding : MonoBehaviour
     // GetVectors Updated by Anthony 23/01/26 
     public Vector2Int GetPosition()
     {
-        //Try to use the entrance point (preferred for pathfinding)
         Transform entrance = this.Building.transform.Find("EntrancePoint");
 
-        Vector3 target_world = (entrance != null) ? entrance.position : building.transform.position;
-
-        //Convert world space to grid coordinates
-        Vector2Int building_loc = new Vector2Int(
-            Mathf.RoundToInt(target_world.x),
-            Mathf.RoundToInt(target_world.z)
-        );
+        Vector2Int building_loc = new Vector2Int((int)entrance.position.x, (int)entrance.position.z);
 
         return building_loc;
     }

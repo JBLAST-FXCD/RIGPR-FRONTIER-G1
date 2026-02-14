@@ -30,7 +30,7 @@ public class FactoryCheeseSwitcherDebug : MonoBehaviour
         if (main_camera == null) main_camera = Camera.main;
 
         int mask = LayerMask.GetMask("Buildings");
-        Debug.Log($"[FactorySwitch] BuildingTest mask = {mask}");
+        //Debug.Log($"[FactorySwitch] BuildingTest mask = {mask}");
 
         factory_mask = mask;
     }

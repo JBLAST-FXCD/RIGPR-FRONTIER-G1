@@ -277,19 +277,16 @@ public class PathFinding: MonoBehaviour, ISaveable
                 uses = 0;
             }
             else
-            {
                 uses++;
-                return route;
-            }
         }
-        return null;
+        return route;
     }
 
     public void SavePath(Vector2Int mouse, Vector2Int building, List<BaseNode> route)
     {
         //Save
         string key = GenKey(mouse, building);
-        solutions.Add(key, route);
+        solutions.TryAdd(key, route);
     }
 
     public void PopulateSaveData(GameData data)

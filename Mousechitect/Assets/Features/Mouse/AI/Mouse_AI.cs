@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using static UnityEngine.Rendering.DebugUI;
 
 public class Mouse_AI : MonoBehaviour
 {
@@ -56,6 +58,9 @@ public class Mouse_AI : MonoBehaviour
         {
             ParentBuilding building = FindObjectOfType(typeof(ParentBuilding)) as ParentBuilding;
             MouseTemp      mouse    = FindObjectOfType(typeof(MouseTemp)) as MouseTemp;
+
+            MouseTemp.Grid_manager = grid_manager;
+            pathfinding.Grid_manager = grid_manager;
 
             if (building != null && mouse != null)
                 MoveMouse(mouse, building);
@@ -248,9 +253,9 @@ public class Mouse_AI : MonoBehaviour
         return false;
     }
 
-    protected int CheckIfCloser(Vector2Int destination, Vector2Int location, float current_mag, int i)
+    protected int CheckIfCloser(Vector2Int destination, Vector2Int location, float current_mag, int index, int i)
     {
-        int rv = 0;
+        int rv = index;
 
         float new_mag = (destination - location).sqrMagnitude;
         if (new_mag < current_mag)
@@ -267,7 +272,9 @@ public class Mouse_AI : MonoBehaviour
     protected MouseTemp FindClosestMouse(Task task, ParentBuilding[] buildings, BuildingType building)
     {
         float current_mag = float.MaxValue;
-        int index = 0;
+        int index1 = 0;
+        int index2 = 0;
+        bool safe = false;
 
         if (buildings != null && buildings.Length > 0)
         {
@@ -284,14 +291,21 @@ public class Mouse_AI : MonoBehaviour
                         break;
                 }
 
-                if (container.CURRENT_MILK_AMOUNT >= task.amounts[0] && buildings[i].Mouse_occupants.Count > 0)
-                    index = CheckIfCloser(task.building.GetPosition(), buildings[i].GetPosition(), current_mag, i);
+                for (int j = 0; j < buildings[i].Mouse_occupants.Count; j++)
+                {
+                    if (container.CURRENT_MILK_AMOUNT >= task.amounts[0] && !buildings[i].Mouse_occupants[j].Moving)
+                    {
+                        index1 = CheckIfCloser(task.building.GetPosition(), buildings[i].GetPosition(), current_mag, index1, i);
+                        index2 = j;
+                        safe = true;
+                    }
+                }
             }
 
-            if(buildings[index].Mouse_occupants.Count > 0)
+            if(safe)
             {
-                MouseTemp mouse = buildings[index].Mouse_occupants[0];
-                buildings[index].MouseLeave(mouse);
+                MouseTemp mouse = buildings[index1].Mouse_occupants[index2];
+                buildings[index1].MouseLeave(mouse);
                 return mouse;
             }
         }
@@ -310,7 +324,7 @@ public class Mouse_AI : MonoBehaviour
             for (int i = 0; i < mice.Length; i++)
             {
                 if (mice[i].Moving == false)
-                    index = CheckIfCloser(building, mice[i].Position, current_mag, i);
+                    index = CheckIfCloser(building, mice[i].Position, current_mag, index, i);
             }
 
             if(mice[index].Home != null)
@@ -343,7 +357,7 @@ public class Mouse_AI : MonoBehaviour
                 }
 
                 if (container.CURRENT_MILK_AMOUNT >= task.amounts[0])
-                    index = CheckIfCloser(task.building.GetPosition(), buildings[i].GetPosition(), current_mag, i);
+                    index = CheckIfCloser(task.building.GetPosition(), buildings[i].GetPosition(), current_mag, index, i);
             }
 
             return buildings[index];
@@ -376,6 +390,8 @@ public class Mouse_AI : MonoBehaviour
 
     protected bool PickMouseInBuilding()
     {
+        int change = mice.Count;
+
         for (int i = tasks.Count - 1; i >= 0; i--) 
         {
             switch (tasks[i].building_type)
@@ -402,12 +418,11 @@ public class Mouse_AI : MonoBehaviour
                     break;
             }
         }
-        if (mice.Count > 0)
-        {
+        if (change == mice.Count)
+            return false;
+        else
             MoveSingleRoute();
             return true;
-        }
-        return false;
     }
 
     protected void GetRoute(MouseTemp mouse, Vector2Int building_loc)
@@ -473,8 +488,8 @@ public class Mouse_AI : MonoBehaviour
                 else
                 {
                     mouse.Moving = false;
-                    GetRoute(mouse, next_building.GetPosition());
-                    mice.TryAdd(next_building, mouse);
+                    mouse.Home.MouseLeave(mouse);
+                    MoveMouse(mouse, next_building);
                 }
             }));
         }
@@ -487,9 +502,8 @@ public class Mouse_AI : MonoBehaviour
         Vector2Int mouse_loc = mouse.Position;
 
         //Caculate path.
-        MouseTemp.Grid_manager = grid_manager;
-        pathfinding.Grid_manager = grid_manager;
-        mouse.Path = pathfinding.CreatePath(mouse_loc, building_loc);
+        List<BaseNode> path = pathfinding.CreatePath(mouse_loc, building_loc);
+        mouse.Path = path;
 
         //LERP mouse if fail start pathfinding again.
         if (mouse.Path != null)
@@ -506,6 +520,7 @@ public class Mouse_AI : MonoBehaviour
                 {
                     mouse.Moving = false;
                     mouse.Rigidbody = true;
+                    pathfinding.SavePath(mouse_loc, building_loc, path);
                 }
             }));
         }
@@ -513,15 +528,17 @@ public class Mouse_AI : MonoBehaviour
 
     protected bool PickMouse()
     {
+        int change = mice.Count;
+
         List<MouseTemp> mouses = new List<MouseTemp>();
-        mouses.AddRange(FindObjectsOfType(typeof(MouseTemp)) as MouseTemp[]);
+        mouses.AddRange(FindObjectsOfType(typeof(MouseTemp), true) as MouseTemp[]);
 
         for (int i = 0; i < mouses.Count; i++)
         {
-            if (mouses[i].Moving == true)
+            if (mouses[i].Moving)
                 mouses.RemoveAt(i);
         }
-
+        
         MouseTemp mouse = gameObject.AddComponent<MouseTemp>();
 
         for (int i = tasks.Count - 1; i >= 0; i--)
@@ -537,6 +554,8 @@ public class Mouse_AI : MonoBehaviour
 
                         if (mouse != null)
                         {
+                            if (mouse.Home != null)
+                                mouse.Home.MouseLeave(mouse);
                             mouses.Remove(mouse);
                             mouse.Moving = true;
                             MoveMouse(mouse, milk_building, tasks[i].building);
@@ -548,6 +567,8 @@ public class Mouse_AI : MonoBehaviour
 
                         if (mouse != null)
                         {
+                            if (mouse.Home != null)
+                                mouse.Home.MouseLeave(mouse);
                             mouses.Remove(mouse);
                             mouse.Moving = true;
                             GetRoute(mouse, tasks[i].building.GetPosition());
@@ -565,6 +586,8 @@ public class Mouse_AI : MonoBehaviour
 
                             if (mouse != null)
                             {
+                                                            if (mouse.Home != null)
+                                mouse.Home.MouseLeave(mouse);
                                 mouses.Remove(mouse);
                                 mouse.Moving = true;
                                 MoveMouse(mouse, colletor_building, tasks[i].building);
@@ -575,39 +598,16 @@ public class Mouse_AI : MonoBehaviour
             }
         }
 
-        if (mice.Count > 0)
-            return true;
-        return false;
+        if (change == mice.Count)
+            return false;
+        return true;
     }
 
     protected void Pathfinding()
     {
         foreach (var (key, value) in mice) 
         {
-            value.Moving = false;
-            value.Home.MouseLeave(value);
-
-            //LERP mouse if fail start pathfinding again.
-            if (value.Path != null)
-            {
-                value.Moving = true;
-                value.Rigidbody = false;
-                StartCoroutine(value.FollowPath((success) =>
-                {
-                    if (!success)
-                    {
-                        MoveMouse(value, key);
-                    }
-                    else
-                    {
-                        value.Moving = false;
-                        value.Rigidbody = true;
-                        mice.Remove(key);
-                        value.Moving = false;
-                        pathfinding.SavePath(value.Position, key.GetPosition(), value.Path);
-                    }
-                }));
-            }
+            MoveMouse(value, key);
         }
     }
 

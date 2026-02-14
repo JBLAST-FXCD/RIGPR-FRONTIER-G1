@@ -185,6 +185,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Mouse
       objectReference: {fileID: 0}
+    - target: {fileID: 7107526642561120775, guid: 4af012edfcc5a9b4383d0ecd2f838d66,
+        type: 3}
+      propertyPath: m_Name
+      value: MouseModel
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

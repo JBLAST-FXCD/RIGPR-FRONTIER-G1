@@ -151,13 +151,15 @@ public class ResourceManager : MonoBehaviour, ISaveable
         data.player_data.resources.scrap = scrap;
         data.player_data.resources.total_cheese = total_cheese;
         data.player_data.resources.money = money;
-/*
+
+        data.player_data.resources.cheese_amounts = new int[Enum.GetValues(typeof(CheeseTypes)).Length];
+
         int i = 0;
         foreach (CheeseTypes c in Enum.GetValues(typeof(CheeseTypes)))
         {
             data.player_data.resources.cheese_amounts[i] = cheeses[c];
             i++;
-        }*/
+        }
     }
 
     public void LoadFromSaveData(GameData data)
@@ -165,13 +167,13 @@ public class ResourceManager : MonoBehaviour, ISaveable
         scrap = data.player_data.resources.scrap;
         total_cheese = data.player_data.resources.total_cheese;
         money = data.player_data.resources.money;
-/*
+
         int i = 0;
-        foreach (CheeseTypes c in Enum.GetValues(typeof(CheeseTypes))) 
+        foreach (CheeseTypes c in Enum.GetValues(typeof(CheeseTypes)))
         {
             cheeses[c] = data.player_data.resources.cheese_amounts[i];
             i++;
-        }*/
+        }
     }
 
     // Updates by Anthony - 05/02/2026
@@ -230,7 +232,7 @@ public class ResourceManager : MonoBehaviour, ISaveable
             IncActive(new_type);
         }
 
-        Debug.Log($"[ResourceManager] ACTIVE variety={active_type_counts.Count} (factory {factory.name}={new_type})");
+        //Debug.Log($"[ResourceManager] ACTIVE variety={active_type_counts.Count} (factory {factory.name}={new_type})");
     }
 
     // Removes a factory from ACTIVE variety tracking (called when a factory is disabled/destroyed).

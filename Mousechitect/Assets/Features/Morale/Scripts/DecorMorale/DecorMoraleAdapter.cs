@@ -67,7 +67,7 @@ public class DecorMoraleAdapter : MonoBehaviour, IMoraleContributor
 
         // Convert points to a 0-1 contribution
         float score = Mathf.Clamp01(points / Mathf.Max(0.01f, points_for_max_score));
-        Debug.Log($"[Morale-Decor] points={points:0.00} score={score:0.00}");
+        //Debug.Log($"[Morale-Decor] points={points:0.00} score={score:0.00}");
         return score;
     }
 }

@@ -25,7 +25,7 @@ public class FoodVarietyMoraleAdapter : MonoBehaviour, IMoraleContributor
         // Map 0..types_for_max_score -> 0..1
         float score = Mathf.Clamp01((float)variety / types_for_max_score);
 
-        Debug.Log($"[Morale-Food] ACTIVE variety={variety}/{types_for_max_score} score={score:0.00}");
+        //Debug.Log($"[Morale-Food] ACTIVE variety={variety}/{types_for_max_score} score={score:0.00}");
         return score;
     }
 }
