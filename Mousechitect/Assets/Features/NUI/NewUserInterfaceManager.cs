@@ -10,8 +10,9 @@ public class NewUserInterfaceManager : MonoBehaviour
     // Created by Joe Mcdonnell, 09/02/2026
 
     // --- References ---
-    
+
     [Header("General")]
+    [SerializeField] private NUIConnector nui_connector;
     [SerializeField] private GameObject path_panel;
 
     [Header("Build Panel")]
@@ -21,9 +22,6 @@ public class NewUserInterfaceManager : MonoBehaviour
     [SerializeField] private GameObject[] industrial_rows;
     [SerializeField] private GameObject[] commercial_rows;
     [SerializeField] private GameObject[] research_rows;
-
-    [Header("Systems")]
-    [SerializeField] private BuildingManager building_manager;
 
 
     // --- Internal Variables ---
@@ -51,10 +49,6 @@ public class NewUserInterfaceManager : MonoBehaviour
 
     // --- Private Functions ---
 
-    private void Start()
-    {
-        building_manager.UpdateBuildPanel += ClosePanels;
-    }
 
     private GameObject[] LoadBuildArray(CATEGORY load_category)
     {
@@ -99,7 +93,7 @@ public class NewUserInterfaceManager : MonoBehaviour
         switch (open_panel)
         {
             case OPEN_PANEL.OPEN_PANEL_BUILD:
-                ToggleBuildPanel();
+                ToggleBuildPanel(false);
                 break;
             case OPEN_PANEL.OPEN_PANEL_PATH:
                 TogglePathPanel();
@@ -119,7 +113,7 @@ public class NewUserInterfaceManager : MonoBehaviour
 
     }
 
-    public void ToggleBuildPanel()
+    public void ToggleBuildPanel(bool overide)
     {
         if (open_panel == OPEN_PANEL.OPEN_PANEL_BUILD)
         {
@@ -137,6 +131,10 @@ public class NewUserInterfaceManager : MonoBehaviour
 
         }
 
+        if (!overide)
+        {
+            nui_connector.NUIToggleBuildTool();
+        }
     }
 
     public void TogglePathPanel()
@@ -155,6 +153,7 @@ public class NewUserInterfaceManager : MonoBehaviour
             path_panel.GetComponent<Animator>().SetBool("is_panel_open", true);
             open_panel = OPEN_PANEL.OPEN_PANEL_PATH;
         }
+        nui_connector.NUITogglePathTool();
     }
 
     public void BuildCategoryNext()

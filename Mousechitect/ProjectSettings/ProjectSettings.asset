@@ -812,7 +812,7 @@ PlayerSettings:
   webGLMemoryGeometricGrowthCap: 96
   webGLPowerPreference: 2
   scriptingDefineSymbols:
-    Standalone: UIMGUI_REMOVE_IMGUIZMO;UIMGUI_REMOVE_IMNODES;UIMGUI_REMOVE_IMPLOT
+    Standalone: UIMGUI_REMOVE_IMPLOT;UIMGUI_REMOVE_IMNODES;UIMGUI_REMOVE_IMGUIZMO
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend: {}
