@@ -2,6 +2,7 @@ using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
 using System;
+using UImGui;
 
 // Updated by Iain Benner 02/02/2026
 // Hani Hailston 13/12/2025
@@ -32,6 +33,8 @@ public class ResourceManager : MonoBehaviour, ISaveable
 
     // cheese type -> how many factories currently set to it
     private readonly Dictionary<CheeseTypes, int> active_type_counts = new Dictionary<CheeseTypes, int>();
+
+    public int total_milk => MilkManager.Instance != null ? MilkManager.Instance.GetTotalMilk() : 0;
 
     public int Scrap { get { return scrap; } }
     public int Total_cheese { get {return total_cheese; } }
@@ -262,6 +265,29 @@ public class ResourceManager : MonoBehaviour, ISaveable
     public bool IsCheeseTypeActive(CheeseTypes type)
     {
         return active_type_counts != null && active_type_counts.ContainsKey(type);
+    }
+
+    // Jess 15/02/2026
+    public void ConsumeMilkFromNetwork(int amount)
+    {
+        int remaining = amount;
+        
+        while (remaining > 0)
+        {
+            IMilkContainer source = MilkManager.Instance.RequestMilkSource(1);
+
+            if (source != null)
+            {
+                int take = Mathf.Min(source.CURRENT_MILK_AMOUNT, remaining);
+                source.CURRENT_MILK_AMOUNT -= take;
+                remaining -= take;
+            }
+            else
+            {
+                DebugWindow.LogToConsole($"[ResourceManager] Warning: Not enough milk in network");
+                break;
+            }
+        }
     }
 
 }

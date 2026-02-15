@@ -47,7 +47,7 @@ public class Cheese : MonoBehaviour
         rv.prodution_time = prodution_times[index];
         rv.milk_cost = milk_costs[index];
         rv.scrap_cost = scrap_costs[index];
-        rv.scrap_cost = scrap_price[index];
+        rv.scrap_price = scrap_price[index];
 
         return rv;
     }
