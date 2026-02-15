@@ -338,21 +338,6 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1466573997635342453, guid: 946f8cebc86ddcd46a88837349f845d8,
-        type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: NUIPlaceBuilding
-      objectReference: {fileID: 0}
-    - target: {fileID: 1466573997635342453, guid: 946f8cebc86ddcd46a88837349f845d8,
-        type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: NUIConnector, Assembly-CSharp
-      objectReference: {fileID: 0}
-    - target: {fileID: 1466573997635342453, guid: 946f8cebc86ddcd46a88837349f845d8,
-        type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_IntArgument
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 1829412327764070441, guid: 946f8cebc86ddcd46a88837349f845d8,
         type: 3}
       propertyPath: m_AnchorMax.y
