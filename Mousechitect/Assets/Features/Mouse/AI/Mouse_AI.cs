@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using static UnityEngine.Rendering.DebugUI;
 
 public class Mouse_AI : MonoBehaviour
 {
@@ -19,6 +17,7 @@ public class Mouse_AI : MonoBehaviour
     protected float milk_weight;
 
     protected float overtime_multiple;
+    protected float tree_cycle;
 
     protected FactoryBuilding[] factories;
     protected CommercialBuilding[] markets;
@@ -46,6 +45,8 @@ public class Mouse_AI : MonoBehaviour
         milk_weight   = 0.5f;
 
         overtime_multiple = 1.1f;
+        //seconds
+        tree_cycle = 15;
 
         tasks = new List<Task>();
         mice = new Dictionary<ParentBuilding, MouseTemp>();
@@ -64,14 +65,6 @@ public class Mouse_AI : MonoBehaviour
 
             if (building != null && mouse != null)
                 MoveMouse(mouse, building);
-        }
-
-        if (Input.GetKeyDown(KeyCode.Z))
-        {
-            MouseTemp.Grid_manager = grid_manager;
-            pathfinding.Grid_manager = grid_manager;
-
-            BehaviourTree();
         }
     }
 
@@ -531,7 +524,7 @@ public class Mouse_AI : MonoBehaviour
         int change = mice.Count;
 
         List<MouseTemp> mouses = new List<MouseTemp>();
-        mouses.AddRange(FindObjectsOfType(typeof(MouseTemp), true) as MouseTemp[]);
+        mouses.AddRange(GameObject.FindObjectsOfType(typeof(MouseTemp), true) as MouseTemp[]);
 
         for (int i = 0; i < mouses.Count; i++)
         {
@@ -539,7 +532,7 @@ public class Mouse_AI : MonoBehaviour
                 mouses.RemoveAt(i);
         }
         
-        MouseTemp mouse = gameObject.AddComponent<MouseTemp>();
+        MouseTemp mouse = new MouseTemp();
 
         for (int i = tasks.Count - 1; i >= 0; i--)
         {
@@ -626,6 +619,22 @@ public class Mouse_AI : MonoBehaviour
                 else
                     Pathfinding();
             }
+        }
+
+        Invoke(nameof(BehaviourTree), 15);
+    }
+
+    protected void Start()
+    {
+        if (UImGui.DebugWindow.Instance != null)
+        {
+            UImGui.DebugWindow.Instance.RegisterExternalCommand("Mouse_AI", " - Allows the AI to be active and control the mice.", args =>
+            {
+                UImGui.DebugWindow.LogToConsole("Mouse_AI Activated:");
+                MouseTemp.Grid_manager = grid_manager;
+                pathfinding.Grid_manager = grid_manager;
+                BehaviourTree();
+            });
         }
     }
 }

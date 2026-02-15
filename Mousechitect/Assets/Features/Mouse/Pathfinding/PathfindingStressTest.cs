@@ -55,7 +55,7 @@ public class StressTest : MonoBehaviour
         }
     }
 
-    protected void FirstWave()
+    protected IEnumerator FirstWave()
     {
         buildings = FindObjectsOfType(typeof(ParentBuilding)) as ParentBuilding[];
         mouses = new MouseTemp[buildings.Length * occupants];
@@ -72,18 +72,19 @@ public class StressTest : MonoBehaviour
             j++;
             if (j == buildings.Length)
                 j = 0;
+            yield return new WaitForEndOfFrame();
         }
 
         StartCoroutine(SecondWave());
     }
 
-    protected void Move(MouseTemp mouse)
+    protected void MoveIndex(MouseTemp mouse)
     {
         int rand = UnityEngine.Random.Range(0, buildings.Length);
 
         if (buildings[rand].GetPosition() == mouse.Position)
         {
-            Move(mouse);
+            MoveIndex(mouse);
         }
         else
         {
@@ -103,7 +104,7 @@ public class StressTest : MonoBehaviour
         {
             if (!mouses[i].Moving)
             {
-                Move(mouses[i]);
+                MoveIndex(mouses[i]);
                 yield return new WaitForEndOfFrame();
             }
         }
@@ -121,7 +122,7 @@ public class StressTest : MonoBehaviour
                 UImGui.DebugWindow.LogToConsole("Starting Stress Test:");
                 MouseTemp.Grid_manager = grid_manager;
                 pathfinding.Grid_manager = grid_manager;
-                FirstWave();
+                StartCoroutine(FirstWave());
             });
         }
     }
