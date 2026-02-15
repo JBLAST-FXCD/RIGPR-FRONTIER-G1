@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class NUIConnector : MonoBehaviour
 {
+    // Script for handling external connections. Improves modularity and implementation.
+    // Created by Joe Mcdonnell, 15/02/2026
+    
     [Header("Exernal Connections")]
     [SerializeField] private BuildingManager build_tool;
     [SerializeField] private PathTool path_tool;
