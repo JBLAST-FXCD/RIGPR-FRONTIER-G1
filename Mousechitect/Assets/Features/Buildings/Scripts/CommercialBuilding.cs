@@ -33,6 +33,9 @@ public class CommercialBuilding : ParentBuilding
     [SerializeField] protected float mini_sell_delay;
     [SerializeField] protected float max_sell_delay;
 
+    public float[] Cheese_popularity { get { return cheese_popularity; } }
+    public override BuildingType Building_type => BuildingType.market;
+
     CommercialBuilding() 
     {
         //These number is based off GDD and is hard coded for the algorithm to work. In future [SerializeField] for designers to access easily 
@@ -69,7 +72,7 @@ public class CommercialBuilding : ParentBuilding
         UnityEngine.Random.InitState((int)DateTime.Now.Ticks);
 
         //These funtions are looped infinitely per GDD
-        RecalculatePopularity();
+        PopularityAlgorithm();
         SellDelay();
 
         ConstructTier();

@@ -185,6 +185,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Mouse
       objectReference: {fileID: 0}
+    - target: {fileID: 7107526642561120775, guid: 4af012edfcc5a9b4383d0ecd2f838d66,
+        type: 3}
+      propertyPath: m_Name
+      value: MouseModel
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1165,6 +1170,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: _IMGUI
       objectReference: {fileID: 0}
+    - target: {fileID: 4441706945572521969, guid: 32bf7a93e0e2ec341bb62e5dde8a232a,
+        type: 3}
+      propertyPath: stresstest
+      value: 
+      objectReference: {fileID: 661020217}
     - target: {fileID: 6144214566736496332, guid: 32bf7a93e0e2ec341bb62e5dde8a232a,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1273,6 +1283,8 @@ MonoBehaviour:
   total_housing_capacity: 0
   current_visual_capacity: 0
   base_arrival_interval: 10
+  mouse_prefab: {fileID: 0}
+  mouse_spawn_points: []
 --- !u!1001 &1602038162
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -22,6 +22,7 @@ public class MilkCollector : ParentBuilding, IMilkContainer
     public int CURRENT_MILK_AMOUNT { get => current_milk_amount; set => current_milk_amount = value; }
     public int MAX_MILK_CAPACITY { get => max_milk_capacity; set => max_milk_capacity = value; }
     public bool IS_TANK => false;
+    public override BuildingType Building_type => BuildingType.collector;
 
     protected new void Start()
     {
@@ -31,7 +32,7 @@ public class MilkCollector : ParentBuilding, IMilkContainer
         ConstructTier();
     }
 
-    protected new void Update()
+    public void Update()
     {
         timer += Time.deltaTime;
         if (timer >= production_interval)
@@ -44,7 +45,11 @@ public class MilkCollector : ParentBuilding, IMilkContainer
     protected new void OnTriggerStay(Collider other)
     {
         if (other != null && other.tag == "MouseTemp" && mouse_occupants.Count < capacity)
-            mouse_occupants.Add(other.gameObject.GetComponent<MouseTemp>());
+        {
+            MouseTemp mouse = other.gameObject.GetComponent<MouseTemp>();
+            mouse_occupants.Add(mouse);
+            mouse.Home = this;
+        }
     }
 
     private void ProduceMilk()

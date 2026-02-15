@@ -2,7 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
+
+[RequireComponent(typeof(CapsuleCollider))]
 
 public class MouseTemp : MonoBehaviour
 {
@@ -10,7 +11,7 @@ public class MouseTemp : MonoBehaviour
 
     //Varibles for paths and LERP.
     protected List<BaseNode> path;
-    protected bool moving;
+    protected bool moving; 
 
     //Grind manager is for checking calulated speed vs current speed.
     protected static GridManager grid_manager;
@@ -24,6 +25,7 @@ public class MouseTemp : MonoBehaviour
     public List<BaseNode> Path { get { return path; } set { path = value; } }
     public static GridManager Grid_manager { set { grid_manager = value; } }
     public ParentBuilding Home { get { return home; } set { home = value; } }
+    public bool Collider { set { GetComponent<CapsuleCollider>().enabled = value; } }
 
     // updated by Anthony - 10/2/2026
     [Header("Per-mouse Morale")]
@@ -77,7 +79,7 @@ public class MouseTemp : MonoBehaviour
 
             if (path[i].speed == speed)
             {
-                if(speed == 0)
+                if (speed == 0)
                     speed = 1;
 
                 float time_elapsed = 0;
@@ -90,9 +92,17 @@ public class MouseTemp : MonoBehaviour
                 }
             }
             else
-                callback(false);
+                break;
         }
-        callback(true);
+
+        path = null;
+        Collider = true;
+        yield return new WaitForFixedUpdate();
+
+        if (home == null)
+            callback(false);
+        else
+            callback(true);
     }
 
     // Anthony - 10/2/2026 (Per-mouse morale)

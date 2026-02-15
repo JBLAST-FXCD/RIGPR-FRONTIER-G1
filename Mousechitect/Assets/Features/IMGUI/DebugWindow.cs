@@ -20,6 +20,7 @@ namespace UImGui
     public class DebugWindow : MonoBehaviour
     {
         [SerializeField] private KeyCode toggle_key = KeyCode.F1;
+        [SerializeField] protected StressTest stresstest;
 
         private int scrap_input = 0;
         private string console_command_input = "";
@@ -89,6 +90,12 @@ namespace UImGui
                 if (ImGui.BeginTabItem("Milk Logistics"))
                 {
                     DrawMilkLogisticsTab();
+                    ImGui.EndTabItem();
+                }
+
+                if (ImGui.BeginTabItem("Buildings"))
+                {
+                    DrawBuildingsLogisticsTab();
                     ImGui.EndTabItem();
                 }
 
@@ -260,6 +267,101 @@ namespace UImGui
                     }
                 }
                 ImGui.PopID();
+            }
+        }
+
+        private void DrawBuildingsLogisticsTab()
+        {
+            ParentBuilding[] buildings = FindObjectsOfType(typeof(ParentBuilding)) as ParentBuilding[];
+
+            ImGui.Text($"Total buildings in system: {buildings.Length}");
+
+            ImGui.Separator();
+
+            foreach (var building in buildings)
+            {
+                ImGui.PushID(building.GetHashCode());
+
+                string building_type = string.Empty;
+
+                switch (building.Building_type)
+                {
+                    case BuildingType.residental:
+                        building_type = "[Residental]";
+                        break;
+                    case BuildingType.factory:
+                        building_type = "[Factory]";
+                        break;
+                    case BuildingType.market:
+                        building_type = "[Commercial]";
+                        break;
+                    case BuildingType.research:
+                        building_type = "[Research]";
+                        break;
+                    case BuildingType.tank:
+                        building_type = "[Tank]";
+                        break;
+                    case BuildingType.collector:
+                        building_type = "[Collector]";
+                        break;
+                }
+
+                if (ImGui.CollapsingHeader($"{building_type} {building.name}"))
+                {
+                    ImGui.Text($"Tier: {building.Tier}");
+                    ImGui.Text($"Mice in building: {building.Mouse_occupants.Count}");
+
+                    if (ImGui.Button("Upgrade building"))
+                    {
+                        building.UpdateTier();
+                    }
+
+                    if (ImGui.Button("Kick mouse"))
+                    {
+                        if(building.Mouse_occupants.Count > 0)
+                            building.MouseLeave(building.Mouse_occupants[0]);
+                    }
+
+                    if (ImGui.Button("Move a mouse to building"))
+                    {
+                        MouseTemp mouse = FindObjectOfType(typeof(MouseTemp), true) as MouseTemp;
+
+                        if (building != null && mouse != null)
+                        {
+                            if (mouse.Home != null)
+                                mouse.Home.MouseLeave(mouse);
+
+                            if(mouse.Moving == false)
+                                stresstest.MoveMouse(mouse, building);
+                        }
+                    }
+
+                    switch (building.Building_type)
+                    {
+                        case BuildingType.residental:
+                            ResidentialBuilding home = (ResidentialBuilding)building;
+                            ImGui.Text($"Building quality: {home.Quality}");
+                            break;
+                        case BuildingType.factory:
+                            FactoryBuilding factory = (FactoryBuilding)building;
+
+                            ImGui.Text($"Producing cheese: {factory.Produce_cheese}");
+
+                            if (ImGui.Button("Turn factory On/Off"))
+                                factory.ProduceCheeseSwitch();
+                            break;
+                        case BuildingType.market:
+                            CommercialBuilding market = (CommercialBuilding)building;
+                            ImGui.Text($"AmericanCheese popularity: {market.Cheese_popularity[(int)CheeseTypes.AmericanCheese]}");
+                            ImGui.Text($"Cheddar popularity:        {market.Cheese_popularity[(int)CheeseTypes.Cheddar]}");
+                            ImGui.Text($"Mozzarella popularity:     {market.Cheese_popularity[(int)CheeseTypes.Mozzarella]}");
+                            ImGui.Text($"Brie popularity:           {market.Cheese_popularity[(int)CheeseTypes.Brie]}");
+                            ImGui.Text($"Gouda popularity:          {market.Cheese_popularity[(int)CheeseTypes.Gouda]}");
+                            ImGui.Text($"Parmesan popularity:       {market.Cheese_popularity[(int)CheeseTypes.Parmesan]}");
+                            ImGui.Text($"BlueCheese popularity:     {market.Cheese_popularity[(int)CheeseTypes.BlueCheese]}");
+                            break;
+                    }
+                }
             }
         }
 

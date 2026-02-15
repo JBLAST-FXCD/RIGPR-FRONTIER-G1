@@ -1,4 +1,8 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class StressTest : MonoBehaviour
@@ -17,44 +21,41 @@ public class StressTest : MonoBehaviour
         occupants = 32;
     }
 
-    protected Vector2Int GetPosition(ParentBuilding building)
-    {
-        //Try to use the entrance point (preferred for pathfinding)
-        Transform entrance = building.Building.transform.Find("EntrancePoint");
-
-        Vector3 target_world = (entrance != null) ? entrance.position : building.transform.position;
-
-        //Convert world space to grid coordinates
-        Vector2Int building_loc = new Vector2Int(
-            Mathf.RoundToInt(target_world.x),
-            Mathf.RoundToInt(target_world.z)
-        );
-
-        return building_loc;
-    }
-
-    protected void GetVectors(ParentBuilding building, MouseTemp mouse)
+    public void MoveMouse(MouseTemp mouse, ParentBuilding building)
     {
         //Convert world space to grid coordinates
-        Vector2Int building_loc = GetPosition(building);
-
-        //Convert world space to grid coordinates
-        Vector2Int mouse_loc = new Vector2Int(
-            Mathf.RoundToInt(mouse.transform.position.x),
-            Mathf.RoundToInt(mouse.transform.position.z)
-        );
+        Vector2Int building_loc = building.GetPosition();
+        Vector2Int mouse_loc = mouse.Position;
 
         //Caculate path.
-        MouseTemp.Grid_manager = grid_manager;
-        pathfinding.Grid_manager = grid_manager;
+        List<BaseNode> path = pathfinding.FindPath(mouse.Position, building_loc);
+
+        if(path == null)
+            path = pathfinding.CreatePath(mouse_loc, building_loc);
         mouse.Path = pathfinding.CreatePath(mouse_loc, building_loc);
 
         //LERP mouse if fail start pathfinding again.
-        if (mouse.Path != null)
-            StartCoroutine(mouse.FollowPath((success) => { if (success == false) { mouse.Path = pathfinding.CreatePath(mouse_loc, building_loc); } }));
+        if (mouse.Path != null && !mouse.Moving)
+        {
+            mouse.Moving = true;
+            mouse.Collider = false;
+            StartCoroutine(mouse.FollowPath((success) =>
+            {
+                if (!success)
+                {
+                    MoveMouse(mouse, building);
+                }
+                else
+                {
+                    mouse.Moving = false;
+                    mouse.Collider = true;
+                    pathfinding.SavePath(mouse_loc, building_loc, path);
+                }
+            }));
+        }
     }
 
-    protected void FirstWave()
+    protected IEnumerator FirstWave()
     {
         buildings = FindObjectsOfType(typeof(ParentBuilding)) as ParentBuilding[];
         mouses = new MouseTemp[buildings.Length * occupants];
@@ -64,63 +65,65 @@ public class StressTest : MonoBehaviour
         {
             MouseTemp new_mouse = Instantiate(mouse, new Vector3(0.0f, 0.5f, 0.0f), mouse.transform.rotation);
 
-            GetVectors(buildings[j], new_mouse);
+            MoveMouse(new_mouse, buildings[j]);
 
             mouses[i] = new_mouse;
 
             j++;
             if (j == buildings.Length)
                 j = 0;
+            yield return new WaitForEndOfFrame();
         }
 
-        Invoke(nameof(SecondWave), 30);
+        StartCoroutine(SecondWave());
     }
 
-    protected void SecondWave(MouseTemp mouse, ParentBuilding building)
+    protected void MoveIndex(MouseTemp mouse)
     {
-        building.MouseLeave(mouse);
+        int rand = UnityEngine.Random.Range(0, buildings.Length);
+
+        if (buildings[rand].GetPosition() == mouse.Position)
+        {
+            MoveIndex(mouse);
+        }
+        else
+        {
+            if (mouse.Home != null)
+                mouse.Home.MouseLeave(mouse);
+
+            MoveMouse(mouse, buildings[rand]);
+        }
     }
 
-    protected void SecondWave()
+    protected IEnumerator SecondWave()
     {
-        int j = 0;
+        yield return new WaitForSeconds(30);
+
         UnityEngine.Random.InitState((int)DateTime.Now.Ticks);
         for (int i = 0; i < mouses.Length; i++)
         {
-            int rand = UnityEngine.Random.Range(0, buildings.Length);
-            if (buildings[j].CheckOccupants(mouses[i]))
+            if (!mouses[i].Moving)
             {
-                buildings[j].MouseLeave(mouses[i]);
-
-                GetVectors(buildings[rand], mouses[i]);
+                MoveIndex(mouses[i]);
+                yield return new WaitForEndOfFrame();
             }
-
-            j++;
-            if (j == buildings.Length)
-                j = 0;
         }
 
-        Invoke(nameof(SecondWave), 30);
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            FirstWave();
-        }
+        StartCoroutine(SecondWave());
     }
 
     // added by jess 
     private void Start()
     {
+        MouseTemp.Grid_manager = grid_manager;
+        pathfinding.Grid_manager = grid_manager;
+
         if (UImGui.DebugWindow.Instance != null)
         {
             UImGui.DebugWindow.Instance.RegisterExternalCommand("stresstest", " - Spawns waves of mice to test pathfinding performance.", args =>
             {
                 UImGui.DebugWindow.LogToConsole("Starting Stress Test:");
-                FirstWave();
+                StartCoroutine(FirstWave());
             });
         }
     }

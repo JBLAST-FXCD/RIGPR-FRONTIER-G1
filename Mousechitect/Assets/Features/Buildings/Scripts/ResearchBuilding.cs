@@ -9,6 +9,8 @@ using UnityEngine;
 /// </summary>
 public class ResearchBuilding : ParentBuilding
 {
+    public override BuildingType Building_type => BuildingType.research;
+
     //The player will call the funtion through the UI 
     protected void ResearchNode(ResearchTreeTemp tree)
     {

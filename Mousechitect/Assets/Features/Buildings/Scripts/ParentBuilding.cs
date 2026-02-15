@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
 
 // Iain Benner 05/12/2025
@@ -9,6 +11,12 @@ using UnityEngine;
 /// On start the correct varition of the building is picked.
 /// Mice can enter and leave the building.
 /// </summary>
+
+public enum BuildingType
+{
+    residental, factory, market, research, tank, collector
+}
+
 public class ParentBuilding : MonoBehaviour
 {
     //Varibles for designers to create tiers.
@@ -25,6 +33,7 @@ public class ParentBuilding : MonoBehaviour
     public int Tier { get { return tier; } }
     public GameObject Building { get { return building; } }
     public List<MouseTemp> Mouse_occupants { get { return mouse_occupants; } }
+    public virtual BuildingType Building_type { get; }
 
     public ParentBuilding()
     {
@@ -36,23 +45,6 @@ public class ParentBuilding : MonoBehaviour
     protected virtual void Start()
     {
         ConstructTier();
-    }
-
-    protected virtual void Update()
-    {
-        //This is for debuging.
-        //Mise will leave when certain conditions are met, depending on the building type.
-        if (Input.GetKeyDown(KeyCode.E) && mouse_occupants.Count > 0)
-        {
-            MouseLeave(mouse_occupants[0]);
-        }
-
-        //This is for debuging.
-        //Buildings will be upgraded when certain conditions are met, depending on the building type.
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            UpdateTier();
-        }
     }
 
     protected virtual void TierSelection()
@@ -72,7 +64,7 @@ public class ParentBuilding : MonoBehaviour
         }
     }
 
-    protected virtual void UpdateTier()
+    public virtual void UpdateTier()
     {
         tier++;
         if (tier > 0 && tier <= capacitys.Length)
@@ -83,6 +75,8 @@ public class ParentBuilding : MonoBehaviour
             building = Instantiate(building_prefab, gameObject.transform);
             this.GetComponent<BoxCollider>().center = building.transform.Find("EntrancePoint").localPosition;
         }
+        else
+            tier = capacitys.Length;
     }
 
     //Mouse is storded and turned off to make effetivly inside the building.
@@ -100,28 +94,17 @@ public class ParentBuilding : MonoBehaviour
     //checks building rotion to place the mice on the right side to stop mice appaering inside building.
     public void MouseLeave(MouseTemp mouse)
     {
-        Vector3 new_loc = mouse.transform.position;
-        new_loc.x = Mathf.CeilToInt(new_loc.x);
-        new_loc.z = Mathf.CeilToInt(new_loc.z);
+        if (!mouse.Moving)
+        {
+            float angle = this.transform.eulerAngles.y;
 
-        float angle = this.transform.eulerAngles.y;
-        angle = Mathf.Repeat(angle, 360.0f);
+            mouse.Home = null;
+            mouse.Collider = false;
+            mouse.transform.eulerAngles = new Vector3(0, angle - 90, 0);
+            mouse.transform.gameObject.SetActive(true);
 
-        if (angle >= 315 || angle < 45)
-            new_loc.x += 2;
-        else if (angle >= 45 || angle < 135)
-            new_loc.z -= 2;
-        else if (angle >= 135 || angle < 225)
-            new_loc.x -= 2;
-        else if (angle >= 225 || angle < 315)
-            new_loc.z += 2;
-
-        mouse.Path = null;
-        mouse.transform.localPosition = new_loc;
-        mouse.transform.eulerAngles = new Vector3(0, angle - 90, 0);
-        mouse.transform.gameObject.SetActive(true);
-
-        mouse_occupants.Remove(mouse);
+            mouse_occupants.Remove(mouse);
+        }
     }
 
     public bool CheckOccupants(MouseTemp mouse)
@@ -137,5 +120,15 @@ public class ParentBuilding : MonoBehaviour
         {
             data.mouse_ids.Add(mouse_occupants[i].Mouse_id);
         }
+    }
+
+    // GetVectors Updated by Anthony 23/01/26 
+    public Vector2Int GetPosition()
+    {
+        Transform entrance = this.Building.transform.Find("EntrancePoint");
+
+        Vector2Int building_loc = new Vector2Int((int)entrance.position.x, (int)entrance.position.z);
+
+        return building_loc;
     }
 }

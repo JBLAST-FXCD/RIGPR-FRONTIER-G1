@@ -53,8 +53,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 5, y: 20, z: 8}
-  m_Center: {x: -3, y: 10, z: 0}
+  m_Size: {x: 3.5, y: 20, z: 17}
+  m_Center: {x: -2.25, y: 10, z: 0}
 --- !u!33 &-1026952941364474196
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -122,7 +122,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   building_prefabs:
-  - {fileID: 8190863958714023708, guid: f6342fb014e077148bfa251aa1582b9d, type: 3}
+  - {fileID: 4983315770514510202, guid: a9636b85d8b8e734aacda667693a4a01, type: 3}
   capacitys: 01000000
   tier: 1
   production_interval: 10

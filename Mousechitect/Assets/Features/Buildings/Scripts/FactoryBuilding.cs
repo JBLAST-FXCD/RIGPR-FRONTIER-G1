@@ -51,6 +51,8 @@ public class FactoryBuilding : ParentBuilding
     public bool IsActive { get { return factory_switch; } }
     public int Stored_milk { get { return stored_milk; } }
     public int Milk_capacity { get { return milk_capasity; } }
+    public bool Produce_cheese { get { return produce_cheese; } set { produce_cheese = value; } }
+    public override BuildingType Building_type => BuildingType.factory;
 
     public FactoryBuilding()
     {
@@ -81,35 +83,6 @@ public class FactoryBuilding : ParentBuilding
 
     }
 
-    protected override void Update()
-    {
-        //This is for debuging.
-        //Mise will leave when certain conditions are met, depending on the building type.
-        if (Input.GetKeyDown(KeyCode.E) && mouse_occupants.Count > 0)
-        {
-            MouseLeave(mouse_occupants[0]);
-        }
-
-        //This is for debuging.
-        //Buildings will be upgraded when certain conditions are met, depending on the building type.
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            UpdateTier();
-        }
-
-        //This is for debuging.
-        //Later this will be a bottun in the UI.
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            if (produce_cheese)
-                produce_cheese = false;
-            else
-                produce_cheese = true;
-
-            ProduceCheese(produce_cheese);
-        }
-    }
-
     //for player to select cheese
     protected void SelectCheese(CheeseTypes input) 
     {
@@ -121,6 +94,7 @@ public class FactoryBuilding : ParentBuilding
         building_prefab = building_prefabs[tier - 1];
         capacity        = capacitys[tier - 1];
         scrap_cost      = scrap_costs[tier - 1];
+        milk_capasity   = milk_capasitys[tier - 1];
     }
 
     //Delay is hard coded because theres variation in the GDD
@@ -136,7 +110,7 @@ public class FactoryBuilding : ParentBuilding
         }
     }
 
-    protected override void UpdateTier()
+    public override void UpdateTier()
     {
         tier++;
         if (tier > 0 && tier <= capacitys.Length)
@@ -148,8 +122,9 @@ public class FactoryBuilding : ParentBuilding
             factory_switch = true;
             this.GetComponent<BoxCollider>().center = building.transform.Find("EntrancePoint").localPosition;
             RefreshAllowedCheesesForTier();
-
         }
+        else
+            tier = capacitys.Length;
     }
 
     //Each cheese has production time
@@ -179,13 +154,15 @@ public class FactoryBuilding : ParentBuilding
     }
 
     //For player to create cheese when factory is running
-    protected void ProduceCheese(bool input)
+    public void ProduceCheeseSwitch()
     {
-        if (factory_switch == true)
-        {
-            produce_cheese = input;
+        if (produce_cheese)
+            produce_cheese = false;
+        else
+            produce_cheese = true;
+
+        if (produce_cheese)
             CheeseProduction();
-        }
     }
 
     //Fits GDD requirement of making cheese when theres enough milk
