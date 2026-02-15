@@ -99,7 +99,7 @@ public class ParentBuilding : MonoBehaviour
             float angle = this.transform.eulerAngles.y;
 
             mouse.Home = null;
-            mouse.Rigidbody = false;
+            mouse.Collider = false;
             mouse.transform.eulerAngles = new Vector3(0, angle - 90, 0);
             mouse.transform.gameObject.SetActive(true);
 

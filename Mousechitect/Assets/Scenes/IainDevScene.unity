@@ -1170,6 +1170,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: _IMGUI
       objectReference: {fileID: 0}
+    - target: {fileID: 4441706945572521969, guid: 32bf7a93e0e2ec341bb62e5dde8a232a,
+        type: 3}
+      propertyPath: stresstest
+      value: 
+      objectReference: {fileID: 661020217}
     - target: {fileID: 6144214566736496332, guid: 32bf7a93e0e2ec341bb62e5dde8a232a,
         type: 3}
       propertyPath: m_LocalPosition.x

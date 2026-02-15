@@ -21,7 +21,7 @@ public class StressTest : MonoBehaviour
         occupants = 32;
     }
 
-    protected void MoveMouse(MouseTemp mouse, ParentBuilding building)
+    public void MoveMouse(MouseTemp mouse, ParentBuilding building)
     {
         //Convert world space to grid coordinates
         Vector2Int building_loc = building.GetPosition();
@@ -38,7 +38,7 @@ public class StressTest : MonoBehaviour
         if (mouse.Path != null && !mouse.Moving)
         {
             mouse.Moving = true;
-            mouse.Rigidbody = false;
+            mouse.Collider = false;
             StartCoroutine(mouse.FollowPath((success) =>
             {
                 if (!success)
@@ -48,7 +48,7 @@ public class StressTest : MonoBehaviour
                 else
                 {
                     mouse.Moving = false;
-                    mouse.Rigidbody = true;
+                    mouse.Collider = true;
                     pathfinding.SavePath(mouse_loc, building_loc, path);
                 }
             }));
@@ -115,13 +115,14 @@ public class StressTest : MonoBehaviour
     // added by jess 
     private void Start()
     {
+        MouseTemp.Grid_manager = grid_manager;
+        pathfinding.Grid_manager = grid_manager;
+
         if (UImGui.DebugWindow.Instance != null)
         {
             UImGui.DebugWindow.Instance.RegisterExternalCommand("stresstest", " - Spawns waves of mice to test pathfinding performance.", args =>
             {
                 UImGui.DebugWindow.LogToConsole("Starting Stress Test:");
-                MouseTemp.Grid_manager = grid_manager;
-                pathfinding.Grid_manager = grid_manager;
                 StartCoroutine(FirstWave());
             });
         }

@@ -20,6 +20,7 @@ namespace UImGui
     public class DebugWindow : MonoBehaviour
     {
         [SerializeField] private KeyCode toggle_key = KeyCode.F1;
+        [SerializeField] protected StressTest stresstest;
 
         private int scrap_input = 0;
         private string console_command_input = "";
@@ -319,6 +320,20 @@ namespace UImGui
                     {
                         if(building.Mouse_occupants.Count > 0)
                             building.MouseLeave(building.Mouse_occupants[0]);
+                    }
+
+                    if (ImGui.Button("Move a mouse to building"))
+                    {
+                        MouseTemp mouse = FindObjectOfType(typeof(MouseTemp), true) as MouseTemp;
+
+                        if (building != null && mouse != null)
+                        {
+                            if (mouse.Home != null)
+                                mouse.Home.MouseLeave(mouse);
+
+                            if(mouse.Moving == false)
+                                stresstest.MoveMouse(mouse, building);
+                        }
                     }
 
                     switch (building.Building_type)

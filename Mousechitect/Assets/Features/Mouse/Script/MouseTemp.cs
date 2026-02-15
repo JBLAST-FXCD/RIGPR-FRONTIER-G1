@@ -25,7 +25,7 @@ public class MouseTemp : MonoBehaviour
     public List<BaseNode> Path { get { return path; } set { path = value; } }
     public static GridManager Grid_manager { set { grid_manager = value; } }
     public ParentBuilding Home { get { return home; } set { home = value; } }
-    public bool Rigidbody { set { GetComponent<CapsuleCollider>().enabled = value; } }
+    public bool Collider { set { GetComponent<CapsuleCollider>().enabled = value; } }
 
     // updated by Anthony - 10/2/2026
     [Header("Per-mouse Morale")]
@@ -96,7 +96,7 @@ public class MouseTemp : MonoBehaviour
         }
 
         path = null;
-        Rigidbody = true;
+        Collider = true;
         yield return new WaitForFixedUpdate();
 
         if (home == null)
