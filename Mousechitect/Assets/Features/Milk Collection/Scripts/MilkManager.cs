@@ -43,6 +43,7 @@ public class MilkManager : MonoBehaviour
 
     public void RefreshRankings()
     {
+        all_containers.RemoveAll(c => c.CONTAINER_GAME_OBJECT == null);
         // ranks containers first by whether they are tanks, then by current milk amount
         ranked_containers = all_containers.OrderByDescending(c => c.IS_TANK).ThenByDescending(c => c.CURRENT_MILK_AMOUNT).ToList();
     }
@@ -56,7 +57,7 @@ public class MilkManager : MonoBehaviour
     public int GetTotalMilk()
     {
         // returns the total amount of milk across all containers
-        return all_containers.Sum(c => c.CURRENT_MILK_AMOUNT);
+        return all_containers.Where(c => c != null && c.CONTAINER_GAME_OBJECT != null).Sum(c => c.CURRENT_MILK_AMOUNT);
     }
 
     public IMilkContainer RequestMilkSource(int amount_needed)

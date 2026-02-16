@@ -168,7 +168,8 @@ namespace UImGui
                 ImGui.SliderFloat($"WASD Movement Speed", ref PerspectiveCameraController.Instance.wasd_pan_speed, 0.1f, 1f);
                 ImGui.SliderFloat($"Edge Movement Speed", ref PerspectiveCameraController.Instance.edge_pan_speed, 0.1f, 1f);
                 ImGui.SliderFloat($"Border Size", ref PerspectiveCameraController.Instance.edge_pan_size, 0.1f, 1f);
-                
+                ImGui.Checkbox($"Enable Edge Pan", ref PerspectiveCameraController.Instance.is_edge_pan_enabled);
+
             }
         }
 

@@ -21,6 +21,7 @@ public class PerspectiveCameraController : MonoBehaviour, ISaveable
     [SerializeField] public float edge_pan_speed = 0.0f;
     [SerializeField] public float follow_smoothing = 0.0f;
     [SerializeField] public float edge_pan_size = 0.0f;
+    [SerializeField] public bool is_edge_pan_enabled = true;
     [SerializeField] private LayerMask ground_layer;
 
     [Header("Camera Zoom Settings")]
@@ -29,6 +30,7 @@ public class PerspectiveCameraController : MonoBehaviour, ISaveable
 
     private float zoom_distance = 0.0f, zoom_min_distance = 0.0f, zoom_max_distance = 0.0f;
     private float yaw = 0.0f, pitch = 0.0f, float_value_zero;
+    private float desired_zoom_distance = 0.0f;
 
     private Vector3 target_position_current, target_position_desired;
     private Camera camera_component;
@@ -71,6 +73,7 @@ public class PerspectiveCameraController : MonoBehaviour, ISaveable
 
         target_position_current = target.position;
         target_position_desired = target.position;
+        desired_zoom_distance = zoom_distance;
         pitch = float_value_zero;
         yaw = float_value_zero;
     }
@@ -89,7 +92,8 @@ public class PerspectiveCameraController : MonoBehaviour, ISaveable
 
         if (mouse_scroll != float_value_zero)
         {
-            zoom_distance -= mouse_scroll * zoom_speed;
+            desired_zoom_distance -= mouse_scroll * zoom_speed;
+            desired_zoom_distance = Mathf.Clamp(desired_zoom_distance, 2.0f, 100.0f);
         }
 
         if (Input.GetMouseButton(MOUSE_RIGHT_BUTTON))
@@ -129,24 +133,27 @@ public class PerspectiveCameraController : MonoBehaviour, ISaveable
         Vector3 forward_edge_pan = Vector3.ProjectOnPlane(transform.forward, Vector3.up).normalized;
         Vector3 right_edge_pan = Vector3.ProjectOnPlane(transform.right, Vector3.up).normalized;
 
-        if (mouse_position.x <= edge_pan_size)
+        if (Application.isFocused && is_edge_pan_enabled == true)
         {
-            target_position_desired -= right_edge_pan * edge_pan_speed;
-        }
+            if (mouse_position.x <= edge_pan_size)
+            {
+                target_position_desired -= right_edge_pan * edge_pan_speed;
+            }
 
-        else if (mouse_position.x >= Screen.width - edge_pan_size)
-        {
-            target_position_desired += right_edge_pan * edge_pan_speed;
-        }
+            else if (mouse_position.x >= Screen.width - edge_pan_size)
+            {
+                target_position_desired += right_edge_pan * edge_pan_speed;
+            }
 
-        if (mouse_position.y <= edge_pan_size)
-        {
-            target_position_desired -= forward_edge_pan * edge_pan_speed;
-        }
+            if (mouse_position.y <= edge_pan_size)
+            {
+                target_position_desired -= forward_edge_pan * edge_pan_speed;
+            }
 
-        else if (mouse_position.y >= Screen.height - edge_pan_size)
-        {
-            target_position_desired += forward_edge_pan * edge_pan_speed;
+            else if (mouse_position.y >= Screen.height - edge_pan_size)
+            {
+                target_position_desired += forward_edge_pan * edge_pan_speed;
+            }
         }
     }
 
@@ -163,7 +170,7 @@ public class PerspectiveCameraController : MonoBehaviour, ISaveable
         zoom_min_distance = ground_distance * ZOOM_MIN_PERCENT;
         zoom_max_distance = ground_distance * ZOOM_MAX_PERCENT;
 
-        zoom_distance = Mathf.Clamp(zoom_distance, zoom_min_distance, zoom_max_distance);
+        zoom_distance = Mathf.Clamp(desired_zoom_distance, zoom_min_distance, zoom_max_distance);
 
         // Calculate camera position and rotation
         Quaternion rotation = Quaternion.Euler(pitch, yaw, float_value_zero);
@@ -243,6 +250,6 @@ public class PerspectiveCameraController : MonoBehaviour, ISaveable
         target_position_current = camera_state.target_position;
         target_position_desired = camera_state.target_position;
 
-
+        desired_zoom_distance = camera_state.zoom_distance;
     }
 }
