@@ -1,7 +1,7 @@
 using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.Experimental.RestService;
+using Unity.VisualScripting;
 using UnityEngine;
 
 //jess @ 12/12/2025
@@ -18,25 +18,29 @@ public class GameData
     public BuildingData building_data;
     public ResearchData research_data;
     public PathData path_data;
+    public PathMap pathmap;
 
     public GameData()
     {
-        player_data = new PlayerData();
+        player_data   = new PlayerData();
         building_data = new BuildingData();
         research_data = new ResearchData();
-        path_data = new PathData();
+        path_data     = new PathData();
+        pathmap       = new PathMap();
     }
 }
-
 
 // to be implemented (excluding camera state)
 [System.Serializable]
 public class PlayerData
 {
-    public int money;
     public float play_time;
     public string city_name;
 
+    public int cheese;
+    public int population;
+
+    public resource_save_data resources;
     public camera_save_data camera_state;
 }
 
@@ -61,6 +65,24 @@ public class PathData
     }
 }
 
+[System.Serializable]
+public class ResearchData
+{
+    public List<string> completed_research = new List<string>();
+
+    public float current_research_progress;
+}
+
+[System.Serializable]
+public class PathMap
+{
+    public List<route_save_data> paths;
+    public PathMap()
+    {
+        paths = new List<route_save_data>();
+    }
+}
+
 // to be implemented
 [System.Serializable]
 public struct building_save_data
@@ -73,6 +95,11 @@ public struct building_save_data
 
     public int tier;
     public List<string> mouse_ids;
+
+    //for milk buildings
+    public int current_milk;
+    public int max_milk_capacity;
+    public float milk_production_rate;
 }
 
 [System.Serializable]
@@ -95,11 +122,19 @@ public struct camera_save_data
     public float zoom_distance;
 }
 
-// to be implemented when research feature is added
 [System.Serializable]
-public class ResearchData
+public struct resource_save_data
 {
-    public List<string> completed_research = new List<string>();
+    public int scrap;
+    public int total_cheese;
+    public int money;
 
-    public float current_research_progress;
+    public int[] cheese_amounts;
+}
+
+[System.Serializable]
+public struct route_save_data
+{
+    public string key;
+    public List<BaseNode> values; 
 }

@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Data;
-using System.Diagnostics.Contracts;
+using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
 
 // Iain Benner 05/12/2025
@@ -11,6 +11,12 @@ using UnityEngine;
 /// On start the correct varition of the building is picked.
 /// Mice can enter and leave the building.
 /// </summary>
+
+public enum BuildingType
+{
+    residental, factory, market, research, tank, collector
+}
+
 public class ParentBuilding : MonoBehaviour
 {
     //Varibles for designers to create tiers.
@@ -24,6 +30,11 @@ public class ParentBuilding : MonoBehaviour
     protected List<MouseTemp> mouse_occupants;
     protected int capacity;
 
+    public int Tier { get { return tier; } }
+    public GameObject Building { get { return building; } }
+    public List<MouseTemp> Mouse_occupants { get { return mouse_occupants; } }
+    public virtual BuildingType Building_type { get; }
+
     public ParentBuilding()
     {
         building_prefab = null;
@@ -31,35 +42,18 @@ public class ParentBuilding : MonoBehaviour
         capacity = 0;
     }
 
-    void Start()
+    protected virtual void Start()
     {
         ConstructTier();
     }
 
-    protected void Update()
-    {
-        //This is for debuging.
-        //Mise will leave when certain conditions are met, depending on the building type.
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            MouseLeave(mouse_occupants[0]);
-        }
-
-        //This is for debuging.
-        //Buildings will be upgraded when certain conditions are met, depending on the building type.
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            UpdateTier();
-        }
-    }
-
-    protected void TierSelection()
+    protected virtual void TierSelection()
     {
         building_prefab = building_prefabs[tier - 1];
         capacity = capacitys[tier - 1];
     }
 
-    //The funtionb allows for diffrent varition depending on the designers choise and can be used for when the player upgrades the building.
+    //The function allows for diffrent varition depending on the designers choise and can be used for when the player upgrades the building.
     protected void ConstructTier()
     {
         if (tier > 0 && tier <= capacitys.Length)
@@ -70,7 +64,7 @@ public class ParentBuilding : MonoBehaviour
         }
     }
 
-    protected void UpdateTier()
+    public virtual void UpdateTier()
     {
         tier++;
         if (tier > 0 && tier <= capacitys.Length)
@@ -79,46 +73,44 @@ public class ParentBuilding : MonoBehaviour
             TierSelection();
             building_prefab.transform.localPosition = new Vector3(0, 0, 0);
             building = Instantiate(building_prefab, gameObject.transform);
+            this.GetComponent<BoxCollider>().center = building.transform.Find("EntrancePoint").localPosition;
         }
+        else
+            tier = capacitys.Length;
     }
 
     //Mouse is storded and turned off to make effetivly inside the building.
-    protected void OnTriggerEnter(Collider other)
+    protected virtual void OnTriggerStay(Collider other)
     {
         if (other != null && other.tag == "MouseTemp" && mouse_occupants.Count < capacity)
         {
             other.transform.gameObject.SetActive(false);
-            mouse_occupants.Add(other.gameObject.GetComponent<MouseTemp>());
+            MouseTemp mouse = other.gameObject.GetComponent<MouseTemp>();
+            mouse_occupants.Add(mouse);
+            mouse.Home = this;
         }
     }
 
     //checks building rotion to place the mice on the right side to stop mice appaering inside building.
-    protected void MouseLeave(MouseTemp mouse)
+    public void MouseLeave(MouseTemp mouse)
     {
-        Vector3 new_loc = mouse.transform.localPosition;
-
-        switch (this.transform.eulerAngles.y)
+        if (!mouse.Moving)
         {
-            case 0:
-                new_loc.z += 1;
-                break;
-            case 90:
-                new_loc.x += 1;
-                break;
-            case 180:
-                new_loc.z -= 1;
-                break;
-            case 270:
-                new_loc.x -= 1;
-                break;
+            float angle = this.transform.eulerAngles.y;
+
+            mouse.Home = null;
+            mouse.Collider = false;
+            mouse.transform.eulerAngles = new Vector3(0, angle - 90, 0);
+            mouse.transform.gameObject.SetActive(true);
+
+            mouse_occupants.Remove(mouse);
         }
-
-        mouse_occupants.Remove(mouse);
-
-        mouse.transform.localPosition = new_loc;
-        mouse.transform.gameObject.SetActive(true);
     }
 
+    public bool CheckOccupants(MouseTemp mouse)
+    {
+        return mouse_occupants.Contains(mouse);
+    }
     public void PopulateInstanceSaveData(ref building_save_data data)
     {
         data.tier = tier;
@@ -126,7 +118,17 @@ public class ParentBuilding : MonoBehaviour
 
         for (int i = 0; i < mouse_occupants.Count; i++)
         {
-            data.mouse_ids.Add(mouse_occupants[i].GetMouseID());
+            data.mouse_ids.Add(mouse_occupants[i].Mouse_id);
         }
+    }
+
+    // GetVectors Updated by Anthony 23/01/26 
+    public Vector2Int GetPosition()
+    {
+        Transform entrance = this.Building.transform.Find("EntrancePoint");
+
+        Vector2Int building_loc = new Vector2Int((int)entrance.position.x, (int)entrance.position.z);
+
+        return building_loc;
     }
 }

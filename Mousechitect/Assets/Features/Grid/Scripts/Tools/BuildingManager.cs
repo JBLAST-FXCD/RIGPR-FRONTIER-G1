@@ -37,6 +37,13 @@ public class BuildingManager : MonoBehaviour, ISaveable
     private const float COARSE_ROTATION_STEP_DEGREES = 15.0f;
     private const float FINE_ROTATION_STEP_DEGREES = 0.25f;
     private const float ROTATION_HOLD_THRESHOLD_SECONDS = 0.2f;
+    private const float LOGIC_ROTATION_STEP_DEGREES = 90.0f;
+
+    private const int VISUAL_STEP_DEGREES = 15;
+    private const int STEPS_PER_QUARTER_TURN = 90 / VISUAL_STEP_DEGREES; // 6
+
+
+
 
     private const float RMB_CLICK_MAX_DRAG_DISTANCE = 5.0f;      // pixels
     private const float RMB_CLICK_MAX_DURATION = 0.3f;           // seconds
@@ -66,6 +73,9 @@ public class BuildingManager : MonoBehaviour, ISaveable
     private bool has_used_fine_rotation = false;
     private float rotation_key_down_time = 0.0f;
     private Quaternion base_building_rotation = Quaternion.identity;
+    private Quaternion base_visual_local_rotation = Quaternion.identity;
+
+    private int rotation_steps = 0; // counts 15 degree steps (can go negative)
 
     // Remember which prefab index is currently selected (for UI integration)
     private int selected_building_index = 0;
@@ -78,6 +88,19 @@ public class BuildingManager : MonoBehaviour, ISaveable
 
     // Track placed buildings so we can save/load them.
     private readonly List<PlacedObjectData> placed_buildings = new List<PlacedObjectData>();
+
+    // Anthony 22/01/26 
+
+    public event Action<GameObject> building_placed;
+    public event Action<string> building_removed;
+
+    // --- Joe 03/02/2026
+    // Added a broadcast function to communicate to the NUI when is_build_mode_active is false
+    // Broadcasts are independent connections and can fail silently on both ends, keeping this script modular.
+    public delegate void UpdateNUI();
+    public event UpdateNUI UpdateBuildPanel;
+    // ---
+
 
     private void Update()
     {
@@ -140,12 +163,23 @@ public class BuildingManager : MonoBehaviour, ISaveable
     }
     public void OnBuildingButtonPressed(int building_index)
     {
-        if (!is_build_mode_active)
+        // If UI calls this while the tool is disabled,
+        // force the controller to re-enable the Building tool.
+        if (!enabled || !is_build_mode_active)
         {
-            Debug.Log("Cannot select building: build mode is not active.");
-            return;
+            BuildToolController controller = FindObjectOfType<BuildToolController>();
+            if (controller != null)
+            {
+                controller.OnBuildingToolButton(); // this calls SetToolEnabled(true) on BuildingManager
+            }
+            else
+            {
+                // Fallback: enable ourselves so Update runs even if controller isn't found
+                SetToolEnabled(true);
+            }
         }
 
+        // Now we should be active and in build mode
         StartPlacingBuilding(building_index);
     }
 
@@ -181,6 +215,9 @@ public class BuildingManager : MonoBehaviour, ISaveable
         current_building_collider = current_building.GetComponentInChildren<Collider>();
         current_preview_visual = current_building.GetComponentInChildren<BuildingPreviewVisual>();
 
+        Transform visual = current_building.transform.Find("Visual");
+        base_visual_local_rotation = (visual != null) ? visual.localRotation : Quaternion.identity;
+
         // reset rotation state for this new preview
         base_building_rotation = current_building.transform.rotation;
         current_rotation_y = 0.0f;
@@ -207,6 +244,23 @@ public class BuildingManager : MonoBehaviour, ISaveable
             occupied_cells.Remove(cells[i]);
             ++i;
         }
+    }
+
+    // Anthony - 15/2/2026
+    // Public wrapper so other tools (MoveTool) can validate placement.
+    public bool AreCellsFree(List<Vector2Int> cells)
+    {
+        return CheckCellSurfaces(cells);
+    }
+
+    // Anthony - 15/2/2026
+    // Allows tools (MoveTool) to reserve cells after validation.
+    public void AddOccupiedCells(List<Vector2Int> cells)
+    {
+        if (cells == null) return;
+
+        for (int i = 0; i < cells.Count; i++)
+            occupied_cells.Add(cells[i]);
     }
 
     // Allows UI / tool controller to cancel only the current preview
@@ -310,11 +364,24 @@ public class BuildingManager : MonoBehaviour, ISaveable
             return;
         }
 
+        // Root ONLY updates when we cross a full 90 degrees (15 * 6).
+        // Using Floor avoids snapping early at 45 degrees (Round would do that).
+        float logic_y = Mathf.Floor(current_rotation_y / LOGIC_ROTATION_STEP_DEGREES) * LOGIC_ROTATION_STEP_DEGREES;
+        logic_y = Mathf.Repeat(logic_y, 360.0f);
+
         current_building.transform.rotation =
-            base_building_rotation * Quaternion.Euler(0.0f, current_rotation_y, 0.0f);
+            base_building_rotation * Quaternion.Euler(0f, logic_y, 0f);
+
+        // Visual rotates smoothly in 15-degree (or fine) steps inside the 90-degree block.
+        Transform visual = current_building.transform.Find("Visual");
+        if (visual != null)
+        {
+            float visual_offset = current_rotation_y - logic_y;
+            visual.localRotation = base_visual_local_rotation * Quaternion.Euler(0f, visual_offset, 0f);
+        }
     }
 
-    // Keeps current_rotation_y within 0�360 range.
+    // Keeps current_rotation_y within 0�360 range.
     private void NormalizeCurrentRotation()
     {
         current_rotation_y = Mathf.Repeat(current_rotation_y, 360.0f);
@@ -359,6 +426,11 @@ public class BuildingManager : MonoBehaviour, ISaveable
 
         // CheckCellSurfaces(cells) - returns new is_valid_build_zone
         is_valid_build_zone = CheckCellSurfaces(covered_cells);
+
+        if (current_preview_visual == null)
+        {
+            current_preview_visual = current_building.GetComponent<BuildingPreviewVisual>();
+        }
 
         if (current_preview_visual != null)
         {
@@ -502,7 +574,8 @@ public class BuildingManager : MonoBehaviour, ISaveable
 
         if (placed_data == null)
         {
-            placed_data = current_building.gameObject.AddComponent<PlacedObjectData>();
+            placed_data = current_building.
+                gameObject.AddComponent<PlacedObjectData>();
         }
 
         placed_data.is_path = false;
@@ -510,6 +583,7 @@ public class BuildingManager : MonoBehaviour, ISaveable
 
         placed_data.is_path = false;
         placed_data.prefab_index = selected_building_index;
+        placed_data.speed_modifier = -1;
 
         if (string.IsNullOrEmpty(placed_data.unique_id))
         {
@@ -529,6 +603,35 @@ public class BuildingManager : MonoBehaviour, ISaveable
             ++i;
         }
 
+        // also write into GridManager to set speed to 0 stopping mice from walking
+        grid_manager.SetPathOnCells(placed_data.occupied_cells, placed_data.speed_modifier);
+
+        // Re-open the entrance cell so pathfinding has a reachable target
+        Transform entrance = current_building.transform.Find("EntrancePoint");
+        if (entrance != null)
+        {
+            Vector2Int entrance_cell = new Vector2Int(
+                Mathf.RoundToInt(entrance.position.x),
+                Mathf.RoundToInt(entrance.position.z)
+            );
+
+            // IMPORTANT:
+            // If SetPathOnCells ADDS a modifier to a base speed (common), then:
+            // - building uses -1 to block (1 + -1 = 0)
+            // - entrance should use +1 to undo that block (0 + 1 = 1)
+            grid_manager.SetPathOnCells(new List<Vector2Int> { entrance_cell }, 1.0f);
+            Debug.Log($"Entrance cell {entrance_cell} speed now {grid_manager.GetCellMoveSpeed(entrance_cell)}");
+        }
+
+        // If this placed object is a decoration, register its grid cell for synergy checks
+        Decoration decor = current_building.GetComponentInChildren<Decoration>();
+        if (decor != null && placed_data.occupied_cells.Count > 0 && DecorRegistry.Instance != null)
+        {
+            // Use first occupied cell as the decor “anchor”
+            DecorRegistry.Instance.UpdateCell(decor, placed_data.occupied_cells[0]);
+        }
+
+
         current_building = null;
         current_building_collider = null;
         covered_cells.Clear();
@@ -547,6 +650,11 @@ public class BuildingManager : MonoBehaviour, ISaveable
         {
             // Leave build mode (this will also hide the build panel via BuildModeUI)
             BuildMode(false);
+            if (UpdateBuildPanel != null)
+            {
+                UpdateBuildPanel(); //Broadcasts to NUI - will not fail if unsuccessful
+            }
+            
         }
     }
 
@@ -611,6 +719,11 @@ public class BuildingManager : MonoBehaviour, ISaveable
         if (placed_data != null)
         {
             Destroy(placed_data.gameObject);
+        }
+
+        if (building_removed != null)
+        {
+            building_removed.Invoke(unique_id);
         }
 
         return true;
@@ -703,6 +816,7 @@ public class BuildingManager : MonoBehaviour, ISaveable
             placed.unique_id = entry.unique_id;
             placed.prefab_index = entry.prefab_index;
             placed.is_path = false;
+            placed.speed_modifier = -1;
 
             placed.occupied_cells.Clear();
 
@@ -719,9 +833,21 @@ public class BuildingManager : MonoBehaviour, ISaveable
                 }
             }
 
+            // Restore speed modifiers for pathfinding
+            grid_manager.SetPathOnCells(placed.occupied_cells, placed.speed_modifier);
+
+            Decoration decor = new_building.GetComponentInChildren<Decoration>();
+            if (decor != null && placed.occupied_cells.Count > 0 && DecorRegistry.Instance != null)
+            {
+                DecorRegistry.Instance.UpdateCell(decor, placed.occupied_cells[0]);
+            }
+
+
             placed_buildings_by_id[placed.unique_id] = placed;
 
             ++b;
         }
     }
+
+
 }

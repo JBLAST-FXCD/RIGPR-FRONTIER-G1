@@ -11,16 +11,17 @@ using UnityEngine;
 /// </summary>
 public class CommercialBuilding : ParentBuilding
 {
-    protected int[] cheese_prices;
-    protected int cheese_amount;
+    //Delete these varible when script is connect to global variable
+    protected int population;
 
-    //Delete these varibles when script is connect to global cheese and scrap counter
-    protected int cheese;
-    protected int scrap;
+    //For selling
+    protected CheeseTypes[] keys;
 
     //Numbers for PopularityAlgorithm()
+    protected int cheese_types;
     protected float[] cheese_popularity;
     protected float remaining_percent;
+    protected int max_persent;
     protected int mini_percent;
     protected int remaining_cheese;
     protected int index;
@@ -28,23 +29,24 @@ public class CommercialBuilding : ParentBuilding
     //Delay for recalculating popularity values
     [SerializeField] protected float mini_pop_delay;
     [SerializeField] protected float max_pop_delay;
-    protected float pop_delay;
 
     [SerializeField] protected float mini_sell_delay;
     [SerializeField] protected float max_sell_delay;
-    protected float sell_delay;
+
+    public float[] Cheese_popularity { get { return cheese_popularity; } }
+    public override BuildingType Building_type => BuildingType.market;
+
     CommercialBuilding() 
     {
         //These number is based off GDD and is hard coded for the algorithm to work. In future [SerializeField] for designers to access easily 
-        cheese_prices = new int[7] {10, 15, 25, 40, 60, 85, 100 };
-        cheese_amount = 7;
+        cheese_types = Enum.GetNames(typeof(CheeseTypes)).Length;
 
-        //Delete these varibles when script is connect to global cheese and scrap counter
-        cheese = 0;
-        scrap = 0;
+        //Delete these varible when script is connect to global variable
+        population = 20;
 
-        cheese_popularity = new float[cheese_amount];
+        cheese_popularity = new float[cheese_types];
         remaining_percent = 100.0f;
+        max_persent       = 50;
         mini_percent      = 5;
         remaining_cheese  = 0;
         index             = 0;
@@ -52,37 +54,28 @@ public class CommercialBuilding : ParentBuilding
         //In seconds
         mini_pop_delay = 300.0f;
         max_pop_delay  = 600.0f;
-        pop_delay      = 0;
 
         mini_sell_delay = 10;
         max_sell_delay  = 20;
-        sell_delay      = 0;
+    }
+
+    public int CheeseAmount(CheeseTypes cheese)
+    {
+        int rv = population / 10 * (int)cheese_popularity[(int)cheese] / mini_percent;
+
+        return rv;
     }
 
     // Start is called before the first frame update
-    void Start()
+    protected new void Start()
     {
         UnityEngine.Random.InitState((int)DateTime.Now.Ticks);
 
         //These funtions are looped infinitely per GDD
-        RecalculatePopularity();
+        PopularityAlgorithm();
         SellDelay();
-    }
 
-    protected new void Update()
-    {
-        //For debuging the popularity numbers
-        if (Input.GetKeyDown(KeyCode.C))
-        {
-            cheese_popularity = new float[cheese_amount];
-            float temp = 0;
-            PopularityAlgorithm();
-            for (int i = 0; i < cheese_popularity.Length; i++)
-                Debug.Log(cheese_popularity[i]);
-            for (int j = 0; j < cheese_popularity.Length; j++)
-                temp += cheese_popularity[j];
-            Debug.Log(temp);
-        }
+        ConstructTier();
     }
 
     //The maximum range is limited to prevent any element of the array from having a disproportionate chance of being the maximum number,
@@ -93,9 +86,10 @@ public class CommercialBuilding : ParentBuilding
         //Make the random number a factor of mini_percent because the minimum_percent is equivalent to the percentage for the unit
         int random = UnityEngine.Random.Range(mini_percent, max_range);
         int factor = random - (random % mini_percent);
+
         cheese_popularity[i] = factor;
 
-        //Record these number to contune funtionality outside for loop
+        //Record these numbers to contune funtionality outside for loop
         remaining_percent -= cheese_popularity[i];
         remaining_cheese = cheese_popularity.Length - 1 - i;
         index++;
@@ -103,17 +97,23 @@ public class CommercialBuilding : ParentBuilding
 
     protected void PopularityAlgorithm()
     {
+        //For resetting value when looped
+        cheese_popularity = new float[cheese_types];
+        remaining_percent = 100.0f;
+        remaining_cheese = 0;
+        index = 0;
+
         for (int i = 0; i <= cheese_popularity.Length - 1; i++)
         {
-            //Stop the element of the array having a disproportionate chance of being the maximum numbe
-            if (remaining_percent > 100 - remaining_cheese * mini_percent && remaining_percent > mini_percent * remaining_cheese)
-            {
-                PickPercent(i, (int)(remaining_percent - (remaining_cheese - 1) * mini_percent));
-            }
             //Runs when remian percent is not too little 
-            else if (remaining_percent >= mini_percent * remaining_cheese)
+            if (remaining_percent >= mini_percent * remaining_cheese)
             {
-                PickPercent(i, (int)remaining_percent);
+                //Stop the element of the array having a disproportionate chance of being the maximum numbe
+                int highest = (int)(remaining_percent - (remaining_cheese - 1) * mini_percent);
+                int max_range = max_persent < highest ? max_persent : highest;
+                max_range = max_range < remaining_percent ? max_range : (int)remaining_percent;
+
+                PickPercent(i, max_range);
             }
             else
                 break;
@@ -131,11 +131,17 @@ public class CommercialBuilding : ParentBuilding
                 }
             }
         }
-
-        //Remaing cheese equal mini_percentmum percent
-        for (int k = index; k <= cheese_popularity.Length - 1; k++)
+        //Stops total popularity  being less than 100%
+        if (remaining_percent > 0)
         {
-            cheese_popularity[k] += mini_percent;
+            for (int x = index - 1; x > remaining_cheese; x--)
+            {
+                if (cheese_popularity[x] < max_persent && remaining_percent > 0)
+                {
+                    cheese_popularity[x] += mini_percent;
+                    remaining_percent -= mini_percent;
+                }
+            }
         }
 
         //Repeat loop of recalculating popularity values
@@ -145,35 +151,38 @@ public class CommercialBuilding : ParentBuilding
     //Recalculates Popularity every 5 to 10 mins as per GDD
     protected void RecalculatePopularity()
     {
-        pop_delay = UnityEngine.Random.Range(mini_pop_delay, max_pop_delay);
+        float pop_delay = UnityEngine.Random.Range(mini_pop_delay, max_pop_delay);
 
-        cheese_popularity = new float[cheese_amount];
         Invoke(nameof(PopularityAlgorithm), pop_delay);
     }
 
     //Sells cheese ever 10 to 20 seconds as per GDD
     protected void SellDelay()
     {
-        sell_delay = UnityEngine.Random.Range(mini_sell_delay, max_sell_delay);
+        float sell_delay = UnityEngine.Random.Range(mini_sell_delay, max_sell_delay);
 
-        Invoke(nameof(Sell), pop_delay);
+        Invoke(nameof(Sell), sell_delay);
     }
 
     protected void Sell()
     {
-        for (int i = 0; i <= cheese_prices.Length - 1; i++)
+        ResourceManager resources = ResourceManager.instance;
+
+        if (keys != null)
         {
-            int units = (int)cheese_popularity[i] / mini_percent;
-
-            if(cheese >= units)
+            for (int i = 0; i <= keys.Length - 1; i++)
             {
-                //Later replace scrap and cheese with global scrap and cheese counter
-                cheese -= units;
-                scrap += cheese_prices[i] * units;
-            }
+                int units = population / 10 * (int)cheese_popularity[i] / mini_percent;
 
-            //Repeat loop of selling cheese
-            SellDelay();
+                if (resources.CanAfford(keys[i], units) == true)
+                {
+                    //Later replace scrap and cheese with global scrap and cheese counter
+                    resources.SpendResources(keys[i], units);
+                    resources.AddResources(Cheese.GetCheese(keys[i]).scrap_price * units);
+                }
+            }
         }
+        //Repeat loop of selling cheese
+        SellDelay();
     }
 }

@@ -1,13 +1,13 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-//// Hani Hailston 14/12/2025
+// Updated by Iain Benner 02/02/2026
+// Hani Hailston 14/12/2025
 
 /// <summary>
-/// Abstract Base Class for the upgrade system, meaning this script should not be attached to building objects. 
-/// Attach ResidentialUpgradeHandler, CommercialUpgradeHandler etc instead.
-/// Handles the 'spending' logic: checking costs against resource availability via the ResourceManager.
-/// Also ensures prerequisites in the upgrade tree are met before an upgrade is purchasable.
+/// Abstract Base Class for the upgrade system, so attach ResidentialUpgradeHandler, CommercialUpgradeHandler etc. to buildings instead.
+/// Handles spending logic e.g checking costs against resource availability using the ResourceManager script.
+/// Ensures any prior upgrades are applied before a new upgrade is purchasable.
 /// </summary>
 
 public abstract class BuildingUpgradeHandler : MonoBehaviour, ISaveable
@@ -35,9 +35,9 @@ public abstract class BuildingUpgradeHandler : MonoBehaviour, ISaveable
             return false;
         }
 
-        if (ResourceManager.instance.CanAfford(upgrade.scrap_cost, upgrade.cheese_cost))
+        if (ResourceManager.instance.CanAfford(upgrade.scrap_cost, upgrade.type, upgrade.cheese_amount))
         {
-            ResourceManager.instance.SpendResources(upgrade.scrap_cost, upgrade.cheese_cost);
+            ResourceManager.instance.SpendResources(upgrade.scrap_cost, upgrade.type, upgrade.cheese_amount);
 
             UnlockedUpgradeIDs.Add(upgrade.upgrade_id);
 

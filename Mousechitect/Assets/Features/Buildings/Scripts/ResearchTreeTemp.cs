@@ -5,29 +5,19 @@ using UnityEngine;
 
 public class ResearchTreeTemp : MonoBehaviour
 {
-    protected int cheese_cost;
+    protected CheeseTypes type;
+    protected int cheese_amount;
     protected int scrap_cost;
 
     protected float prodution_time;
 
     protected bool is_researched;
 
-    public int GetCheeseCost()
-    {
-        return cheese_cost;
-    }
-    public int GetScrapCost()
-    {
-        return scrap_cost;
-    }
-    public float GetProductionTime()
-    {
-        return prodution_time;
-    }
-    public bool CheckIfResearched()
-    {
-        return is_researched;
-    }
+    public CheeseTypes Type { get { return type; } }
+    public int Cheese_amount { get { return cheese_amount; } }
+    public int Scrap_cost { get { return scrap_cost; } }
+    public float Production_time {  get { return prodution_time; } }
+    public bool Is_researched { get { return is_researched; } }
 
     public void IsResearched()
     {
@@ -36,7 +26,8 @@ public class ResearchTreeTemp : MonoBehaviour
 
     public ResearchTreeTemp()
     {
-        cheese_cost = 0;
+        type = CheeseTypes.AmericanCheese;
+        cheese_amount = 0;
         scrap_cost = 0;
         prodution_time = 5f;
         is_researched = false;

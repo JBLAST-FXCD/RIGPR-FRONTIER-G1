@@ -9,31 +9,23 @@ using UnityEngine;
 /// </summary>
 public class ResearchBuilding : ParentBuilding
 {
-    //Delete these varibles when script is connect to global cheese and scrap counter
-    protected int cheese;
-    protected int scrap;
-
-    public ResearchBuilding()
-    {
-        //Delete these varibles when script is connect to global cheese and scrap counter
-        cheese = 0;
-        scrap  = 0;
-    }
+    public override BuildingType Building_type => BuildingType.research;
 
     //The player will call the funtion through the UI 
     protected void ResearchNode(ResearchTreeTemp tree)
     {
-        if (tree.CheckIfResearched() == false && tree.GetCheeseCost() >= cheese && tree.GetScrapCost() >= scrap)
+        ResourceManager resources = ResourceManager.instance;
+
+        if (tree.Is_researched == false && resources.CanAfford(tree.Scrap_cost, tree.Type, tree.Cheese_amount) == true)
         {
-            cheese -= tree.GetCheeseCost();
-            scrap  -= tree.GetScrapCost();
+            resources.SpendResources(tree.Scrap_cost, tree.Type, tree.Cheese_amount);
             StartCoroutine(CompleteResearch(tree));
         }
     }
 
     protected IEnumerator CompleteResearch(ResearchTreeTemp tree)
     {
-        yield return new WaitForSeconds(tree.GetProductionTime());
+        yield return new WaitForSeconds(tree.Production_time);
 
         //Add information thats need updating on research completion before IsResearched().
         tree.IsResearched();
