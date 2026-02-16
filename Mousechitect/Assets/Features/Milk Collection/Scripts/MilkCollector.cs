@@ -24,6 +24,14 @@ public class MilkCollector : ParentBuilding, IMilkContainer
     public bool IS_TANK => false;
     public override BuildingType Building_type => BuildingType.collector;
 
+    private void OnDestroy()
+    {
+        if (MilkManager.Instance != null)
+        {
+            MilkManager.Instance.UnregisterContainer(this);
+        }
+    }
+
     protected new void Start()
     {
         // register with milk manager
