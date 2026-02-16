@@ -27,6 +27,7 @@ public class ResourceManager : MonoBehaviour, ISaveable
     [Header("UI References")]
     public TextMeshProUGUI scrap_text;
     public TextMeshProUGUI cheese_text;
+    public TextMeshProUGUI milk_text;
 
     // factory instance -> current cheese type
     private readonly Dictionary<int, CheeseTypes> factory_to_type = new Dictionary<int, CheeseTypes>();
@@ -140,12 +141,17 @@ public class ResourceManager : MonoBehaviour, ISaveable
     {
         if (scrap_text != null)
         {
-            scrap_text.text = "Scrap: " + scrap;
+            scrap_text.text = "" + scrap;
         }
 
         if (cheese_text != null)
         {
-            cheese_text.text = "Total Cheese: " + total_cheese;
+            cheese_text.text = "" + total_cheese;
+        }
+
+        if (milk_text != null)
+        {
+            milk_text.text = "" + total_milk;
         }
     }
 

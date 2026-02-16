@@ -5,6 +5,7 @@ using ImGuiNET;
 using UImGui;
 using UnityEngine.UIElements;
 using System;
+using Unity.VisualScripting;
 
 // Jess @ 27/01/2026
 // <summary>
@@ -84,6 +85,8 @@ namespace UImGui
                     DrawPopulationTab();
                     ImGui.Separator();
                     DrawMoraleTab();
+                    ImGui.Separator();
+                    DrawAudioSection();
                     ImGui.EndTabItem();
                 }
 
@@ -157,7 +160,44 @@ namespace UImGui
                     ResourceManager.instance.SpendResources(scrap_input);
                 }
             }
-        } 
+        }
+
+        private void DrawAudioSection()
+        {
+            if (ImGui.CollapsingHeader("Audio Manager"))
+            {
+                if (ImGui.Button("Play Sample Track 1") && !AudioHandler.instance.is_music_playing)
+                {
+                    AudioHandler.instance.music_track_1.Play();
+                }
+
+                if (ImGui.Button("Play Sample Track 2") && !AudioHandler.instance.is_music_playing)
+                {
+                    AudioHandler.instance.music_track_2.Play();
+                }
+
+                if (ImGui.Button("Play Sample Track 3") && !AudioHandler.instance.is_music_playing)
+                {
+                    AudioHandler.instance.music_track_3.Play();
+                }
+                ImGui.Separator();
+                if (!AudioHandler.instance.is_music_playing)
+                {
+                    ImGui.Text("No music is currently playing");
+                }
+                else
+                {
+                    ImGui.Text("Music is currently playing");
+                }
+
+                if (ImGui.Button("Stop Music"))
+                {
+                    AudioHandler.instance.music_track_1.Stop();
+                    AudioHandler.instance.music_track_2.Stop();
+                    AudioHandler.instance.music_track_3.Stop();
+                }
+            }
+        }
 
         private void DrawCameraSection()
         {
