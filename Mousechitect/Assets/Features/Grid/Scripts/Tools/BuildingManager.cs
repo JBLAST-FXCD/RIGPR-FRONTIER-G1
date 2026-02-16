@@ -163,12 +163,23 @@ public class BuildingManager : MonoBehaviour, ISaveable
     }
     public void OnBuildingButtonPressed(int building_index)
     {
-        if (!is_build_mode_active)
+        // If UI calls this while the tool is disabled,
+        // force the controller to re-enable the Building tool.
+        if (!enabled || !is_build_mode_active)
         {
-            Debug.Log("Cannot select building: build mode is not active.");
-            return;
+            BuildToolController controller = FindObjectOfType<BuildToolController>();
+            if (controller != null)
+            {
+                controller.OnBuildingToolButton(); // this calls SetToolEnabled(true) on BuildingManager
+            }
+            else
+            {
+                // Fallback: enable ourselves so Update runs even if controller isn't found
+                SetToolEnabled(true);
+            }
         }
 
+        // Now we should be active and in build mode
         StartPlacingBuilding(building_index);
     }
 
@@ -233,6 +244,23 @@ public class BuildingManager : MonoBehaviour, ISaveable
             occupied_cells.Remove(cells[i]);
             ++i;
         }
+    }
+
+    // Anthony - 15/2/2026
+    // Public wrapper so other tools (MoveTool) can validate placement.
+    public bool AreCellsFree(List<Vector2Int> cells)
+    {
+        return CheckCellSurfaces(cells);
+    }
+
+    // Anthony - 15/2/2026
+    // Allows tools (MoveTool) to reserve cells after validation.
+    public void AddOccupiedCells(List<Vector2Int> cells)
+    {
+        if (cells == null) return;
+
+        for (int i = 0; i < cells.Count; i++)
+            occupied_cells.Add(cells[i]);
     }
 
     // Allows UI / tool controller to cancel only the current preview
@@ -820,4 +848,6 @@ public class BuildingManager : MonoBehaviour, ISaveable
             ++b;
         }
     }
+
+
 }
