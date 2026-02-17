@@ -24,22 +24,39 @@ public class BuildToolController : MonoBehaviour
 
     public void OnBuildingToolButton()
     {
-        SetActiveTool(TOOL_TYPE.TOOL_TYPE_BUILDING);
+        if (current_tool_type == TOOL_TYPE.TOOL_TYPE_BUILDING)
+            SetActiveTool(TOOL_TYPE.TOOL_TYPE_NONE);
+        else
+            SetActiveTool(TOOL_TYPE.TOOL_TYPE_BUILDING);
     }
 
     public void OnPathToolButton()
     {
-        SetActiveTool(TOOL_TYPE.TOOL_TYPE_PATH);
+        if (current_tool_type == TOOL_TYPE.TOOL_TYPE_PATH)
+            SetActiveTool(TOOL_TYPE.TOOL_TYPE_NONE);
+        else
+            SetActiveTool(TOOL_TYPE.TOOL_TYPE_PATH);
     }
 
     public void OnDestroyToolButton()
     {
-        SetActiveTool(TOOL_TYPE.TOOL_TYPE_DESTROY);
+        if (current_tool_type == TOOL_TYPE.TOOL_TYPE_DESTROY)
+            SetActiveTool(TOOL_TYPE.TOOL_TYPE_NONE);
+        else
+            SetActiveTool(TOOL_TYPE.TOOL_TYPE_DESTROY);
     }
 
     public void SetActiveTool_None()
     {
         SetActiveTool(TOOL_TYPE.TOOL_TYPE_NONE);
+    }
+
+    public void ToggleMoveTool()
+    {
+        if (current_tool_type == TOOL_TYPE.TOOL_TYPE_MOVE)
+            SetActiveTool(TOOL_TYPE.TOOL_TYPE_NONE);
+        else
+            SetActiveTool(TOOL_TYPE.TOOL_TYPE_MOVE);
     }
 
     private void SetActiveTool(TOOL_TYPE new_tool_type)

@@ -10,9 +10,10 @@ public class NUIConnector : MonoBehaviour
     [Header("Exernal Connections")]
     [SerializeField] private BuildingManager build_tool;
     [SerializeField] private PathTool path_tool;
-    [SerializeField] private DestroyTool destroy_tool;
-    private bool path_enabled = false;
-    private bool destroy_enabled = false;
+    [SerializeField] private BuildToolController tool_controller;
+    //private bool path_enabled = false;
+    //private bool destroy_enabled = false;
+    //private bool move_enabled = false;
 
     [Header("Internal Connections")]
     [SerializeField] private NewUserInterfaceManager nui_manager;
@@ -31,45 +32,35 @@ public class NUIConnector : MonoBehaviour
 
     public void NUIToggleBuildTool()
     {
-        if (build_tool != null)
+        if (tool_controller != null)
         {
-            build_tool.ToggleBuildMode();
+            tool_controller.OnBuildingToolButton();
         }
     }
 
     public void NUITogglePathTool()
     {
-        if (path_tool != null)
+        if (tool_controller != null)
         {
-            if (!path_enabled)
-            {
-                path_tool.SetToolEnabled(true);
-                path_enabled = true;
-            }
-            else
-            {
-                path_tool.SetToolEnabled(false);
-                path_enabled = false;
-            }
+            tool_controller.OnPathToolButton();
         }
     }
 
     public void NUIToggleDestroyTool()
     {
-        if (destroy_tool != null)
+        if (tool_controller != null)
         {
-            if (!destroy_enabled)
-            {
-               destroy_tool.SetToolEnabled(true);
-               destroy_enabled = true;
-            }
-            else
-            {
-                destroy_tool.SetToolEnabled(false);
-                destroy_enabled = false;
-            }
+            tool_controller.OnDestroyToolButton();
         }
 
+    }
+
+    public void NUIToggleMoveTool()
+    {
+        if (tool_controller != null)
+        {
+            tool_controller.ToggleMoveTool();
+        }
     }
 
     public void NUIPlaceBuilding(int building_index)
