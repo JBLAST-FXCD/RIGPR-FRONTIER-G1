@@ -14,6 +14,8 @@ public class NewUserInterfaceManager : MonoBehaviour
     [Header("General")]
     [SerializeField] private NUIConnector nui_connector;
     [SerializeField] private GameObject path_panel;
+    [SerializeField] private GameObject destroy_panel;
+    [SerializeField] private GameObject move_panel;
 
     [Header("Build Panel")]
     [SerializeField] private GameObject build_panel;
@@ -22,6 +24,7 @@ public class NewUserInterfaceManager : MonoBehaviour
     [SerializeField] private GameObject[] industrial_rows;
     [SerializeField] private GameObject[] commercial_rows;
     [SerializeField] private GameObject[] research_rows;
+    [SerializeField] private GameObject[] decoration_rows;
 
 
     // --- Internal Variables ---
@@ -32,6 +35,7 @@ public class NewUserInterfaceManager : MonoBehaviour
         CATEGORY_INDUSTRIAL,
         CATEGORY_COMMERCIAL,
         CATEGORY_RESEARCH,
+        CATEGORY_DECORATION,
     }
     private CATEGORY current_category = CATEGORY.CATEGORY_RESIDENTIAL;
 
@@ -40,6 +44,7 @@ public class NewUserInterfaceManager : MonoBehaviour
         OPEN_PANEL_BUILD,
         OPEN_PANEL_PATH,
         OPEN_PANEL_DESTROY,
+        OPEN_PANEL_MOVE,
         OPEN_PANEL_MICE,
         OPEN_PANEL_BUILDING,
         OPEN_PANEL_NONE
@@ -62,6 +67,8 @@ public class NewUserInterfaceManager : MonoBehaviour
                 return commercial_rows;
             case CATEGORY.CATEGORY_RESEARCH:
                 return research_rows;
+            case CATEGORY.CATEGORY_DECORATION:
+                return decoration_rows;
             default:
                 return residential_rows;
         }
@@ -99,7 +106,10 @@ public class NewUserInterfaceManager : MonoBehaviour
                 TogglePathPanel();
                 break;
             case OPEN_PANEL.OPEN_PANEL_DESTROY:
-                //ToggleDestroyPanel();
+                ToggleDestroyPanel();
+                break;
+            case OPEN_PANEL.OPEN_PANEL_MOVE:
+                ToggleMovePanel();
                 break;
             case OPEN_PANEL.OPEN_PANEL_MICE:
                 //ToggleMicePanel();
@@ -156,6 +166,45 @@ public class NewUserInterfaceManager : MonoBehaviour
         nui_connector.NUITogglePathTool();
     }
 
+    public void ToggleDestroyPanel()
+    {
+        if (open_panel == OPEN_PANEL.OPEN_PANEL_DESTROY)
+        {
+            destroy_panel.GetComponent<Animator>().SetBool("is_panel_open", false);
+            open_panel = OPEN_PANEL.OPEN_PANEL_NONE;
+        }
+        else
+        {
+            if (open_panel != OPEN_PANEL.OPEN_PANEL_NONE)
+            {
+                ClosePanels();
+            }
+            destroy_panel.GetComponent<Animator>().SetBool("is_panel_open", true);
+            open_panel = OPEN_PANEL.OPEN_PANEL_DESTROY;
+        }
+        nui_connector.NUIToggleDestroyTool();
+    }
+
+    public void ToggleMovePanel()
+    {
+        if (open_panel == OPEN_PANEL.OPEN_PANEL_MOVE)
+        {
+            move_panel.GetComponent<Animator>().SetBool("is_panel_open", false);
+            open_panel = OPEN_PANEL.OPEN_PANEL_NONE;
+        }
+        else
+        {
+            if (open_panel != OPEN_PANEL.OPEN_PANEL_NONE)
+            {
+                ClosePanels();
+            }
+            move_panel.GetComponent<Animator>().SetBool("is_panel_open", true);
+            open_panel = OPEN_PANEL.OPEN_PANEL_MOVE;
+        }
+        nui_connector.NUIToggleMoveTool();
+    }
+
+
     public void BuildCategoryNext()
     {
         CATEGORY previous_category = current_category;
@@ -174,6 +223,10 @@ public class NewUserInterfaceManager : MonoBehaviour
                 category_text.text = "Research";
                 break;
             case CATEGORY.CATEGORY_RESEARCH:
+                current_category = CATEGORY.CATEGORY_DECORATION;
+                category_text.text = "Decoration";
+                break;
+            case CATEGORY.CATEGORY_DECORATION:
                 current_category = CATEGORY.CATEGORY_RESIDENTIAL;
                 category_text.text = "Residential";
                 break;
@@ -190,6 +243,10 @@ public class NewUserInterfaceManager : MonoBehaviour
         CATEGORY previous_category = current_category;
         switch (current_category)
         {
+            case CATEGORY.CATEGORY_DECORATION:
+                current_category = CATEGORY.CATEGORY_RESEARCH;
+                category_text.text = "Research";
+                break;
             case CATEGORY.CATEGORY_RESEARCH:
                 current_category = CATEGORY.CATEGORY_COMMERCIAL;
                 category_text.text = "Commerical";
@@ -203,8 +260,8 @@ public class NewUserInterfaceManager : MonoBehaviour
                 category_text.text = "Residential";
                 break;
             case CATEGORY.CATEGORY_RESIDENTIAL:
-                current_category = CATEGORY.CATEGORY_RESEARCH;
-                category_text.text = "Research";
+                current_category = CATEGORY.CATEGORY_DECORATION;
+                category_text.text = "Decoration";
                 break;
             default:
                 current_category = CATEGORY.CATEGORY_RESIDENTIAL;

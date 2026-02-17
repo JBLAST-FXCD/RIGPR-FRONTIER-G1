@@ -18,16 +18,30 @@ public class NUIConnector : MonoBehaviour
     [Header("Internal Connections")]
     [SerializeField] private NewUserInterfaceManager nui_manager;
 
-
-
     private void Start()
     {
-        build_tool.UpdateBuildPanel += InterceptBroadcast;
+        tool_controller.UpdatePanels += UpdatePanels;
     }
 
-    private void InterceptBroadcast()
+    private void UpdatePanels(int tool)
     {
-        nui_manager.ToggleBuildPanel(true);
+        switch (tool)
+        {
+            case 1:
+                nui_manager.ToggleBuildPanel(true);
+                break;
+            case 2:
+                nui_manager.TogglePathPanel();
+                break;
+            case 3:
+                nui_manager.ToggleDestroyPanel();
+                break;
+            case 4:
+                nui_manager.ToggleMovePanel();
+                break;
+            default:
+                break;
+        }
     }
 
     public void NUIToggleBuildTool()

@@ -22,6 +22,11 @@ public class BuildToolController : MonoBehaviour
 
     private TOOL_TYPE current_tool_type = TOOL_TYPE.TOOL_TYPE_NONE;
 
+    // --- Broadcast function to communicate to the NUI when a tool disables itself
+    public delegate void UpdateNUI(int tool);
+    public event UpdateNUI UpdatePanels;
+    // --- Added by Joe Mcdonnell, 17/02/2026
+
     public void OnBuildingToolButton()
     {
         if (current_tool_type == TOOL_TYPE.TOOL_TYPE_BUILDING)
@@ -48,6 +53,32 @@ public class BuildToolController : MonoBehaviour
 
     public void SetActiveTool_None()
     {
+        //--- Broadcasts to NUIConnector when and which tool has disabled itself
+        int tool_num = 0;
+        switch(current_tool_type)
+        {
+            case TOOL_TYPE.TOOL_TYPE_BUILDING:
+                tool_num = 1;
+                break;
+            case TOOL_TYPE.TOOL_TYPE_PATH:
+                tool_num = 2;
+                break;
+            case TOOL_TYPE.TOOL_TYPE_DESTROY:
+                tool_num = 3;
+                break;
+            case TOOL_TYPE.TOOL_TYPE_MOVE:
+                tool_num = 4;
+                break;
+            default:
+                tool_num = 0;
+                break;
+        }
+        if (UpdatePanels != null)
+        {
+            UpdatePanels(tool_num);
+        }
+        //--- Added by Joe Mcdonnell, 17/02/2026
+
         SetActiveTool(TOOL_TYPE.TOOL_TYPE_NONE);
     }
 

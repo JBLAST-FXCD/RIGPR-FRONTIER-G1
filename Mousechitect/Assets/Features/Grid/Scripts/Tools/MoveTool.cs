@@ -44,6 +44,11 @@ public class MoveTool : MonoBehaviour
 
     private float reselect_block_timer = 0f;
 
+    // --- Joe 17/02/2026
+    // Added a broadcast function to communicate to the NUI when is_tool_active is declared false
+    public delegate void UpdateNUI();
+    public event UpdateNUI UpdateMovePanel;
+    // ---
 
     public void SetToolEnabled(bool is_enabled)
     {

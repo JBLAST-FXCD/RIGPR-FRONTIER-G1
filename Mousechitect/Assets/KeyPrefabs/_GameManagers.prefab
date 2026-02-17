@@ -64,6 +64,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   scrap_text: {fileID: 0}
   cheese_text: {fileID: 0}
+  milk_text: {fileID: 0}
 --- !u!114 &7001459534572547520
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -160,3 +161,7 @@ MonoBehaviour:
   - {fileID: 7454611493747716669, guid: 56dcf4cd5e5eaf843805acf77258c2a8, type: 3}
   - {fileID: 2212835445630256447, guid: a3a269ae88a57f0489b0231449849c90, type: 3}
   - {fileID: 2212835445630256447, guid: 6890c3104818c9146a11aa7e88c8db45, type: 3}
+  - {fileID: 5998747787420578947, guid: 891cc52ee3e67c643b2efd785f52b8b9, type: 3}
+  - {fileID: 1568305239043164955, guid: 64295a35c39d5dc4b9a77fb425a02d62, type: 3}
+  - {fileID: 7075817096644765608, guid: 6832cdca3a293674ab307669dba51272, type: 3}
+  - {fileID: 2456205720212298267, guid: a5ec174236070dc40b2cd82279526424, type: 3}
