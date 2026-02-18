@@ -80,6 +80,7 @@ public class BuildingManager : MonoBehaviour, ISaveable
 
     // Remember which prefab index is currently selected (for UI integration)
     private int selected_building_index = 0;
+    private int selected_building_tier = 0;
 
     // Cells already occupied by placed buildings
     private readonly HashSet<Vector2Int> occupied_cells = new HashSet<Vector2Int>();
@@ -109,6 +110,11 @@ public class BuildingManager : MonoBehaviour, ISaveable
         if (is_build_mode_active && Input.GetKeyDown(KeyCode.Escape))
         {
             CancelBuildingPlacement();
+
+            if (controller != null)
+            {
+                controller.SetActiveTool_None();
+            }
         }
 
         if (!is_build_mode_active)
@@ -123,7 +129,7 @@ public class BuildingManager : MonoBehaviour, ISaveable
         // press 1 to start placing the first building prefab (instead of UI)
         if (current_building == null && Input.GetKeyDown(KeyCode.Alpha1))
         {
-            StartPlacingBuilding(0);
+            StartPlacingBuilding(0, 0);
         }
 
         if (current_building != null)
@@ -155,7 +161,7 @@ public class BuildingManager : MonoBehaviour, ISaveable
             BuildMode(false);
         }
     }
-    public void OnBuildingButtonPressed(int building_index)
+    public void OnBuildingButtonPressed(int building_index, int building_tier)
     {
         // If UI calls this while the tool is disabled,
         // force the controller to re-enable the Building tool.
@@ -174,7 +180,7 @@ public class BuildingManager : MonoBehaviour, ISaveable
         }
 
         // Now we should be active and in build mode
-        StartPlacingBuilding(building_index);
+        StartPlacingBuilding(building_index, building_tier);
     }
 
     public bool GetIsBuildModeActive()
@@ -183,7 +189,7 @@ public class BuildingManager : MonoBehaviour, ISaveable
     }
 
     // Entry point when a building type is selected (from UI or debug hotkey).
-    public void StartPlacingBuilding(int building_index)
+    public void StartPlacingBuilding(int building_index, int building_tier)
     {
         if (!is_build_mode_active)
         {
@@ -197,6 +203,7 @@ public class BuildingManager : MonoBehaviour, ISaveable
         }
 
         selected_building_index = building_index;
+        selected_building_tier = building_tier;
 
         if (current_building != null)
         {
@@ -206,6 +213,7 @@ public class BuildingManager : MonoBehaviour, ISaveable
         GameObject building_prefab = building_prefabs[selected_building_index];
 
         current_building = Instantiate(building_prefab);
+        current_building.transform.GetChild(0).GetComponent<ParentBuilding>().Tier = building_tier;
         current_building_collider = current_building.GetComponentInChildren<Collider>();
         current_preview_visual = current_building.GetComponentInChildren<BuildingPreviewVisual>();
 
@@ -638,7 +646,7 @@ public class BuildingManager : MonoBehaviour, ISaveable
         if (is_shift_held)
         {
             // Stay in build mode and spawn a new ghost of the same building
-            StartPlacingBuilding(selected_building_index);
+            StartPlacingBuilding(selected_building_index, selected_building_tier);
         }
         else
         {

@@ -11,9 +11,7 @@ public class NUIConnector : MonoBehaviour
     [SerializeField] private BuildingManager build_tool;
     [SerializeField] private PathTool path_tool;
     [SerializeField] private BuildToolController tool_controller;
-    //private bool path_enabled = false;
-    //private bool destroy_enabled = false;
-    //private bool move_enabled = false;
+    int building_index = 0;
 
     [Header("Internal Connections")]
     [SerializeField] private NewUserInterfaceManager nui_manager;
@@ -77,11 +75,17 @@ public class NUIConnector : MonoBehaviour
         }
     }
 
-    public void NUIPlaceBuilding(int building_index)
+    public void NUISetBuildingIndex(int index)
     {
+        building_index = index;
+    }
+
+    public void NUIPlaceBuilding(int building_tier)
+    {
+
         if (build_tool != null)
         {
-            build_tool.OnBuildingButtonPressed(building_index);
+            build_tool.OnBuildingButtonPressed(building_index, building_tier);
         }
     }
 
