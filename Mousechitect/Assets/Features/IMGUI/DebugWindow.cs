@@ -386,10 +386,23 @@ namespace UImGui
                         case BuildingType.factory:
                             FactoryBuilding factory = (FactoryBuilding)building;
 
-                            ImGui.Text($"Producing cheese: {factory.Produce_cheese}");
+                            if (ImGui.CollapsingHeader($"Cheese")) 
+                            {
+                                ImGui.Text($"Current cheese: {factory.Cheese_type}");
 
-                            if (ImGui.Button("Turn factory On/Off"))
-                                factory.ProduceCheeseSwitch();
+                                CheeseTypes[] cheeses = factory.GetAvalibleCheese();
+
+                                foreach (CheeseTypes cheese in cheeses)
+                                {
+                                    if (ImGui.Button($"Select cheese: {cheese}"))
+                                        factory.SelectCheese(cheese);
+                                }
+
+                                ImGui.Text($"Producing cheese: {factory.Produce_cheese}");
+
+                                if (ImGui.Button("Turn factory On/Off"))
+                                    factory.ProduceCheeseSwitch();
+                            }
                             break;
                         case BuildingType.market:
                             CommercialBuilding market = (CommercialBuilding)building;

@@ -33,7 +33,7 @@ public class FactoryBuilding : ParentBuilding
         new[] { CheeseTypes.Parmesan, CheeseTypes.BlueCheese }       // Tier 3
     };
 
-    protected CheeseValues cheese_type;
+    protected CheeseTypes cheese_type;
     protected int scrap_cost;
 
     //Delete these varible when script is connect to global variable
@@ -52,11 +52,13 @@ public class FactoryBuilding : ParentBuilding
     public int Stored_milk { get { return stored_milk; } }
     public int Milk_capacity { get { return milk_capasity; } }
     public bool Produce_cheese { get { return produce_cheese; } set { produce_cheese = value; } }
+    public CheeseTypes Cheese_type { get { return cheese_type; } }
     public override BuildingType Building_type => BuildingType.factory;
 
     public FactoryBuilding()
     {
-        cheese_type = new CheeseValues();
+        //Default
+        cheese_type = CheeseTypes.AmericanCheese;
 
         //Delete these varible when script is connect to global variable
         population = 20;
@@ -80,13 +82,12 @@ public class FactoryBuilding : ParentBuilding
         count++;
         ConstructTier();
         RefreshAllowedCheesesForTier();
-
     }
 
     //for player to select cheese
-    protected void SelectCheese(CheeseTypes input) 
+    public void SelectCheese(CheeseTypes input) 
     {
-        cheese_type = Cheese.GetCheese(input);
+        cheese_type = input;
     }
 
     protected override void TierSelection()
@@ -130,11 +131,13 @@ public class FactoryBuilding : ParentBuilding
     //Each cheese has production time
     protected void CheeseProduction()
     {
+        CheeseValues cheese = Cheese.GetCheese(cheese_type);
+
         //Checks if theres enought mise for factory as per GDD. id starts at 0 not 1
         if (id < population / 20)
         {
-            if (cheese_type.milk_cost >= stored_milk && produce_cheese == true)
-                Invoke(nameof(CreateCheese), cheese_type.prodution_time);
+            if (cheese.milk_cost <= stored_milk && produce_cheese == true)
+                Invoke(nameof(CreateCheese), cheese.prodution_time);
         }
         else
             Debug.Log("Not enough mice to operate this factory");
@@ -144,10 +147,13 @@ public class FactoryBuilding : ParentBuilding
     protected void CreateCheese()
     {
         ResourceManager resources = ResourceManager.instance;
+        CheeseValues cheese = Cheese.GetCheese(cheese_type);
 
         if (resources.CanAfford(scrap_cost) == true)
         {
-            resources.SpendResources(scrap_cost);
+            stored_milk -= cheese.milk_cost;
+            resources.SpendResources(cheese.scrap_cost);
+            resources.AddResources(cheese_type, 1);
             factory_switch = false;
             Invoke(nameof(UpdateTier), 60.0f);
         }
@@ -228,5 +234,10 @@ public class FactoryBuilding : ParentBuilding
         // If the factory is removed/destroyed, remove it from active variety tracking.
         if (ResourceManager.instance != null)
             ResourceManager.instance.UnregisterFactory(this);
+    }
+
+    public CheeseTypes[] GetAvalibleCheese()
+    {
+        return allowed_cheese_types;
     }
 }
