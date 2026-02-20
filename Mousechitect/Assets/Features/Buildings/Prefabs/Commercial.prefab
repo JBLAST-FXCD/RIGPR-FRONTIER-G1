@@ -62,6 +62,7 @@ MonoBehaviour:
   building_prefabs:
   - {fileID: 451139600085777321, guid: db301167af4e9d442952f024712be2f6, type: 3}
   capacitys: 20000000
+  scrap_costs: 01000000
   tier: 1
   mini_pop_delay: 300
   max_pop_delay: 600

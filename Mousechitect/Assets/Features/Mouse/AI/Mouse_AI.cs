@@ -101,7 +101,7 @@ public class Mouse_AI : MonoBehaviour
     //The weights applied all read have all factors combined.
     protected void FactoryTask(FactoryBuilding factory, ParentBuilding building)
     {
-        if (factory.IsActive && factory.Stored_milk < factory.Milk_capacity)
+        if (factory.IsActive && factory.CURRENT_MILK_AMOUNT < factory.MAX_MILK_CAPACITY)
         {
             Task new_taks = new Task();
 
@@ -109,7 +109,7 @@ public class Mouse_AI : MonoBehaviour
             new_taks.weight = 1 * cheese_weight;
             new_taks.building_type = BuildingType.factory;
             new_taks.amounts = new int[1];
-            new_taks.amounts[0] = factory.Milk_capacity - factory.Stored_milk;
+            new_taks.amounts[0] = factory.MAX_MILK_CAPACITY - factory.CURRENT_MILK_AMOUNT;
 
             tasks.Add(new_taks);
         }
@@ -148,7 +148,7 @@ public class Mouse_AI : MonoBehaviour
         new_taks.weight = 1 * milk_weight;
         new_taks.building_type = BuildingType.tank;
         new_taks.amounts = new int[1];
-        new_taks.amounts[0] = tank.max_capacity - tank.current_milk_amount;
+        new_taks.amounts[0] = tank.MAX_MILK_CAPACITY - tank.CURRENT_MILK_AMOUNT;
 
         tasks.Add(new_taks);
     }

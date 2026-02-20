@@ -121,12 +121,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f33aeeff351516e4295861087724b8ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  tier: 1
   building_prefabs:
   - {fileID: 3198148555316966977, guid: 2b3c953399b11fa46b8f0fbd383e0a0a, type: 3}
   capacitys: 01000000
-  tier: 1
-  max_capacity: 50
-  current_milk_amount: 0
+  scrap_costs: 01000000
+  max_capacitys: 32000000
 --- !u!65 &2865412012560817843
 BoxCollider:
   m_ObjectHideFlags: 0

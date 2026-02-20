@@ -21,6 +21,7 @@ public class ResidentialBuilding : ParentBuilding
     {
         building_prefab = building_prefabs[tier - 1];
         capacity = capacitys[tier - 1];
+        scrap_cost = scrap_costs[tier - 1];
         quality = max_quality[tier - 1];
     }
 

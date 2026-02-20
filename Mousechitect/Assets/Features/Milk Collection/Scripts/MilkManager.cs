@@ -41,11 +41,12 @@ public class MilkManager : MonoBehaviour
         all_containers.Remove(container);
     }
 
+    //****************************************************************
     public void RefreshRankings()
     {
         all_containers.RemoveAll(c => c.CONTAINER_GAME_OBJECT == null);
         // ranks containers first by whether they are tanks, then by current milk amount
-        ranked_containers = all_containers.OrderByDescending(c => c.IS_TANK).ThenByDescending(c => c.CURRENT_MILK_AMOUNT).ToList();
+        ranked_containers = all_containers.OrderByDescending(c => c.BUILDING_TYPE == BuildingType.tank).ThenByDescending(c => c.CURRENT_MILK_AMOUNT).ToList();
     }
 
     public MilkTank GetAvailableTank()
@@ -60,6 +61,7 @@ public class MilkManager : MonoBehaviour
         return all_containers.Where(c => c != null && c.CONTAINER_GAME_OBJECT != null).Sum(c => c.CURRENT_MILK_AMOUNT);
     }
 
+    //****************************************************************
     public IMilkContainer RequestMilkSource(int amount_needed)
     {
         // provides a milk container that can fulfill the requested amount

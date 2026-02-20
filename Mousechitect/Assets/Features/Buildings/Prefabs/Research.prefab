@@ -124,6 +124,7 @@ MonoBehaviour:
   building_prefabs:
   - {fileID: 8190863958714023708, guid: f6342fb014e077148bfa251aa1582b9d, type: 3}
   capacitys: 20000000
+  scrap_costs: 01000000
   tier: 1
 --- !u!65 &2865412012560817843
 BoxCollider:

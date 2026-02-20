@@ -191,6 +191,8 @@ public class BuildingManager : MonoBehaviour, ISaveable
     // Entry point when a building type is selected (from UI or debug hotkey).
     public void StartPlacingBuilding(int building_index)
     {
+        ResourceManager resources = ResourceManager.instance;
+
         if (!is_build_mode_active)
         {
             Debug.Log("StartPlacingBuilding called while build mode is inactive.");
