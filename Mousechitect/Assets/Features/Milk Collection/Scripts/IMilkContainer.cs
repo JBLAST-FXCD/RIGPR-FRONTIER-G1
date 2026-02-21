@@ -13,7 +13,7 @@ public interface IMilkContainer
     int CURRENT_MILK_AMOUNT { get; set; }
     int[] MAX_MILK_CAPACITYS { get; set; }
     int MAX_MILK_CAPACITY { get; set; }
-    BuildingType BUILDING_TYPE { get; }
+    BuildingType Building_type { get; }
 
     bool CanAfford(int MILK);
     void SubtractMilk(int MILK);

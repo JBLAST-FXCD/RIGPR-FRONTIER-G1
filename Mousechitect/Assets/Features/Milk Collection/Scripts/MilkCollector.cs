@@ -24,7 +24,6 @@ public class MilkCollector : ParentBuilding, IMilkContainer
     public int[] MAX_MILK_CAPACITYS { get => max_capacitys; set => max_capacitys = value; }
     public int MAX_MILK_CAPACITY { get => max_capacitys[tier - 1]; set => MAX_MILK_CAPACITY = value; }
     public override BuildingType Building_type => BuildingType.collector;
-    public BuildingType BUILDING_TYPE => Building_type;
 
     private void OnDestroy()
     {
