@@ -31,14 +31,16 @@ public class Mouse_AI : MonoBehaviour
     protected float tree_cycle;
 
     //Buildings for creating tasks.
-    //protected CommercialBuilding[] markets;
+    protected CommercialBuilding[] markets;
     protected List<IMilkContainer> factories;
     protected List<IMilkContainer> tanks;
     protected List<IMilkContainer> containers;
+    List<MouseTemp> mouses;
 
     protected ResourceManager resources;
 
     protected List<MilkTask> milk_tasks;
+    protected List<CheeseTask> cheese_tasks;
     protected Dictionary<ParentBuilding, MouseTemp> mice_route;
 
 
@@ -48,6 +50,13 @@ public class Mouse_AI : MonoBehaviour
         public ParentBuilding building;
         public float weight;
         public int amount;
+    }
+    protected struct CheeseTask
+    {
+        public CommercialBuilding market;
+        public float weight;
+        public int[] amounts;
+        public CheeseTypes[] types;
     }
 
     public Mouse_AI() 
@@ -60,6 +69,7 @@ public class Mouse_AI : MonoBehaviour
         tree_cycle = 15;
 
         milk_tasks = new List<MilkTask>();
+        cheese_tasks = new List<CheeseTask>();
         mice_route = new Dictionary<ParentBuilding, MouseTemp>();
     }
 
@@ -67,14 +77,14 @@ public class Mouse_AI : MonoBehaviour
     //Tanks are not necessary because the collectors produce the milk.
     protected bool FindBuildings()
     {
-        //markets = FindObjectsOfType(typeof(CommercialBuilding)) as CommercialBuilding[];
+        markets = FindObjectsOfType(typeof(CommercialBuilding)) as CommercialBuilding[];
 
         milkmanager.RefreshRankings();
         factories  = milkmanager.ranked_factories;
         tanks      = milkmanager.ranked_tanks;
         containers = milkmanager.ranked_containers;
 
-        if (factories.Any() /*|| markets.Any()*/ || containers.Any())
+        if (factories.Any() || markets.Any() || containers.Any())
             return true;
         return false;
     }
@@ -90,6 +100,22 @@ public class Mouse_AI : MonoBehaviour
                 MilkTask temp = milk_tasks[i];
                 temp.weight *= overtime_multiple;
                 milk_tasks[i] = temp;
+
+                return true;
+            }
+        }
+        return false;
+    }
+    protected bool TasksContainsBuilding(CommercialBuilding market)
+    {
+        for (int i = 0; i < cheese_tasks.Count; i++)
+        {
+            if (cheese_tasks[i].market == market)
+            {
+                //Update weight per cycle
+                CheeseTask temp = cheese_tasks[i];
+                temp.weight *= overtime_multiple;
+                cheese_tasks[i] = temp;
 
                 return true;
             }
@@ -112,32 +138,31 @@ public class Mouse_AI : MonoBehaviour
             milk_tasks.Add(new_taks);
         }
     }
-    //protected void CommercialTask(CommercialBuilding market, ParentBuilding building)
-    //{
-    //    List<CheeseTypes> keys = new List<CheeseTypes>();
-    //    List<int> amounts = new List<int>();
+    protected void CommercialTask(CommercialBuilding market)
+    {
+        List<CheeseTypes> keys = new List<CheeseTypes>();
+        List<int> amounts = new List<int>();
 
-    //    foreach (CheeseTypes c in Enum.GetValues(typeof(CheeseTypes)))
-    //    {
-    //        int cheese_amount = market.CheeseAmount(c);
-    //        bool enough = resources.CanAfford(c, cheese_amount);
-    //        if (enough == true)
-    //        {
-    //            keys.Add(c);
-    //            amounts.Add(cheese_amount);
-    //        }
-    //    }
+        foreach (CheeseTypes c in Enum.GetValues(typeof(CheeseTypes)))
+        {
+            int cheese_amount = market.CheeseAmount(c);
+            bool enough = resources.CanAfford(c, cheese_amount);
+            if (enough == true)
+            {
+                keys.Add(c);
+                amounts.Add(cheese_amount);
+            }
+        }
 
-    //    Task new_taks = new Task();
+        CheeseTask new_taks = new CheeseTask();
 
-    //    new_taks.building = building;
-    //    new_taks.weight = 1 * scrap_weight;
-    //    new_taks.building_type = BuildingType.market;
-    //    new_taks.amounts = amounts.ToArray();
-    //    new_taks.cheese_types = keys.ToArray();
+        new_taks.market = market;
+        new_taks.weight = 1 * scrap_weight;
+        new_taks.amounts = amounts.ToArray();
+        new_taks.types = keys.ToArray();
 
-    //    tasks.Add(new_taks);
-    //}
+        cheese_tasks.Add(new_taks);
+    }
     protected void TankTask(MilkTank tank)
     {
         MilkTask new_taks = new MilkTask();
@@ -147,34 +172,6 @@ public class Mouse_AI : MonoBehaviour
         new_taks.amount = tank.MilkToAdd();
 
         milk_tasks.Add(new_taks);
-    }
-
-    //Checks whether a task needs to be created or updated for all buildings that require a resource added.
-    protected void CheckTasks(List<IMilkContainer> containers)
-    {
-        if (containers != null)
-        {
-            for (int i = 0; i < containers.Count; i++)
-            {
-                IMilkContainer container = containers[i];
-
-                //Weight gets upadted if the task exsists else create task
-                switch (container.Building_type)
-                {
-                    case BuildingType.factory:
-                        if (!TasksContainsBuilding((FactoryBuilding)container))
-                            FactoryTask((FactoryBuilding)container);
-                        break;
-                    //case BuildingType.market:
-                    //    CommercialTask((CommercialBuilding)buildings[i], building);
-                    //    break;
-                    case BuildingType.tank:
-                        if (!TasksContainsBuilding((MilkTank)container))
-                            TankTask((MilkTank)container);
-                        break;
-                }
-            }
-        }
     }
 
     //Will create and update tasks with the latest weights and sort the tasks into a list.
@@ -215,10 +212,22 @@ public class Mouse_AI : MonoBehaviour
         //If lots of milk make cheese
         cheese_weight += milk_cheese;
 
-        //Checks if task needs to updated or created.
-        CheckTasks(factories);
-        //CheckTasks(markets);
-        CheckTasks(tanks);
+        //Checks whether a task needs to be created or updated for all buildings that require a resource added.
+        foreach (IMilkContainer c in factories)
+        {
+            if (!TasksContainsBuilding((FactoryBuilding)c))
+                FactoryTask((FactoryBuilding)c);
+        }
+        foreach (IMilkContainer c in tanks)
+        {
+            if (!TasksContainsBuilding((MilkTank)c))
+                TankTask((MilkTank)c);
+        }
+        foreach (CommercialBuilding m in markets)
+        {
+            if (!TasksContainsBuilding(m))
+                CommercialTask(m);
+        }
 
         if (milk_tasks.Count > 0) 
         {
@@ -235,9 +244,27 @@ public class Mouse_AI : MonoBehaviour
                     } 
                 }
             }
-
-            return true;
         }
+
+        if (cheese_tasks.Count > 0)
+        {
+            //Sort list in wieght order from lowest to hights because we will loop over the list backwords.
+            for (int i = 0; i < cheese_tasks.Count - 1; i++)
+            {
+                for (int j = 0; j < cheese_tasks.Count - i - 1; j++)
+                {
+                    if (cheese_tasks[j].weight > cheese_tasks[j + 1].weight)
+                    {
+                        CheeseTask temp = cheese_tasks[j];
+                        cheese_tasks[j] = cheese_tasks[j + 1];
+                        cheese_tasks[j + 1] = temp;
+                    }
+                }
+            }
+        }
+
+        if (milk_tasks.Any() || cheese_tasks.Any())
+            return true;
         return false;
     }
 
@@ -507,6 +534,71 @@ public class Mouse_AI : MonoBehaviour
             }));
         }
     }
+    
+    protected int MilkDoubleTask(MouseTemp mouse, int index)
+    {
+        switch (milk_tasks[index].building.Building_type)
+        {
+            case BuildingType.factory:
+                //Finding the correct building to go to first then building that created task.
+                ParentBuilding milk_building = FindClosestBuilding(milk_tasks[index], containers);
+
+                if (milk_building != null)
+                {
+                    mouse = FindClosestMouse(milk_building.GetPosition(), mouses.ToArray());
+
+                    if (mouse != null)
+                    {
+                        //Mouse might be in third building so needs to leave.
+                        if (mouse.Home != null)
+                            mouse.Home.MouseLeave(mouse);
+
+                        //mouse can't be picked again in this cycle.
+                        mouses.Remove(mouse);
+
+                        //Move mouse to both buildings.
+                        mouse.Moving = true;
+                        MoveMouse(mouse, milk_building, milk_tasks[index].building);
+                    }
+                }
+                break;
+            case BuildingType.tank:
+                List<IMilkContainer> collectors = GetCollectors();
+                ParentBuilding colletor_building = FindClosestBuilding(milk_tasks[index], collectors);
+
+                if (colletor_building != null)
+                {
+                    mouse = FindClosestMouse(colletor_building.GetPosition(), mouses.ToArray());
+
+                    if (mouse != null)
+                    {
+                        if (mouse.Home != null)
+                            mouse.Home.MouseLeave(mouse);
+                        mouses.Remove(mouse);
+                        mouse.Moving = true;
+                        MoveMouse(mouse, colletor_building, milk_tasks[index].building);
+                    }
+                }
+                break;
+        }
+        return --index;
+    }
+
+    protected int CheeseDoubleTask(MouseTemp mouse, int index)
+    {
+        mouse = FindClosestMouse(cheese_tasks[index].market.GetPosition(), mouses.ToArray());
+
+        if (mouse != null)
+        {
+            if (mouse.Home != null)
+                mouse.Home.MouseLeave(mouse);
+            mouses.Remove(mouse);
+            mouse.Moving = true;
+            GetRoute(mouse, cheese_tasks[index].market.GetPosition());
+            mice_route.TryAdd(cheese_tasks[index].market, mouse);
+        }
+        return --index;
+    }
 
     //This is to pick mouse to go to two building for task.
     protected bool PickMouse()
@@ -515,8 +607,7 @@ public class Mouse_AI : MonoBehaviour
         int change = mice_route.Count;
 
         //Get all mice that are not moving mouse might be in third building.
-        List<MouseTemp> mouses = new List<MouseTemp>();
-        mouses.AddRange(GameObject.FindObjectsOfType(typeof(MouseTemp), true) as MouseTemp[]);
+        mouses = (GameObject.FindObjectsOfType(typeof(MouseTemp), true) as MouseTemp[]).ToList();
 
         for (int i = 0; i < mouses.Count; i++)
         {
@@ -524,68 +615,25 @@ public class Mouse_AI : MonoBehaviour
                 mouses.RemoveAt(i);
         }
         
-        MouseTemp mouse = new MouseTemp();
+        MouseTemp mouse = null;
 
-        for (int i = milk_tasks.Count - 1; i >= 0; i--)
+        int milk_indedx = milk_tasks.Count - 1;
+        int cheese_index = cheese_tasks.Count - 1;
+        while (mouses.Count > 0 && (milk_tasks.Count > 0 || cheese_tasks.Count > 0)) 
         {
-            switch (milk_tasks[i].building.Building_type)
+            if(milk_tasks.Count == 0)
+                CheeseDoubleTask(mouse, cheese_index);
+            else if (cheese_tasks.Count == 0)
+                MilkDoubleTask(mouse, milk_indedx);
+            else
             {
-                case BuildingType.factory:
-                    //Finding the correct building to go to first then building that created task.
-                    ParentBuilding milk_building = FindClosestBuilding(milk_tasks[i], containers);
-
-                    if (milk_building != null)
-                    {
-                        mouse = FindClosestMouse(milk_building.GetPosition(), mouses.ToArray());
-
-                        if (mouse != null)
-                        {
-                            //Mouse might be in third building so needs to leave.
-                            if (mouse.Home != null)
-                                mouse.Home.MouseLeave(mouse);
-
-                            //mouse can't be picked again in this cycle.
-                            mouses.Remove(mouse);
-
-                            //Move mouse to both buildings.
-                            mouse.Moving = true;
-                            MoveMouse(mouse, milk_building, milk_tasks[i].building);
-                        }
-                    }
-                    break;
-                //case BuildingType.market:
-                //        mouse = FindClosestMouse(milk_tasks[i].building.GetPosition(), mouses.ToArray());
-
-                //        if (mouse != null)
-                //        {
-                //            if (mouse.Home != null)
-                //                mouse.Home.MouseLeave(mouse);
-                //            mouses.Remove(mouse);
-                //            mouse.Moving = true;
-                //            GetRoute(mouse, milk_tasks[i].building.GetPosition());
-                //            mice_route.TryAdd(milk_tasks[i].building, mouse);
-                //        }
-                    //break;
-                case BuildingType.tank:
-                    List <IMilkContainer> collectors = GetCollectors();
-                    ParentBuilding colletor_building = FindClosestBuilding(milk_tasks[i], collectors);
-
-                    if (colletor_building != null)
-                    {
-                        mouse = FindClosestMouse(colletor_building.GetPosition(), mouses.ToArray());
-
-                        if (mouse != null)
-                        {
-                            if (mouse.Home != null)
-                                mouse.Home.MouseLeave(mouse);
-                            mouses.Remove(mouse);
-                            mouse.Moving = true;
-                            MoveMouse(mouse, colletor_building, milk_tasks[i].building);
-                        }
-                    }
-                    break;
+                if (milk_tasks[milk_indedx].weight > cheese_tasks[cheese_index].weight)
+                    MilkDoubleTask(mouse, milk_indedx);
+                else
+                    CheeseDoubleTask(mouse, cheese_index);
             }
         }
+
         //If no task fulfilled, fail.
         if (change == mice_route.Count)
             return false;
