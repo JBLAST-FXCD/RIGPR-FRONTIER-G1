@@ -26,15 +26,18 @@ public class StressTest : MonoBehaviour
         Vector2Int building_loc = building.GetPosition();
         Vector2Int mouse_loc = mouse.Position;
 
-        //Caculate path.
-        List<BaseNode> path = pathfinding.FindPath(mouse.Position, building_loc);
+        mouse.Path = null;
+        mouse.Path = pathfinding.FindPath(mouse.Position, building_loc);
 
-        if(path == null)
-            path = pathfinding.CreatePath(mouse_loc, building_loc);
-        mouse.Path = pathfinding.CreatePath(mouse_loc, building_loc);
+        if (mouse.Path == null)
+            mouse.Path = pathfinding.CreatePath(mouse.Position, building_loc);
+            mouse.Path = pathfinding.CreatePath(mouse.Position, building_loc);
+
+        //For saving path.
+        List<BaseNode> path = mouse.Path;
 
         //LERP mouse if fail start pathfinding again.
-        if (mouse.Path != null && !mouse.Moving)
+        if (mouse.Path != null)
         {
             mouse.Moving = true;
             mouse.Collider = false;
@@ -47,7 +50,6 @@ public class StressTest : MonoBehaviour
                 else
                 {
                     mouse.Moving = false;
-                    mouse.Collider = true;
                     pathfinding.SavePath(mouse_loc, building_loc, path);
                 }
             }));

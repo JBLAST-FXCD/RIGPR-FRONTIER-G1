@@ -105,24 +105,24 @@ public class ParentBuilding : MonoBehaviour
     //Mouse is storded and turned off to make effetivly inside the building.
     protected virtual void OnTriggerStay(Collider other)
     {
-        if (other != null && other.tag == "MouseTemp" && mouse_occupants.Count < capacity)
+        if (other != null && other.CompareTag("MouseTemp") && mouse_occupants.Count < capacity)
         {
             other.transform.gameObject.SetActive(false);
             MouseTemp mouse = other.gameObject.GetComponent<MouseTemp>();
             mouse_occupants.Add(mouse);
+            mouse.Collider = false;
             mouse.Home = this;
         }
     }
 
     //checks building rotion to place the mice on the right side to stop mice appaering inside building.
-    public void MouseLeave(MouseTemp mouse)
+    public virtual void MouseLeave(MouseTemp mouse)
     {
         if (!mouse.Moving)
         {
             float angle = this.transform.eulerAngles.y;
 
             mouse.Home = null;
-            mouse.Collider = false;
             mouse.transform.eulerAngles = new Vector3(0, angle - 90, 0);
             mouse.transform.gameObject.SetActive(true);
 

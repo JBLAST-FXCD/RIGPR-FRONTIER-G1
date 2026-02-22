@@ -34,13 +34,27 @@ public class MilkTank : ParentBuilding, IMilkContainer
         MilkManager.Instance.UnregisterContainer(this);
     }
 
-    protected new void OnTriggerStay(Collider other)
+    protected override void OnTriggerStay(Collider other)
     {
-        if (other != null && other.tag == "MouseTemp" && mouse_occupants.Count < capacity)
+        if (other != null && other.CompareTag("MouseTemp") && mouse_occupants.Count < capacity)
         {
             MouseTemp mouse = other.gameObject.GetComponent<MouseTemp>();
             mouse_occupants.Add(mouse);
+            mouse.Collider = false;
             mouse.Home = this;
+        }
+    }
+
+    public override void MouseLeave(MouseTemp mouse)
+    {
+        if (!mouse.Moving)
+        {
+            float angle = this.transform.eulerAngles.y;
+
+            mouse.Home = null;
+            mouse.transform.eulerAngles = new Vector3(0, angle - 90, 0);
+
+            mouse_occupants.Remove(mouse);
         }
     }
 

@@ -124,7 +124,7 @@ MonoBehaviour:
   tier: 1
   building_prefabs:
   - {fileID: 3198148555316966977, guid: 2b3c953399b11fa46b8f0fbd383e0a0a, type: 3}
-  capacitys: 01000000
+  capacitys: 20000000
   scrap_costs: 01000000
   max_capacitys: 32000000
 --- !u!65 &2865412012560817843

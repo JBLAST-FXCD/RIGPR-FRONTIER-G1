@@ -324,8 +324,6 @@ public class Mouse_AI : MonoBehaviour
         {
             ParentBuilding building = (ParentBuilding)containers[index1];
             MouseTemp mouse = building.Mouse_occupants[index2];
-            //mouse leave home so it can be moved to the task.
-            building.MouseLeave(mouse);
             return mouse;
         }
 
@@ -346,9 +344,6 @@ public class Mouse_AI : MonoBehaviour
                 if (mice[i].Moving == false)
                     index = CheckIfCloser(building, mice[i].Position, current_mag, index, i);
             }
-
-            if(mice[index].Home != null)
-                mice[index].Home.MouseLeave(mice[index]); 
 
             return mice[index];
         }
@@ -394,9 +389,6 @@ public class Mouse_AI : MonoBehaviour
 
         if (mouse.Path == null)
             mouse.Path = pathfinding.CreatePath(mouse.Position, building_loc);
-
-        if (mouse.Path != null)
-            mouse.Moving = true;
     }
 
     //For mice that are already in the correct building and only need to go to one offer.
@@ -479,6 +471,9 @@ public class Mouse_AI : MonoBehaviour
         Vector2Int building_loc = building.GetPosition();
         Vector2Int mouse_loc = mouse.Position;
 
+        if (mouse.Home != null)
+            mouse.Home.MouseLeave(mouse);
+
         GetRoute(mouse, building_loc);
 
         //LERP mouse if fail start pathfinding again.
@@ -495,6 +490,7 @@ public class Mouse_AI : MonoBehaviour
                 }
                 else
                 {
+                    mouse.Moving = false;
                     mouse.Home.MouseLeave(mouse);
                     GetRoute(mouse, next_building.GetPosition());
                     MoveMouse(mouse, next_building);
@@ -510,6 +506,9 @@ public class Mouse_AI : MonoBehaviour
         //Convert world space to grid coordinates
         Vector2Int building_loc = building.GetPosition();
         Vector2Int mouse_loc = mouse.Position;
+
+        if (mouse.Home != null)
+            mouse.Home.MouseLeave(mouse);
 
         //For saving path.
         List<BaseNode> path = mouse.Path;
@@ -528,7 +527,6 @@ public class Mouse_AI : MonoBehaviour
                 else
                 {
                     mouse.Moving = false;
-                    mouse.Collider = true;
                     pathfinding.SavePath(mouse_loc, building_loc, path);
                 }
             }));
@@ -549,15 +547,10 @@ public class Mouse_AI : MonoBehaviour
 
                     if (mouse != null)
                     {
-                        //Mouse might be in third building so needs to leave.
-                        if (mouse.Home != null)
-                            mouse.Home.MouseLeave(mouse);
-
                         //mouse can't be picked again in this cycle.
                         mouses.Remove(mouse);
 
                         //Move mouse to both buildings.
-                        mouse.Moving = true;
                         MoveMouse(mouse, milk_building, milk_tasks[index].building);
                     }
                 }
@@ -572,10 +565,7 @@ public class Mouse_AI : MonoBehaviour
 
                     if (mouse != null)
                     {
-                        if (mouse.Home != null)
-                            mouse.Home.MouseLeave(mouse);
                         mouses.Remove(mouse);
-                        mouse.Moving = true;
                         MoveMouse(mouse, colletor_building, milk_tasks[index].building);
                     }
                 }
@@ -590,8 +580,6 @@ public class Mouse_AI : MonoBehaviour
 
         if (mouse != null)
         {
-            if (mouse.Home != null)
-                mouse.Home.MouseLeave(mouse);
             mouses.Remove(mouse);
             mouse.Moving = true;
             GetRoute(mouse, cheese_tasks[index].market.GetPosition());
