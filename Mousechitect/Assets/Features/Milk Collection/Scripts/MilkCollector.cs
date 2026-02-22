@@ -66,10 +66,13 @@ public class MilkCollector : ParentBuilding, IMilkContainer
     {
         if (!mouse.Moving)
         {
-            float angle = this.transform.eulerAngles.y;
-
             mouse.Home = null;
-            mouse.transform.eulerAngles = new Vector3(0, angle - 90, 0);
+
+            mouse.transform.position = Building.transform.Find("EntrancePoint").position;
+
+            float angle = this.transform.eulerAngles.y;
+            mouse.transform.eulerAngles = new Vector3(0, angle, 0);
+            mouse.transform.gameObject.SetActive(true);
 
             mouse_occupants.Remove(mouse);
         }

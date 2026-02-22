@@ -24,10 +24,4 @@ public class ResidentialBuilding : ParentBuilding
         scrap_cost = scrap_costs[tier - 1];
         quality = max_quality[tier - 1];
     }
-
-    public Transform GetVisualRoot()
-    {
-        return transform.Find("Visual");
-    }
-
 }

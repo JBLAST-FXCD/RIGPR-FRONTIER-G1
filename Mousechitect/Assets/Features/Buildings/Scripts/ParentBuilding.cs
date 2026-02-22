@@ -120,10 +120,12 @@ public class ParentBuilding : MonoBehaviour
     {
         if (!mouse.Moving)
         {
-            float angle = this.transform.eulerAngles.y;
-
             mouse.Home = null;
-            mouse.transform.eulerAngles = new Vector3(0, angle - 90, 0);
+
+            mouse.transform.position = Building.transform.Find("EntrancePoint").position;
+
+            float angle = this.transform.eulerAngles.y;
+            mouse.transform.eulerAngles = new Vector3(0, angle, 0);
             mouse.transform.gameObject.SetActive(true);
 
             mouse_occupants.Remove(mouse);
@@ -148,7 +150,7 @@ public class ParentBuilding : MonoBehaviour
     // GetVectors Updated by Anthony 23/01/26 
     public Vector2Int GetPosition()
     {
-        Transform entrance = this.Building.transform.Find("EntrancePoint");
+        Transform entrance = Building.transform.Find("EntrancePoint");
 
         Vector2Int building_loc = new Vector2Int((int)entrance.position.x, (int)entrance.position.z);
 

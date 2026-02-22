@@ -138,10 +138,10 @@ public class FactoryBuilding : ParentBuilding, IMilkContainer
         TierSelection();
         building_prefab.transform.localPosition = new Vector3(0, 0, 0);
         building = Instantiate(building_prefab, gameObject.transform);
-        factory_switch = true;
         this.GetComponent<BoxCollider>().center = building.transform.Find("EntrancePoint").localPosition;
-        RefreshAllowedCheesesForTier();
+        factory_switch = true;
         upgrading = false;
+        RefreshAllowedCheesesForTier();
     }
 
     //Each cheese has production time

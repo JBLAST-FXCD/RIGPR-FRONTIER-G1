@@ -389,6 +389,9 @@ public class Mouse_AI : MonoBehaviour
 
         if (mouse.Path == null)
             mouse.Path = pathfinding.CreatePath(mouse.Position, building_loc);
+
+        if (mouse.Path != null)
+            mouse.Moving = true;
     }
 
     //For mice that are already in the correct building and only need to go to one offer.
@@ -477,9 +480,8 @@ public class Mouse_AI : MonoBehaviour
         GetRoute(mouse, building_loc);
 
         //LERP mouse if fail start pathfinding again.
-        if (mouse.Path != null)
+        if (mouse.Moving)
         {
-            mouse.Moving = true;
             //Stop mice entering wrong building whilst LERPing.
             mouse.Collider = false;
             StartCoroutine(mouse.FollowPath((success) =>
@@ -514,9 +516,8 @@ public class Mouse_AI : MonoBehaviour
         List<BaseNode> path = mouse.Path;
 
         //LERP mouse if fail start pathfinding again.
-        if (mouse.Path != null)
+        if (mouse.Moving)
         {
-            mouse.Moving = true;
             mouse.Collider = false;
             StartCoroutine(mouse.FollowPath((success) =>
             {
