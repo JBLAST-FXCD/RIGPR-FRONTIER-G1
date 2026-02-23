@@ -152,13 +152,16 @@ public class Mouse_AI : MonoBehaviour
                 keys.Add(c);
         }
 
-        CheeseTask new_taks = new CheeseTask();
+        if (keys.Count > 0)
+        {
+            CheeseTask new_taks = new CheeseTask();
 
-        new_taks.market = market;
-        new_taks.weight = 1 * scrap_weight;
-        new_taks.types = keys;
+            new_taks.market = market;
+            new_taks.weight = 1 * scrap_weight;
+            new_taks.types = keys;
 
-        cheese_tasks.Add(new_taks);
+            cheese_tasks.Add(new_taks);
+        }
     }
     protected void TankTask(MilkTank tank)
     {

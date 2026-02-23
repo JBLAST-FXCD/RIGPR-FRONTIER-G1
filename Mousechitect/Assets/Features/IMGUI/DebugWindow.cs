@@ -24,6 +24,7 @@ namespace UImGui
         [SerializeField] protected StressTest stresstest;
 
         private int scrap_input = 0;
+        private int cheese_input = 0;
         private string console_command_input = "";
 
         private List<string> console_log = new List<string>();
@@ -154,6 +155,26 @@ namespace UImGui
                 {
                     ResourceManager.instance.SpendResources(scrap_input);
                 }
+
+                if (ImGui.CollapsingHeader($"Cheese"))
+                {
+                    ImGui.InputInt("Cheese Amount", ref cheese_input);
+
+                    foreach (CheeseTypes c in Enum.GetValues(typeof(CheeseTypes)))
+                    {
+                        if (ImGui.Button($"Add {c}"))
+                        {
+                            ResourceManager.instance.AddResources(c, cheese_input);
+                        }
+
+                        ImGui.SameLine();
+
+                        if (ImGui.Button($"Subtract {c}"))
+                        {
+                            ResourceManager.instance.SpendResources(c, cheese_input);
+                        }
+                    }
+                }
             }
         }
 
@@ -257,11 +278,12 @@ namespace UImGui
 
         private void Upgrade(ParentBuilding building)
         {
-            ImGui.Text($"Tier: {building.Tier}");
             if (ImGui.Button("Upgrade building"))
             {
                 building.UpdradeFactory();
             }
+            ImGui.SameLine();
+            ImGui.Text($"Tier: {building.Tier}");
         }
         private void MilkLogic(IMilkContainer container)
         {
@@ -324,6 +346,8 @@ namespace UImGui
                             building.MouseLeave(building.Mouse_occupants[0]);
                     }
 
+                    ImGui.SameLine();
+
                     if (ImGui.Button("Move a mouse to building"))
                     {
                         MouseTemp mouse = FindObjectOfType(typeof(MouseTemp), true) as MouseTemp;
@@ -337,6 +361,8 @@ namespace UImGui
                                 stresstest.MoveMouse(mouse, building);
                         }
                     }
+
+                    ImGui.Separator();
 
                     switch (building.Building_type)
                     {
@@ -360,8 +386,10 @@ namespace UImGui
                                 {
                                     if (ImGui.Button($"Select cheese: {cheese}"))
                                         factory.SelectCheese(cheese);
+                                    ImGui.SameLine();
                                 }
 
+                                ImGui.NewLine();
                                 ImGui.Text($"Producing cheese: {factory.Produce_cheese}");
 
                                 if (ImGui.Button("Turn factory On/Off"))
@@ -370,13 +398,10 @@ namespace UImGui
                             break;
                         case BuildingType.market:
                             CommercialBuilding market = (CommercialBuilding)building;
-                            ImGui.Text($"AmericanCheese popularity: {market.Cheese_popularity[(int)CheeseTypes.AmericanCheese]}");
-                            ImGui.Text($"Cheddar popularity:        {market.Cheese_popularity[(int)CheeseTypes.Cheddar]}");
-                            ImGui.Text($"Mozzarella popularity:     {market.Cheese_popularity[(int)CheeseTypes.Mozzarella]}");
-                            ImGui.Text($"Brie popularity:           {market.Cheese_popularity[(int)CheeseTypes.Brie]}");
-                            ImGui.Text($"Gouda popularity:          {market.Cheese_popularity[(int)CheeseTypes.Gouda]}");
-                            ImGui.Text($"Parmesan popularity:       {market.Cheese_popularity[(int)CheeseTypes.Parmesan]}");
-                            ImGui.Text($"BlueCheese popularity:     {market.Cheese_popularity[(int)CheeseTypes.BlueCheese]}");
+                            foreach (CheeseTypes c in Enum.GetValues(typeof(CheeseTypes)))
+                            {
+                                ImGui.Text($"{c} popularity: {market.Cheese_popularity[(int)c]}");
+                            }
                             break;
                         case BuildingType.tank:
                             MilkTank tank = (MilkTank)building;

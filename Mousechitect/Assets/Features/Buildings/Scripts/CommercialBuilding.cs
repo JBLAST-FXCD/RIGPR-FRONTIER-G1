@@ -38,6 +38,8 @@ public class CommercialBuilding : ParentBuilding
 
     CommercialBuilding() 
     {
+        cheeses = new List<CheeseTypes>();
+
         //These number is based off GDD and is hard coded for the algorithm to work. In future [SerializeField] for designers to access easily 
         cheese_types = Enum.GetNames(typeof(CheeseTypes)).Length;
 
@@ -170,13 +172,12 @@ public class CommercialBuilding : ParentBuilding
 
         if (cheeses != null)
         {
-            for (int i = cheeses.Count - 1; i >= 0; i++)
+            for (int i = cheeses.Count - 1; i >= 0; i--)
             {
                 int units = population / 10 * (int)cheese_popularity[i] / mini_percent;
 
                 if (resources.CanAfford(cheeses[i], units) == true)
                 {
-                    //Later replace scrap and cheese with global scrap and cheese counter
                     resources.SpendResources(cheeses[i], units);
                     resources.AddResources(Cheese.GetCheese(cheeses[i]).scrap_price * units);
                     cheeses.RemoveAt(i);
