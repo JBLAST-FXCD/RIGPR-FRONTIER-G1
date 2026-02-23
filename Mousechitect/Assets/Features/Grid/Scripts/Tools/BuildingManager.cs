@@ -213,7 +213,13 @@ public class BuildingManager : MonoBehaviour, ISaveable
         GameObject building_prefab = building_prefabs[selected_building_index];
 
         current_building = Instantiate(building_prefab);
-        current_building.transform.GetChild(0).GetComponent<ParentBuilding>().Tier = building_tier;
+
+        //--- changes the building tier if it has one
+        if (current_building.transform.GetChild(0).GetComponent<ParentBuilding>() != null)
+        {
+            current_building.transform.GetChild(0).GetComponent<ParentBuilding>().Tier = building_tier;
+        }
+        //--- Added by Joe Mcdonnell
         current_building_collider = current_building.GetComponentInChildren<Collider>();
         current_preview_visual = current_building.GetComponentInChildren<BuildingPreviewVisual>();
 
