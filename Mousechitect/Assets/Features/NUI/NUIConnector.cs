@@ -10,73 +10,82 @@ public class NUIConnector : MonoBehaviour
     [Header("Exernal Connections")]
     [SerializeField] private BuildingManager build_tool;
     [SerializeField] private PathTool path_tool;
-    [SerializeField] private DestroyTool destroy_tool;
-    private bool path_enabled = false;
-    private bool destroy_enabled = false;
+    [SerializeField] private BuildToolController tool_controller;
+    int building_index = 0;
 
     [Header("Internal Connections")]
     [SerializeField] private NewUserInterfaceManager nui_manager;
 
-
-
     private void Start()
     {
-        build_tool.UpdateBuildPanel += InterceptBroadcast;
+        tool_controller.UpdatePanels += UpdatePanels;
     }
 
-    private void InterceptBroadcast()
+    private void UpdatePanels(int tool)
     {
-        nui_manager.ToggleBuildPanel(true);
+        switch (tool)
+        {
+            case 1:
+                nui_manager.ToggleBuildPanel(true);
+                break;
+            case 2:
+                nui_manager.TogglePathPanel();
+                break;
+            case 3:
+                nui_manager.ToggleDestroyPanel();
+                break;
+            case 4:
+                nui_manager.ToggleMovePanel();
+                break;
+            default:
+                break;
+        }
     }
 
     public void NUIToggleBuildTool()
     {
-        if (build_tool != null)
+        if (tool_controller != null)
         {
-            build_tool.ToggleBuildMode();
+            tool_controller.OnBuildingToolButton();
         }
     }
 
     public void NUITogglePathTool()
     {
-        if (path_tool != null)
+        if (tool_controller != null)
         {
-            if (!path_enabled)
-            {
-                path_tool.SetToolEnabled(true);
-                path_enabled = true;
-            }
-            else
-            {
-                path_tool.SetToolEnabled(false);
-                path_enabled = false;
-            }
+            tool_controller.OnPathToolButton();
         }
     }
 
     public void NUIToggleDestroyTool()
     {
-        if (destroy_tool != null)
+        if (tool_controller != null)
         {
-            if (!destroy_enabled)
-            {
-               destroy_tool.SetToolEnabled(true);
-               destroy_enabled = true;
-            }
-            else
-            {
-                destroy_tool.SetToolEnabled(false);
-                destroy_enabled = false;
-            }
+            tool_controller.OnDestroyToolButton();
         }
 
     }
 
-    public void NUIPlaceBuilding(int building_index)
+    public void NUIToggleMoveTool()
     {
+        if (tool_controller != null)
+        {
+            tool_controller.ToggleMoveTool();
+        }
+    }
+
+    public void NUISetBuildingIndex(int index)
+    {
+        building_index = index;
+    }
+
+    public void NUIPlaceBuilding(int building_tier)
+    {
+
         if (build_tool != null)
         {
-            build_tool.OnBuildingButtonPressed(building_index);
+            build_tool.OnBuildingButtonPressed(building_index, building_tier);
         }
     }
 

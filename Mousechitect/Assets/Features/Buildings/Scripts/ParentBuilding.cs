@@ -30,7 +30,7 @@ public class ParentBuilding : MonoBehaviour
     protected List<MouseTemp> mouse_occupants;
     protected int capacity;
 
-    public int Tier { get { return tier; } }
+    public int Tier { get { return tier; } set { tier = value; } }
     public GameObject Building { get { return building; } }
     public List<MouseTemp> Mouse_occupants { get { return mouse_occupants; } }
     public virtual BuildingType Building_type { get; }

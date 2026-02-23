@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 4226888250966910632}
   - component: {fileID: 2678787204238611463}
   - component: {fileID: 340000207267174587}
+  - component: {fileID: 2109750807864166039}
   m_Layer: 0
   m_Name: _Tools
   m_TagString: Untagged
@@ -74,7 +75,7 @@ MonoBehaviour:
   main_camera: {fileID: 0}
   destroy_target_mask:
     serializedVersion: 2
-    m_Bits: 8
+    m_Bits: 128
   building_manager: {fileID: 0}
   path_tool: {fileID: 4873993085859753060}
 --- !u!114 &6907196582077796193
@@ -92,6 +93,7 @@ MonoBehaviour:
   building_tool: {fileID: 0}
   path_tool: {fileID: 4873993085859753060}
   destroy_tool: {fileID: 3072447796328210637}
+  move_tool: {fileID: 2109750807864166039}
 --- !u!114 &4226888250966910632
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -142,3 +144,24 @@ MonoBehaviour:
   grid_manager: {fileID: 0}
   pathfinding: {fileID: 2678787204238611463}
   milkmanager: {fileID: 0}
+--- !u!114 &2109750807864166039
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7371916266237598632}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3c73d8a4f2e37845a5d70231f6a0ce0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  main_camera: {fileID: 0}
+  move_target_mask:
+    serializedVersion: 2
+    m_Bits: 128
+  build_surface_mask:
+    serializedVersion: 2
+    m_Bits: 8
+  grid_manager: {fileID: 0}
+  building_manager: {fileID: 0}
