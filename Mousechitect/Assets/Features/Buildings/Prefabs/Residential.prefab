@@ -90,7 +90,7 @@ GameObject:
   - component: {fileID: 6287655259365195176}
   - component: {fileID: 5812361167812074299}
   - component: {fileID: 8254380622077631129}
-  - component: {fileID: 8674604893806056762}
+  - component: {fileID: 7779848880640637927}
   m_Layer: 7
   m_Name: Visual
   m_TagString: BuildingTest
@@ -157,7 +157,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   house_count_bonus: 0.02
---- !u!65 &8674604893806056762
+--- !u!65 &7779848880640637927
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

@@ -30,4 +30,31 @@ public class ResearchBuilding : ParentBuilding
         //Add information thats need updating on research completion before IsResearched().
         tree.IsResearched();
     }
+
+    protected override void OnTriggerStay(Collider other)
+    {
+        if (other != null && other.CompareTag("MouseTemp") && mouse_occupants.Count < capacity)
+        {
+            MouseTemp mouse = other.gameObject.GetComponent<MouseTemp>();
+            mouse_occupants.Add(mouse);
+            mouse.Collider = false;
+            mouse.Home = this;
+        }
+    }
+
+    public override void MouseLeave(MouseTemp mouse)
+    {
+        if (!mouse.Moving)
+        {
+            mouse.Home = null;
+
+            mouse.transform.position = Building.transform.Find("EntrancePoint").position;
+
+            float angle = this.transform.eulerAngles.y;
+            mouse.transform.eulerAngles = new Vector3(0, angle, 0);
+            mouse.transform.gameObject.SetActive(true);
+
+            mouse_occupants.Remove(mouse);
+        }
+    }
 }

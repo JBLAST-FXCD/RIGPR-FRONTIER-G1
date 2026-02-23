@@ -19,9 +19,8 @@ public class ResourceManager : MonoBehaviour, ISaveable
 
     [Header("Current Resources")]
     protected static int scrap  = INITIAL_SCRAP;
-    protected static int cheese = 0;
+    protected static int total_cheese = 0;
     protected static int money  = 0;
-    protected static int total_cheese = 1;
     protected static Dictionary<CheeseTypes, int> cheeses;
 
     [Header("UI References")]

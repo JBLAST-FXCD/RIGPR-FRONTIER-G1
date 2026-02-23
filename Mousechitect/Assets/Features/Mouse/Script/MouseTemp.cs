@@ -79,9 +79,6 @@ public class MouseTemp : MonoBehaviour
 
             if (path[i].speed == speed)
             {
-                if (speed == 0)
-                    speed = 1;
-
                 float time_elapsed = 0;
 
                 while (this.transform.position != new_loc)

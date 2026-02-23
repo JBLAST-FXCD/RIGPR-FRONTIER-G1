@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Windows;
+using static UnityEngine.Rendering.VolumeComponent;
 
 // Create by Iain Benner 15/02/2026
 
@@ -41,7 +44,7 @@ public class Mouse_AI : MonoBehaviour
 
     protected List<MilkTask> milk_tasks;
     protected List<CheeseTask> cheese_tasks;
-    protected Dictionary<ParentBuilding, MouseTemp> mice_route;
+    protected Dictionary<MouseTemp, MilkTask> mice_route;
 
 
     //struct used to convert all classes into a manageable system
@@ -55,8 +58,7 @@ public class Mouse_AI : MonoBehaviour
     {
         public CommercialBuilding market;
         public float weight;
-        public int[] amounts;
-        public CheeseTypes[] types;
+        public List<CheeseTypes> types;
     }
 
     public Mouse_AI() 
@@ -70,7 +72,7 @@ public class Mouse_AI : MonoBehaviour
 
         milk_tasks = new List<MilkTask>();
         cheese_tasks = new List<CheeseTask>();
-        mice_route = new Dictionary<ParentBuilding, MouseTemp>();
+        mice_route = new Dictionary<MouseTemp, MilkTask>();
     }
 
     //Get all the building that will be used to create tasks.
@@ -141,25 +143,20 @@ public class Mouse_AI : MonoBehaviour
     protected void CommercialTask(CommercialBuilding market)
     {
         List<CheeseTypes> keys = new List<CheeseTypes>();
-        List<int> amounts = new List<int>();
 
         foreach (CheeseTypes c in Enum.GetValues(typeof(CheeseTypes)))
         {
             int cheese_amount = market.CheeseAmount(c);
             bool enough = resources.CanAfford(c, cheese_amount);
             if (enough == true)
-            {
                 keys.Add(c);
-                amounts.Add(cheese_amount);
-            }
         }
 
         CheeseTask new_taks = new CheeseTask();
 
         new_taks.market = market;
         new_taks.weight = 1 * scrap_weight;
-        new_taks.amounts = amounts.ToArray();
-        new_taks.types = keys.ToArray();
+        new_taks.types = keys;
 
         cheese_tasks.Add(new_taks);
     }
@@ -309,7 +306,7 @@ public class Mouse_AI : MonoBehaviour
                 //Get index of closest building and eligible mouse.
                 for (int j = 0; j < building.Mouse_occupants.Count; j++)
                 {
-                    if (!building.Mouse_occupants[j].Moving)
+                    if (!building.Mouse_occupants[j].Moving && containers[i].CanAfford(task.amount))
                     {
                         index1 = CheckIfCloser(task.building.GetPosition(), building.GetPosition(), current_mag, index1, i);
                         index2 = j;
@@ -322,6 +319,7 @@ public class Mouse_AI : MonoBehaviour
         //If building and mouse is found
         if (safe)
         {
+            containers[index1].SubtractMilk(task.amount);
             ParentBuilding building = (ParentBuilding)containers[index1];
             MouseTemp mouse = building.Mouse_occupants[index2];
             return mouse;
@@ -399,7 +397,7 @@ public class Mouse_AI : MonoBehaviour
     {
         foreach (var (key, value) in mice_route)
         {
-            GetRoute(value, key.GetPosition());
+            GetRoute(key, value.building.GetPosition());
         }
     }
 
@@ -432,11 +430,8 @@ public class Mouse_AI : MonoBehaviour
 
                     if (factory_mouse != null)
                     {
-                        if (mice_route.TryAdd(milk_tasks[i].building, factory_mouse)) 
-                        {
-                            factory_mouse.transform.gameObject.SetActive(true);
+                        if (mice_route.TryAdd(factory_mouse, milk_tasks[i])) 
                             milk_tasks.RemoveAt(i);
-                        }
                     }
                     break;
                 case BuildingType.tank:
@@ -446,11 +441,8 @@ public class Mouse_AI : MonoBehaviour
 
                     if (tank_mouse != null)
                     {
-                        if(mice_route.TryAdd(milk_tasks[i].building, tank_mouse))
-                        {
-                            tank_mouse.transform.gameObject.SetActive(true);
+                        if(mice_route.TryAdd(tank_mouse, milk_tasks[i]))
                             milk_tasks.RemoveAt(i);
-                        }
                     }
                     break;
             }
@@ -465,10 +457,8 @@ public class Mouse_AI : MonoBehaviour
         }
     }
 
-    //Same as FindMilk(), but return the building because if there are no mice in the right building, we need the building.
-
     //For moving mouse to two buildings because there were no mice in the right building.
-    protected void MoveMouse(MouseTemp mouse, ParentBuilding building, ParentBuilding next_building)
+    protected void MoveMouse(MouseTemp mouse, ParentBuilding building, MilkTask task)
     {
         //Convert world space to grid coordinates
         Vector2Int building_loc = building.GetPosition();
@@ -488,14 +478,16 @@ public class Mouse_AI : MonoBehaviour
             {
                 if (!success)
                 {
-                    MoveMouse(mouse, building, next_building);
+                    MoveMouse(mouse, building, task);
                 }
                 else
                 {
+                    IMilkContainer container = (IMilkContainer)building;
+                    container.SubtractMilk(task.amount);
                     mouse.Moving = false;
                     mouse.Home.MouseLeave(mouse);
-                    GetRoute(mouse, next_building.GetPosition());
-                    MoveMouse(mouse, next_building);
+                    GetRoute(mouse, task.building.GetPosition());
+                    MoveMouse(mouse, task);
                 }
             }));
         }
@@ -503,10 +495,10 @@ public class Mouse_AI : MonoBehaviour
 
     //For moving the mouse to one building if it is in the correct building, and save the path,
     //because mouse movement from building to building is more likely to happen again than mouse movement from anywhere.
-    protected void MoveMouse(MouseTemp mouse, ParentBuilding building)
+    protected void MoveMouse(MouseTemp mouse, MilkTask task)
     {
         //Convert world space to grid coordinates
-        Vector2Int building_loc = building.GetPosition();
+        Vector2Int building_loc = task.building.GetPosition();
         Vector2Int mouse_loc = mouse.Position;
 
         if (mouse.Home != null)
@@ -523,17 +515,51 @@ public class Mouse_AI : MonoBehaviour
             {
                 if (!success)
                 {
-                    MoveMouse(mouse, building);
+                    MoveMouse(mouse, task);
                 }
                 else
                 {
+                    IMilkContainer container = (IMilkContainer)task.building;
+                    container.AddMilk(task.amount);
                     mouse.Moving = false;
                     pathfinding.SavePath(mouse_loc, building_loc, path);
                 }
             }));
         }
     }
-    
+
+    protected void MoveMouse(MouseTemp mouse, CheeseTask task)
+    {
+        //Convert world space to grid coordinates
+        Vector2Int building_loc = task.market.GetPosition();
+        Vector2Int mouse_loc = mouse.Position;
+
+        if (mouse.Home != null)
+            mouse.Home.MouseLeave(mouse);
+
+        //For saving path.
+        List<BaseNode> path = mouse.Path;
+
+        //LERP mouse if fail start pathfinding again.
+        if (mouse.Moving)
+        {
+            mouse.Collider = false;
+            StartCoroutine(mouse.FollowPath((success) =>
+            {
+                if (!success)
+                {
+                    MoveMouse(mouse, task);
+                }
+                else
+                {
+                    task.market.AddCheese(task.types);
+                    mouse.Moving = false;
+                    pathfinding.SavePath(mouse_loc, building_loc, path);
+                }
+            }));
+        }
+    }
+
     protected int MilkDoubleTask(MouseTemp mouse, int index)
     {
         switch (milk_tasks[index].building.Building_type)
@@ -552,7 +578,7 @@ public class Mouse_AI : MonoBehaviour
                         mouses.Remove(mouse);
 
                         //Move mouse to both buildings.
-                        MoveMouse(mouse, milk_building, milk_tasks[index].building);
+                        MoveMouse(mouse, milk_building, milk_tasks[index]);
                     }
                 }
                 break;
@@ -567,7 +593,7 @@ public class Mouse_AI : MonoBehaviour
                     if (mouse != null)
                     {
                         mouses.Remove(mouse);
-                        MoveMouse(mouse, colletor_building, milk_tasks[index].building);
+                        MoveMouse(mouse, colletor_building, milk_tasks[index]);
                     }
                 }
                 break;
@@ -584,7 +610,7 @@ public class Mouse_AI : MonoBehaviour
             mouses.Remove(mouse);
             mouse.Moving = true;
             GetRoute(mouse, cheese_tasks[index].market.GetPosition());
-            mice_route.TryAdd(cheese_tasks[index].market, mouse);
+            MoveMouse(mouse, cheese_tasks[index]);
         }
         return --index;
     }
@@ -596,7 +622,7 @@ public class Mouse_AI : MonoBehaviour
         int change = mice_route.Count;
 
         //Get all mice that are not moving mouse might be in third building.
-        mouses = (GameObject.FindObjectsOfType(typeof(MouseTemp), true) as MouseTemp[]).ToList();
+        mouses = (FindObjectsOfType(typeof(MouseTemp), true) as MouseTemp[]).ToList();
 
         for (int i = 0; i < mouses.Count; i++)
         {
@@ -634,7 +660,7 @@ public class Mouse_AI : MonoBehaviour
     {
         foreach (var (key, value) in mice_route) 
         {
-            MoveMouse(value, key);
+            MoveMouse(key, value);
         }
     }
 

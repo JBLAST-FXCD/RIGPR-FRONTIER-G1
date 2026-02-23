@@ -255,6 +255,14 @@ namespace UImGui
             }
         }
 
+        private void Upgrade(ParentBuilding building)
+        {
+            ImGui.Text($"Tier: {building.Tier}");
+            if (ImGui.Button("Upgrade building"))
+            {
+                building.UpdradeFactory();
+            }
+        }
         private void MilkLogic(IMilkContainer container)
         {
             int current = container.CURRENT_MILK_AMOUNT;
@@ -308,13 +316,7 @@ namespace UImGui
 
                 if (ImGui.CollapsingHeader($"{building_type} {building.name}"))
                 {
-                    ImGui.Text($"Tier: {building.Tier}");
                     ImGui.Text($"Mice in building: {building.Mouse_occupants.Count}");
-
-                    if (ImGui.Button("Upgrade building"))
-                    {
-                        building.UpdradeFactory();
-                    }
 
                     if (ImGui.Button("Kick mouse"))
                     {
@@ -340,11 +342,12 @@ namespace UImGui
                     {
                         case BuildingType.residental:
                             ResidentialBuilding home = (ResidentialBuilding)building;
+                            Upgrade(home);
                             ImGui.Text($"Building quality: {home.Quality}");
                             break;
                         case BuildingType.factory:
                             FactoryBuilding factory = (FactoryBuilding)building;
-
+                            Upgrade(factory);
                             MilkLogic(factory);
 
                             if (ImGui.CollapsingHeader($"Cheese")) 
@@ -377,6 +380,7 @@ namespace UImGui
                             break;
                         case BuildingType.tank:
                             MilkTank tank = (MilkTank)building;
+                            Upgrade(tank);
                             MilkLogic(tank);
                             break;
                         case BuildingType.collector:
