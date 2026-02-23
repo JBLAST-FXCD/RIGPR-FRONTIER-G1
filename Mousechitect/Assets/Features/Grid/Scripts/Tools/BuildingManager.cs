@@ -191,6 +191,8 @@ public class BuildingManager : MonoBehaviour, ISaveable
     // Entry point when a building type is selected (from UI or debug hotkey).
     public void StartPlacingBuilding(int building_index, int building_tier)
     {
+        ResourceManager resources = ResourceManager.instance;
+
         if (!is_build_mode_active)
         {
             Debug.Log("StartPlacingBuilding called while build mode is inactive.");
@@ -614,21 +616,16 @@ public class BuildingManager : MonoBehaviour, ISaveable
         // also write into GridManager to set speed to 0 stopping mice from walking
         grid_manager.SetPathOnCells(placed_data.occupied_cells, placed_data.speed_modifier);
 
+        // entrance updated by Iain Benner 22/02/2026
         // Re-open the entrance cell so pathfinding has a reachable target
-        Transform entrance = current_building.transform.Find("EntrancePoint");
+        Vector2Int entrance = current_building.GetComponentInChildren<ParentBuilding>().GetPosition();
         if (entrance != null)
         {
-            Vector2Int entrance_cell = new Vector2Int(
-                Mathf.RoundToInt(entrance.position.x),
-                Mathf.RoundToInt(entrance.position.z)
-            );
-
             // IMPORTANT:
             // If SetPathOnCells ADDS a modifier to a base speed (common), then:
             // - building uses -1 to block (1 + -1 = 0)
             // - entrance should use +1 to undo that block (0 + 1 = 1)
-            grid_manager.SetPathOnCells(new List<Vector2Int> { entrance_cell }, 1.0f);
-            Debug.Log($"Entrance cell {entrance_cell} speed now {grid_manager.GetCellMoveSpeed(entrance_cell)}");
+            grid_manager.SetPathOnCells(new List<Vector2Int> { entrance }, 1.0f);
         }
 
         // If this placed object is a decoration, register its grid cell for synergy checks

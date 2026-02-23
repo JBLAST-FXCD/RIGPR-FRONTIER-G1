@@ -15,7 +15,7 @@ public class CommercialBuilding : ParentBuilding
     protected int population;
 
     //For selling
-    protected CheeseTypes[] keys;
+    protected List<CheeseTypes> cheeses;
 
     //Numbers for PopularityAlgorithm()
     protected int cheese_types;
@@ -38,6 +38,8 @@ public class CommercialBuilding : ParentBuilding
 
     CommercialBuilding() 
     {
+        cheeses = new List<CheeseTypes>();
+
         //These number is based off GDD and is hard coded for the algorithm to work. In future [SerializeField] for designers to access easily 
         cheese_types = Enum.GetNames(typeof(CheeseTypes)).Length;
 
@@ -168,21 +170,26 @@ public class CommercialBuilding : ParentBuilding
     {
         ResourceManager resources = ResourceManager.instance;
 
-        if (keys != null)
+        if (cheeses != null)
         {
-            for (int i = 0; i <= keys.Length - 1; i++)
+            for (int i = cheeses.Count - 1; i >= 0; i--)
             {
                 int units = population / 10 * (int)cheese_popularity[i] / mini_percent;
 
-                if (resources.CanAfford(keys[i], units) == true)
+                if (resources.CanAfford(cheeses[i], units) == true)
                 {
-                    //Later replace scrap and cheese with global scrap and cheese counter
-                    resources.SpendResources(keys[i], units);
-                    resources.AddResources(Cheese.GetCheese(keys[i]).scrap_price * units);
+                    resources.SpendResources(cheeses[i], units);
+                    resources.AddResources(Cheese.GetCheese(cheeses[i]).scrap_price * units);
+                    cheeses.RemoveAt(i);
                 }
             }
         }
         //Repeat loop of selling cheese
         SellDelay();
+    }
+
+    public void AddCheese(List<CheeseTypes> input)
+    {
+        cheeses.AddRange(input);
     }
 }

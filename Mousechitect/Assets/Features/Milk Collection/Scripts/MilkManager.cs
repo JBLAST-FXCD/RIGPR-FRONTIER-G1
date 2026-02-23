@@ -16,6 +16,8 @@ public class MilkManager : MonoBehaviour
 
     public List<IMilkContainer> all_containers { get; private set; } = new List<IMilkContainer>();
     public List<IMilkContainer> ranked_containers { get; private set; } = new List<IMilkContainer>();
+    public List<IMilkContainer> ranked_factories { get; private set; } = new List<IMilkContainer>();
+    public List<IMilkContainer> ranked_tanks { get; private set; } = new List<IMilkContainer>();
 
     private void Awake()
     {
@@ -24,8 +26,6 @@ public class MilkManager : MonoBehaviour
 
     private void Start()
     {
-        // Refresh rankings every 30 seconds rather than every frame
-        InvokeRepeating(nameof(RefreshRankings), 0f, 30f);
         MilkConsoleCommands();
     }
 
@@ -43,9 +43,41 @@ public class MilkManager : MonoBehaviour
 
     public void RefreshRankings()
     {
-        all_containers.RemoveAll(c => c.CONTAINER_GAME_OBJECT == null);
-        // ranks containers first by whether they are tanks, then by current milk amount
-        ranked_containers = all_containers.OrderByDescending(c => c.IS_TANK).ThenByDescending(c => c.CURRENT_MILK_AMOUNT).ToList();
+        List<IMilkContainer> temp = all_containers;
+        temp.RemoveAll(c => c.CONTAINER_GAME_OBJECT == null);
+
+        for (int i = 0; i < temp.Count; i++) 
+        {
+            switch (temp[i].Building_type)
+            {
+                case BuildingType.factory:
+                    //Checking if theres room to add milk
+                    if (temp[i].MilkToAdd() != 0)
+                        ranked_factories.Add(temp[i]);
+                    break;
+                case BuildingType.tank:
+                    //Checking if theres room to add milk
+                    if (temp[i].MilkToAdd() != 0)
+                        ranked_tanks.Add(temp[i]);
+                    //Checking if theres milk to remove
+                    if (temp[i].CanAfford(1))
+                        ranked_containers.Add(temp[i]);
+                    break;
+                case BuildingType.collector:
+                    //Checking if theres milk to remove
+                    if (temp[i].CanAfford(1))
+                        ranked_containers.Add(temp[i]);
+                    break;
+            }
+        }
+
+        //Ranks containers by current milk amount.
+        //Tanks have greater capacity, so they are prioritised if they have milk.
+        //Containers must have milk to work with Mouse_AI
+        ranked_containers.OrderByDescending(c => c.CURRENT_MILK_AMOUNT);
+
+
+        ranked_factories.OrderByDescending(c => c.MilkToAdd());
     }
 
     public MilkTank GetAvailableTank()
@@ -60,6 +92,7 @@ public class MilkManager : MonoBehaviour
         return all_containers.Where(c => c != null && c.CONTAINER_GAME_OBJECT != null).Sum(c => c.CURRENT_MILK_AMOUNT);
     }
 
+    //****************************************************************
     public IMilkContainer RequestMilkSource(int amount_needed)
     {
         // provides a milk container that can fulfill the requested amount

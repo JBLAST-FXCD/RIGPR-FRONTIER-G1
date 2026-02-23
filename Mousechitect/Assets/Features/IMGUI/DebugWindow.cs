@@ -24,6 +24,7 @@ namespace UImGui
         [SerializeField] protected StressTest stresstest;
 
         private int scrap_input = 0;
+        private int cheese_input = 0;
         private string console_command_input = "";
 
         private List<string> console_log = new List<string>();
@@ -90,12 +91,6 @@ namespace UImGui
                     ImGui.EndTabItem();
                 }
 
-                if (ImGui.BeginTabItem("Milk Logistics"))
-                {
-                    DrawMilkLogisticsTab();
-                    ImGui.EndTabItem();
-                }
-
                 if (ImGui.BeginTabItem("Buildings"))
                 {
                     DrawBuildingsLogisticsTab();
@@ -141,6 +136,7 @@ namespace UImGui
         {
             if (ImGui.CollapsingHeader("Resource Manager"))
             {
+                ImGui.Text($"Total milk in system: {MilkManager.Instance.GetTotalMilk()}");
                 ImGui.Text($"Current Scrap: {ResourceManager.instance.Scrap}");
                 ImGui.Text($"Current Cheese: {ResourceManager.instance.Total_cheese}");
 
@@ -158,6 +154,26 @@ namespace UImGui
                 if (ImGui.Button("Spend Resources"))
                 {
                     ResourceManager.instance.SpendResources(scrap_input);
+                }
+
+                if (ImGui.CollapsingHeader($"Cheese"))
+                {
+                    ImGui.InputInt("Cheese Amount", ref cheese_input);
+
+                    foreach (CheeseTypes c in Enum.GetValues(typeof(CheeseTypes)))
+                    {
+                        if (ImGui.Button($"Add {c}"))
+                        {
+                            ResourceManager.instance.AddResources(c, cheese_input);
+                        }
+
+                        ImGui.SameLine();
+
+                        if (ImGui.Button($"Subtract {c}"))
+                        {
+                            ResourceManager.instance.SpendResources(c, cheese_input);
+                        }
+                    }
                 }
             }
         }
@@ -260,54 +276,27 @@ namespace UImGui
             }
         }
 
-        private void DrawMilkLogisticsTab()
+        private void Upgrade(ParentBuilding building)
         {
-            if (MilkManager.Instance == null)
+            if (ImGui.Button("Upgrade building"))
             {
-                ImGui.TextColored(new Vector4(1, 0, 0, 1), "Milk Manager instance not found");
-                return;
+                building.UpdradeFactory();
+            }
+            ImGui.SameLine();
+            ImGui.Text($"Tier: {building.Tier}");
+        }
+        private void MilkLogic(IMilkContainer container)
+        {
+            int current = container.CURRENT_MILK_AMOUNT;
+            if (ImGui.SliderInt("stored milk", ref current, 0, container.MAX_MILK_CAPACITY))
+            {
+                container.CURRENT_MILK_AMOUNT = current;
             }
 
-            ImGui.Text($"Total milk in system: {MilkManager.Instance.GetTotalMilk()}");
-
-            if (ImGui.Button("Force logistic refresh"))
+            int max = container.MAX_MILK_CAPACITY;
+            if (ImGui.InputInt("Max Capacity", ref max))
             {
-                MilkManager.Instance.RefreshRankings();
-            }
-
-            ImGui.Separator();
-
-            foreach (var container in MilkManager.Instance.all_containers)
-            {
-                ImGui.PushID(container.GetHashCode());
-
-                string container_type = container.IS_TANK ? "[Tank]" : "[Collector]";
-                if (ImGui.CollapsingHeader($"{container_type} {container.CONTAINER_GAME_OBJECT.name}"))
-                {
-                    int current = container.CURRENT_MILK_AMOUNT;
-                    if (ImGui.SliderInt("stored milk", ref current, 0, container.MAX_MILK_CAPACITY))
-                    {
-                        container.CURRENT_MILK_AMOUNT = current;
-                    }
-
-                    int max = container.MAX_MILK_CAPACITY;
-                    if (ImGui.InputInt("Max Capacity", ref max))
-                    {
-                        container.MAX_MILK_CAPACITY = max;
-                    }
-
-                    if (container is MilkCollector collector)
-                    {
-                        float rate = collector.production_interval;
-                        if (ImGui.DragFloat("Production Interval", ref rate, 0.1f, 0.5f, 60.0f))
-                        {
-                            collector.production_interval = rate;
-                        }
-
-                        ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1f), collector.GetStatus());
-                    }
-                }
-                ImGui.PopID();
+                container.MAX_MILK_CAPACITY = max;
             }
         }
 
@@ -349,19 +338,15 @@ namespace UImGui
 
                 if (ImGui.CollapsingHeader($"{building_type} {building.name}"))
                 {
-                    ImGui.Text($"Tier: {building.Tier}");
                     ImGui.Text($"Mice in building: {building.Mouse_occupants.Count}");
-
-                    if (ImGui.Button("Upgrade building"))
-                    {
-                        building.UpdateTier();
-                    }
 
                     if (ImGui.Button("Kick mouse"))
                     {
                         if(building.Mouse_occupants.Count > 0)
                             building.MouseLeave(building.Mouse_occupants[0]);
                     }
+
+                    ImGui.SameLine();
 
                     if (ImGui.Button("Move a mouse to building"))
                     {
@@ -377,14 +362,19 @@ namespace UImGui
                         }
                     }
 
+                    ImGui.Separator();
+
                     switch (building.Building_type)
                     {
                         case BuildingType.residental:
                             ResidentialBuilding home = (ResidentialBuilding)building;
+                            Upgrade(home);
                             ImGui.Text($"Building quality: {home.Quality}");
                             break;
                         case BuildingType.factory:
                             FactoryBuilding factory = (FactoryBuilding)building;
+                            Upgrade(factory);
+                            MilkLogic(factory);
 
                             if (ImGui.CollapsingHeader($"Cheese")) 
                             {
@@ -396,8 +386,10 @@ namespace UImGui
                                 {
                                     if (ImGui.Button($"Select cheese: {cheese}"))
                                         factory.SelectCheese(cheese);
+                                    ImGui.SameLine();
                                 }
 
+                                ImGui.NewLine();
                                 ImGui.Text($"Producing cheese: {factory.Produce_cheese}");
 
                                 if (ImGui.Button("Turn factory On/Off"))
@@ -406,16 +398,31 @@ namespace UImGui
                             break;
                         case BuildingType.market:
                             CommercialBuilding market = (CommercialBuilding)building;
-                            ImGui.Text($"AmericanCheese popularity: {market.Cheese_popularity[(int)CheeseTypes.AmericanCheese]}");
-                            ImGui.Text($"Cheddar popularity:        {market.Cheese_popularity[(int)CheeseTypes.Cheddar]}");
-                            ImGui.Text($"Mozzarella popularity:     {market.Cheese_popularity[(int)CheeseTypes.Mozzarella]}");
-                            ImGui.Text($"Brie popularity:           {market.Cheese_popularity[(int)CheeseTypes.Brie]}");
-                            ImGui.Text($"Gouda popularity:          {market.Cheese_popularity[(int)CheeseTypes.Gouda]}");
-                            ImGui.Text($"Parmesan popularity:       {market.Cheese_popularity[(int)CheeseTypes.Parmesan]}");
-                            ImGui.Text($"BlueCheese popularity:     {market.Cheese_popularity[(int)CheeseTypes.BlueCheese]}");
+                            foreach (CheeseTypes c in Enum.GetValues(typeof(CheeseTypes)))
+                            {
+                                ImGui.Text($"{c} popularity: {market.Cheese_popularity[(int)c]}");
+                            }
+                            break;
+                        case BuildingType.tank:
+                            MilkTank tank = (MilkTank)building;
+                            Upgrade(tank);
+                            MilkLogic(tank);
+                            break;
+                        case BuildingType.collector:
+                            MilkCollector collector = (MilkCollector)building;
+                            MilkLogic(collector);
+
+                            float rate = collector.production_interval;
+                            if (ImGui.DragFloat("Production Interval", ref rate, 0.1f, 0.5f, 60.0f))
+                            {
+                                collector.production_interval = rate;
+                            }
+
+                            ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1f), collector.GetStatus());
                             break;
                     }
                 }
+                ImGui.PopID();
             }
         }
 

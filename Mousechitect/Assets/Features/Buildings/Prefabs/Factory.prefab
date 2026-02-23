@@ -28,7 +28,7 @@ Transform:
   m_GameObject: {fileID: 5237173748113084862}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: -0.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -58,16 +58,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae65f8fb58c377c4bbd39b02c343d700, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  tier: 1
   building_prefabs:
   - {fileID: 2330073249964640259, guid: 12e95f9bb2cb5cc4bb22f45793f14218, type: 3}
   - {fileID: 2338851394216969829, guid: 09a555275ea756e458ee57d3fde0bdd2, type: 3}
   - {fileID: 4914234091039009975, guid: 3246ac95aa51dde429e7bce8da2f0847, type: 3}
   capacitys: 200000002000000020000000
-  tier: 1
   scrap_costs: 050000000500000005000000
-  milk_capasitys: 140000003200000064000000
-  produced_cheese_type: 0
-  selected_cheese: 0
+  milk_capasitys: 0a0000001900000032000000
 --- !u!65 &2824112730333103816
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -115,14 +113,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6884297326217601079}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6603083225439645426}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &6200035165457517435
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -142,8 +140,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 12, y: 15, z: 15}
-  m_Center: {x: -6.5, y: 7.5, z: 2}
+  m_Size: {x: 18, y: 2, z: 12}
+  m_Center: {x: 2, y: 1, z: 6}
 --- !u!33 &-61368153984321835
 MeshFilter:
   m_ObjectHideFlags: 0

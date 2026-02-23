@@ -12,15 +12,13 @@ using UnityEngine;
 /// cheese is made if theres enough milk or player input fitting GDD.
 /// cheese is not produced if there are too many factories for the population, as per GDD.
 /// </summary>
-public class FactoryBuilding : ParentBuilding
+public class FactoryBuilding : ParentBuilding, IMilkContainer
 {
-    //first element is for rarity and second element is for cheese type.
-    [SerializeField] protected int[] scrap_costs;
     [SerializeField] protected int[] milk_capasitys;
-    [SerializeField] private CheeseTypes produced_cheese_type = CheeseTypes.AmericanCheese;
 
     // Anthony - Tier based cheese selection
-    [SerializeField] private CheeseTypes selected_cheese = CheeseTypes.AmericanCheese;
+    private CheeseTypes produced_cheese_type = CheeseTypes.AmericanCheese;
+    private CheeseTypes selected_cheese = CheeseTypes.AmericanCheese;
 
     // runtime allowed list for this tier
     private CheeseTypes[] allowed_cheese_types;
@@ -34,7 +32,6 @@ public class FactoryBuilding : ParentBuilding
     };
 
     protected CheeseTypes cheese_type;
-    protected int scrap_cost;
 
     //Delete these varible when script is connect to global variable
     protected int population;
@@ -43,17 +40,22 @@ public class FactoryBuilding : ParentBuilding
     static protected int count;
     protected int id;
 
+    protected float build_time;
     protected int milk_capasity;
     protected int stored_milk;
     protected bool  produce_cheese;
     protected bool  factory_switch;
 
     public bool IsActive { get { return factory_switch; } }
-    public int Stored_milk { get { return stored_milk; } }
-    public int Milk_capacity { get { return milk_capasity; } }
     public bool Produce_cheese { get { return produce_cheese; } set { produce_cheese = value; } }
     public CheeseTypes Cheese_type { get { return cheese_type; } }
     public override BuildingType Building_type => BuildingType.factory;
+
+    //Milk interface
+    public GameObject CONTAINER_GAME_OBJECT => gameObject;
+    public int CURRENT_MILK_AMOUNT { get => stored_milk; set => stored_milk = value; }
+    public int[] MAX_MILK_CAPACITYS { get => milk_capasitys; set => milk_capasitys = value; }
+    public int MAX_MILK_CAPACITY { get => milk_capasity; set => milk_capasity = value; }
 
     public FactoryBuilding()
     {
@@ -65,23 +67,37 @@ public class FactoryBuilding : ParentBuilding
 
         id = count;
 
+        build_time = 60.0f;
         stored_milk = 0;
         produce_cheese = false;
         factory_switch = true;
     }
 
-    protected new void Start()
+    protected override void Start()
     {
-        //Warns the player if cheese can't be produced when the building is constructed
-        if (id >= population / 20)
-            Debug.Log("Not enough mice to operate this factory");
+        scrap_cost = scrap_costs[0];
 
-        if (ResourceManager.instance != null)
-            ResourceManager.instance.RegisterOrUpdateFactoryCheeseType(this, produced_cheese_type);
+        if (resources.CanAfford(scrap_cost))
+        {
+            //Warns the player if cheese can't be produced when the building is constructed
+            if (id >= population / 20)
+                Debug.Log("Not enough mice to operate this factory");
 
-        count++;
-        ConstructTier();
-        RefreshAllowedCheesesForTier();
+            if (ResourceManager.instance != null)
+                ResourceManager.instance.RegisterOrUpdateFactoryCheeseType(this, produced_cheese_type);
+
+            count++;
+            MilkManager.Instance.RegisterContainer(this);
+            ConstructTier();
+            RefreshAllowedCheesesForTier();
+        }
+        else
+            Destroy(this);
+    }
+
+    private void OnDestroy()
+    {
+        MilkManager.Instance.UnregisterContainer(this);
     }
 
     //for player to select cheese
@@ -98,65 +114,67 @@ public class FactoryBuilding : ParentBuilding
         milk_capasity   = milk_capasitys[tier - 1];
     }
 
-    //Delay is hard coded because theres variation in the GDD
-    protected void UpdradeFactory()
+    public override void UpdradeFactory()
     {
-        ResourceManager resources = ResourceManager.instance;
-
-        if (resources.CanAfford(scrap_cost) == true)
+        if (tier + 1 <= capacitys.Length && !upgrading)
         {
-            resources.SpendResources(scrap_cost);
-            factory_switch = false;
-            Invoke(nameof(UpdateTier), 60.0f);
+            //Updated scrap cost.
+            scrap_cost = scrap_costs[tier - 1];
+
+            if (resources.CanAfford(scrap_cost))
+            {
+                resources.SpendResources(scrap_cost);
+                factory_switch = false;
+                upgrading = true;
+                Invoke(nameof(UpdateTier), build_time);
+            }
         }
     }
 
-    public override void UpdateTier()
+    protected override void UpdateTier()
     {
+        Destroy(building);
         tier++;
-        if (tier > 0 && tier <= capacitys.Length)
-        {
-            Destroy(building);
-            TierSelection();
-            building_prefab.transform.localPosition = new Vector3(0, 0, 0);
-            building = Instantiate(building_prefab, gameObject.transform);
-            factory_switch = true;
-            this.GetComponent<BoxCollider>().center = building.transform.Find("EntrancePoint").localPosition;
-            RefreshAllowedCheesesForTier();
-        }
-        else
-            tier = capacitys.Length;
+        TierSelection();
+        building_prefab.transform.localPosition = new Vector3(0, 0, 0);
+        building = Instantiate(building_prefab, gameObject.transform);
+        this.GetComponent<BoxCollider>().center = building.transform.Find("EntrancePoint").localPosition;
+        factory_switch = true;
+        upgrading = false;
+        RefreshAllowedCheesesForTier();
     }
 
     //Each cheese has production time
-    protected void CheeseProduction()
+    protected IEnumerator CheeseProduction()
     {
-        CheeseValues cheese = Cheese.GetCheese(cheese_type);
-
-        //Checks if theres enought mise for factory as per GDD. id starts at 0 not 1
-        if (id < population / 20)
+        if (produce_cheese)
         {
-            if (cheese.milk_cost <= stored_milk && produce_cheese == true)
-                Invoke(nameof(CreateCheese), cheese.prodution_time);
+            CheeseValues cheese = Cheese.GetCheese(cheese_type);
+
+            yield return new WaitForSeconds(cheese.prodution_time);
+
+            //Checks if theres enought mise for factory as per GDD. id starts at 0 not 1
+            if (id < population / 20)
+            {
+                if (CanAfford(cheese.milk_cost) && resources.CanAfford(scrap_cost))
+                    CreateCheese();
+                else
+                    StartCoroutine(CheeseProduction());
+            }
+            else
+                Debug.Log("Not enough mice to operate this factory");
         }
-        else
-            Debug.Log("Not enough mice to operate this factory");
     }
 
     //This is apart of CheeseProduction() and is called when its invoked.
     protected void CreateCheese()
     {
-        ResourceManager resources = ResourceManager.instance;
         CheeseValues cheese = Cheese.GetCheese(cheese_type);
 
-        if (resources.CanAfford(scrap_cost) == true)
-        {
-            stored_milk -= cheese.milk_cost;
-            resources.SpendResources(cheese.scrap_cost);
-            resources.AddResources(cheese_type, 1);
-            factory_switch = false;
-            Invoke(nameof(UpdateTier), 60.0f);
-        }
+        SubtractMilk(cheese.milk_cost);
+        resources.SpendResources(cheese.scrap_cost);
+        resources.AddResources(cheese_type, 1);
+        StartCoroutine(CheeseProduction());
     }
 
     //For player to create cheese when factory is running
@@ -167,16 +185,32 @@ public class FactoryBuilding : ParentBuilding
         else
             produce_cheese = true;
 
-        if (produce_cheese)
-            CheeseProduction();
+        StartCoroutine(CheeseProduction());
     }
 
-    //Fits GDD requirement of making cheese when theres enough milk
-    protected void AddMilk(int milk)
+    public bool CanAfford(int MILK)
     {
-        if (factory_switch == true && stored_milk + milk <= milk_capasity)
+        if (CURRENT_MILK_AMOUNT >= MILK)
+            return true;
+
+        return false;
+    }
+
+    public void SubtractMilk(int MILK)
+    {
+        CURRENT_MILK_AMOUNT -= MILK;
+    }
+
+    public int MilkToAdd()
+    {
+        return MAX_MILK_CAPACITY - CURRENT_MILK_AMOUNT;
+    }
+    //Fits GDD requirement of making cheese when theres enough milk
+    public void AddMilk(int MILK)
+    {
+        if (factory_switch == true && CURRENT_MILK_AMOUNT + MILK <= MAX_MILK_CAPACITY)
         {
-            stored_milk += milk;
+            CURRENT_MILK_AMOUNT += MILK;
             CheeseProduction();
         }
     }

@@ -3,6 +3,7 @@ using System.Collections;
 using ImGuiNET;
 using UImGui;
 using System.Collections.Generic;
+using System.IO;
 
 //// Hani - 09/02/2026
 
@@ -170,6 +171,7 @@ public class PopulationManager : MonoBehaviour, ISaveable
         if (mt != null) mt.InitialisePreferencesIfNeeded();
     }
 
+    // updated by Iain Benner 23/02/2026
     // Removes the most recently spawned mouse GameObject
     private void DespawnOneMouse()
     {
@@ -177,9 +179,14 @@ public class PopulationManager : MonoBehaviour, ISaveable
         if (last < 0) return;
 
         GameObject mouse = spawned_mice[last];
-        spawned_mice.RemoveAt(last);
+        MouseTemp character = mouse.transform.GetComponentInChildren<MouseTemp>();
+        //Ensure mice are not doing task before despawning.
+        if (!character.Moving && character.Path == null)
+        {
+            spawned_mice.RemoveAt(last);
 
-        if (mouse != null) Destroy(mouse);
+            if (mouse != null) Destroy(mouse);
+        }
     }
 
 }

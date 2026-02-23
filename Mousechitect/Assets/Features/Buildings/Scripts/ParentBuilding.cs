@@ -1,7 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
 
 // Iain Benner 05/12/2025
@@ -20,15 +18,20 @@ public enum BuildingType
 public class ParentBuilding : MonoBehaviour
 {
     //Varibles for designers to create tiers.
+    [SerializeField] protected int tier;
     [SerializeField] protected GameObject[] building_prefabs;
     [SerializeField] protected int[] capacitys;
-    [SerializeField] protected int tier;
+    [SerializeField] protected int[] scrap_costs;
 
     //Varibles to select the correct paramiters for the tier.
     protected GameObject building_prefab;
     protected GameObject building;
     protected List<MouseTemp> mouse_occupants;
     protected int capacity;
+    protected int scrap_cost;
+    protected bool upgrading;
+
+    protected ResourceManager resources = ResourceManager.instance;
 
     public int Tier { get { return tier; } set { tier = value; } }
     public GameObject Building { get { return building; } }
@@ -39,18 +42,25 @@ public class ParentBuilding : MonoBehaviour
     {
         building_prefab = null;
         mouse_occupants = new List<MouseTemp>();
-        capacity = 0;
+
+        upgrading = false;
     }
 
     protected virtual void Start()
     {
-        ConstructTier();
+        scrap_cost = scrap_costs[0];
+
+        if (resources.CanAfford(scrap_cost))
+            ConstructTier();
+        else
+            Destroy(this);
     }
 
     protected virtual void TierSelection()
     {
         building_prefab = building_prefabs[tier - 1];
         capacity = capacitys[tier - 1];
+        scrap_cost = scrap_costs[tier - 1];
     }
 
     //The function allows for diffrent varition depending on the designers choise and can be used for when the player upgrades the building.
@@ -59,48 +69,63 @@ public class ParentBuilding : MonoBehaviour
         if (tier > 0 && tier <= capacitys.Length)
         {
             TierSelection();
+            resources.SpendResources(scrap_cost);
             building_prefab.transform.localPosition = new Vector3(0, 0, 0);
             building = Instantiate(building_prefab, gameObject.transform);
         }
     }
 
-    public virtual void UpdateTier()
+    public virtual void UpdradeFactory()
     {
-        tier++;
-        if (tier > 0 && tier <= capacitys.Length)
+        if (tier + 1 <= capacitys.Length && !upgrading)
         {
-            Destroy(building);
-            TierSelection();
-            building_prefab.transform.localPosition = new Vector3(0, 0, 0);
-            building = Instantiate(building_prefab, gameObject.transform);
-            this.GetComponent<BoxCollider>().center = building.transform.Find("EntrancePoint").localPosition;
+            //Updated scrap cost.
+            scrap_cost = scrap_costs[tier - 1];
+
+            if (resources.CanAfford(scrap_cost))
+            {
+                resources.SpendResources(scrap_cost);
+                upgrading = true;
+                UpdateTier();
+            }
         }
-        else
-            tier = capacitys.Length;
+    }
+
+   protected virtual void UpdateTier()
+    {
+        Destroy(building);
+        tier++;
+        TierSelection();
+        building_prefab.transform.localPosition = new Vector3(0, 0, 0);
+        building = Instantiate(building_prefab, gameObject.transform);
+        this.GetComponent<BoxCollider>().center = building.transform.Find("EntrancePoint").localPosition;
+        upgrading = false;
     }
 
     //Mouse is storded and turned off to make effetivly inside the building.
     protected virtual void OnTriggerStay(Collider other)
     {
-        if (other != null && other.tag == "MouseTemp" && mouse_occupants.Count < capacity)
+        if (other != null && other.CompareTag("MouseTemp") && mouse_occupants.Count < capacity)
         {
             other.transform.gameObject.SetActive(false);
             MouseTemp mouse = other.gameObject.GetComponent<MouseTemp>();
             mouse_occupants.Add(mouse);
+            mouse.Collider = false;
             mouse.Home = this;
         }
     }
 
     //checks building rotion to place the mice on the right side to stop mice appaering inside building.
-    public void MouseLeave(MouseTemp mouse)
+    public virtual void MouseLeave(MouseTemp mouse)
     {
         if (!mouse.Moving)
         {
-            float angle = this.transform.eulerAngles.y;
-
             mouse.Home = null;
-            mouse.Collider = false;
-            mouse.transform.eulerAngles = new Vector3(0, angle - 90, 0);
+
+            mouse.transform.position = Building.transform.Find("EntrancePoint").position;
+
+            float angle = this.transform.eulerAngles.y;
+            mouse.transform.eulerAngles = new Vector3(0, angle, 0);
             mouse.transform.gameObject.SetActive(true);
 
             mouse_occupants.Remove(mouse);
@@ -125,7 +150,7 @@ public class ParentBuilding : MonoBehaviour
     // GetVectors Updated by Anthony 23/01/26 
     public Vector2Int GetPosition()
     {
-        Transform entrance = this.Building.transform.Find("EntrancePoint");
+        Transform entrance = Building.transform.Find("EntrancePoint");
 
         Vector2Int building_loc = new Vector2Int((int)entrance.position.x, (int)entrance.position.z);
 
