@@ -56,6 +56,9 @@ public class BuildingManager : MonoBehaviour, ISaveable
     [SerializeField] private GridManager grid_manager;
     [SerializeField] private LayerMask build_surface_mask;
     [SerializeField] private BuildToolController controller;
+    
+    // Anthony - 24/2/2026
+    [SerializeField] private PathTool path_tool; // used to block buildings on paths
 
     [Header("Building Prefabs")]
     [SerializeField] private GameObject[] building_prefabs;
@@ -479,22 +482,18 @@ public class BuildingManager : MonoBehaviour, ISaveable
     // Checks whether any of the candidate cells are already occupied.
     private bool CheckCellSurfaces(List<Vector2Int> cells)
     {
-        bool is_valid = true;
+        // Block buildings on paths
+        if (path_tool != null && !path_tool.AreCellsFreeOfPaths(cells))
+            return false;
 
-        int i = 0;
-
-        while (i < cells.Count)
+        // Block buildings on other buildings
+        for (int i = 0; i < cells.Count; i++)
         {
             if (occupied_cells.Contains(cells[i]))
-            {
-                is_valid = false;
-                break;
-            }
-
-            ++i;
+                return false;
         }
 
-        return is_valid;
+        return true;
     }
 
     // Destroys the current preview building and clears temporary state.
