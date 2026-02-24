@@ -10,6 +10,9 @@ public class MainMenuController : MonoBehaviour
     public Button SettingsButton;
     public Button QuitButton;
 
+    [Header("Sub-Menus")]
+    public GameObject settingsPanel;
+
     private void Start()
     {
         if (NewGameButton != null)
@@ -47,6 +50,7 @@ public class MainMenuController : MonoBehaviour
     private void OnSettingsClicked()
     {
         Debug.Log("Settings Menu Opened.");
+        settingsPanel.SetActive(true);
     }
 
     private void OnQuitClicked()
