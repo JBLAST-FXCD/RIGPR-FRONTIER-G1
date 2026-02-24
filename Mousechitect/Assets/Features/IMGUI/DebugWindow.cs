@@ -280,7 +280,7 @@ namespace UImGui
         {
             if (ImGui.Button("Upgrade building"))
             {
-                building.UpdradeFactory();
+                building.UpdradeBuilding();
             }
             ImGui.SameLine();
             ImGui.Text($"Tier: {building.Tier}");
