@@ -44,6 +44,9 @@ public class PathTool : MonoBehaviour, ISaveable
     [SerializeField] private GridManager grid_manager;
     [SerializeField] private LayerMask path_surface_mask;
 
+    // Anthony - 23/2/2026
+    [SerializeField] private BuildingManager building_manager; // to block paths on buildings
+
     [Header("Path Types")]
     [SerializeField] private PathTypeData[] path_types;
 
@@ -79,7 +82,9 @@ public class PathTool : MonoBehaviour, ISaveable
     private float next_paint_time = 0.0f;
     private const float PAINT_INTERVAL_SECONDS = 0.02f;
 
-    // PUBLIC
+    // Anthony - 24/2/2026
+    private Vector2Int last_painted_anchor = new Vector2Int(int.MinValue, int.MinValue);
+    private bool is_painting = false;
 
     // Enables or disables the path tool.
     public void SetToolEnabled(bool is_enabled)
@@ -117,6 +122,21 @@ public class PathTool : MonoBehaviour, ISaveable
         }
 
         return 0.0f;
+    }
+
+    // Anthony - 24/2/2026
+    // Used by BuildingManager/MoveTool to block building placement over paths.
+    public bool AreCellsFreeOfPaths(List<Vector2Int> cells)
+    {
+        if (cells == null) return true;
+
+        for (int i = 0; i < cells.Count; i++)
+        {
+            if (occupied_path_cells.Contains(cells[i]))
+                return false;
+        }
+
+        return true;
     }
 
     private void Update()
@@ -248,6 +268,52 @@ public class PathTool : MonoBehaviour, ISaveable
         StartPlacingPath(selected_path_index);
     }
 
+    // Anthony - 24/2/2026
+    // Paint mode placement: stamps a NEW path instance without consuming the preview.
+    private void StampPlacementAtCurrentPreview()
+    {
+        if (current_path == null) return;
+        if (!is_valid_path_zone) return;
+
+        PathTypeData path_type = path_types[selected_path_index];
+
+        // Spawn a real placed path copy at the preview position/rotation
+        GameObject placed_obj = Instantiate(path_type.path_prefab, current_path.transform.position, current_path.transform.rotation);
+
+        // Ensure full opacity
+        SetPathOpacity(placed_obj, PLACED_OPACITY);
+
+        PlacedObjectData placed_data = placed_obj.GetComponent<PlacedObjectData>();
+        if (placed_data == null)
+            placed_data = placed_obj.AddComponent<PlacedObjectData>();
+
+        placed_data.is_path = true;
+        placed_data.prefab_index = selected_path_index;
+        placed_data.speed_modifier = path_type.speed_modifier;
+
+        if (string.IsNullOrEmpty(placed_data.unique_id))
+            placed_data.unique_id = Guid.NewGuid().ToString("N");
+
+        placed_data.occupied_cells.Clear();
+
+        // Use the preview's currently calculated footprint
+        for (int i = 0; i < covered_cells.Count; i++)
+        {
+            Vector2Int cell = covered_cells[i];
+
+            occupied_path_cells.Add(cell);
+            cell_speed_modifiers[cell] = path_type.speed_modifier;
+
+            placed_data.occupied_cells.Add(cell);
+        }
+
+        // Write into GridManager for pathfinding
+        grid_manager.SetPathOnCells(placed_data.occupied_cells, placed_data.speed_modifier);
+
+        // Save/destroy lookup
+        placed_paths_by_id[placed_data.unique_id] = placed_data;
+    }
+
     // ROTATION
 
     private void HandleRotationInput()
@@ -290,7 +356,7 @@ public class PathTool : MonoBehaviour, ISaveable
         Vector3 hit_position = hit_info.point;
 
         Vector3 snapped_position = grid_manager.GetNearestPointOnGrid(hit_position);
-        snapped_position.y = hit_info.point.y;
+        snapped_position = SnapToEvenCellAnchor(snapped_position, hit_info.point.y);
 
         current_path.transform.position = snapped_position;
 
@@ -338,22 +404,18 @@ public class PathTool : MonoBehaviour, ISaveable
 
     private bool CheckCellsFree(List<Vector2Int> cells)
     {
-        bool is_free = true;
+        // Block paths on buildings
+        if (building_manager != null && !building_manager.AreCellsFree(cells))
+            return false;
 
-        int i = 0;
-
-        while (i < cells.Count)
+        // Block paths on other paths
+        for (int i = 0; i < cells.Count; i++)
         {
             if (occupied_path_cells.Contains(cells[i]))
-            {
-                is_free = false;
-                break;
-            }
-
-            ++i;
+                return false;
         }
 
-        return is_free;
+        return true;
     }
 
     // INPUT
@@ -378,13 +440,59 @@ public class PathTool : MonoBehaviour, ISaveable
             }
         }
 
-        // LMB places a path tile if valid
-        if (Input.GetMouseButtonDown(0))
+        // LMB places
+        bool shift_held = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+
+        // Start painting when Shift and LMB pressed
+        if (shift_held && Input.GetMouseButtonDown(0))
+        {
+            is_painting_paths = true;
+            last_painted_cell = new Vector2Int(int.MinValue, int.MinValue);
+            next_paint_time = 0.0f;
+        }
+
+        // Stop painting when LMB released
+        if (Input.GetMouseButtonUp(0))
+        {
+            is_painting_paths = false;
+        }
+
+        // Paint while holding Shift and LMB
+        if (is_painting_paths && Input.GetMouseButton(0))
+        {
+            if (Time.time < next_paint_time)
+                return;
+
+            next_paint_time = Time.time + PAINT_INTERVAL_SECONDS;
+
+            if (!is_valid_path_zone)
+                return;
+
+            // Anchor cell = "lowest" cell in the 2x2 footprint.
+            // covered_cells comes from collider bounds and will always be 4 cells for 2x2.
+            Vector2Int anchor = covered_cells[0];
+            for (int i = 1; i < covered_cells.Count; i++)
+            {
+                Vector2Int c = covered_cells[i];
+                if (c.x < anchor.x) anchor = c;
+                if (c.y < anchor.y) anchor = new Vector2Int(anchor.x, c.y);
+            }
+
+            // Only stamp when we enter a new anchor
+            if (anchor != last_painted_cell)
+            {
+                StampPlacementAtCurrentPreview();
+                last_painted_cell = anchor;
+            }
+
+            return; // don't also do single-click placement in the same frame
+        }
+
+        // Normal single-click placement (no Shift)
+        if (Input.GetMouseButtonDown(0) && !shift_held)
         {
             if (!is_valid_path_zone)
-            {
                 return;
-            }
 
             ConfirmPlacement();
         }
@@ -576,4 +684,29 @@ public class PathTool : MonoBehaviour, ISaveable
             ++p;
         }
     }
+
+    // Anthony - 24/2/2026
+    private Vector3 SnapToEvenCellAnchor(Vector3 world_pos, float y)
+    {
+        float grid_size = grid_manager.GridSize;
+
+        int cell_x = Mathf.RoundToInt(world_pos.x / grid_size);
+        int cell_z = Mathf.RoundToInt(world_pos.z / grid_size);
+
+        // Snap anchor to even cell coords so 2x2 tiles don't overlap
+        if (cell_x % 2 != 0) cell_x -= 1;
+        if (cell_z % 2 != 0) cell_z -= 1;
+
+        return new Vector3(cell_x * grid_size, y, cell_z * grid_size);
+    }
+
+    private void BuildFootprint2x2(Vector2Int anchor, List<Vector2Int> out_cells)
+    {
+        out_cells.Clear();
+        out_cells.Add(anchor);
+        out_cells.Add(new Vector2Int(anchor.x + 1, anchor.y));
+        out_cells.Add(new Vector2Int(anchor.x, anchor.y + 1));
+        out_cells.Add(new Vector2Int(anchor.x + 1, anchor.y + 1));
+    }
+
 }
