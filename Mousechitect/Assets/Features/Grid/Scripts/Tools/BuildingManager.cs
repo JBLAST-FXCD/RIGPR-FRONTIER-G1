@@ -614,7 +614,7 @@ public class BuildingManager : MonoBehaviour, ISaveable
 
         // also write into GridManager to set speed to 0 stopping mice from walking
         grid_manager.SetPathOnCells(placed_data.occupied_cells, placed_data.speed_modifier);
-
+        /*
         // entrance updated by Iain Benner 22/02/2026
         // Re-open the entrance cell so pathfinding has a reachable target
         Vector2Int entrance = current_building.GetComponentInChildren<ParentBuilding>().GetPosition();
@@ -626,9 +626,23 @@ public class BuildingManager : MonoBehaviour, ISaveable
             // - entrance should use +1 to undo that block (0 + 1 = 1)
             grid_manager.SetPathOnCells(new List<Vector2Int> { entrance }, 1.0f);
         }
+        */
 
-        // If this placed object is a decoration, register its grid cell for synergy checks
-        Decoration decor = current_building.GetComponentInChildren<Decoration>();
+        // Jess 24/02/2026 - fixed decoration causing object reference error
+        ParentBuilding building_component = current_building.GetComponentInChildren<ParentBuilding>();
+
+        if (building_component != null)
+        {
+            Vector2Int entrance = building_component.GetPosition();
+            grid_manager.SetPathOnCells(new List<Vector2Int> { entrance }, 1.0f);
+        }
+        else if (current_building.CompareTag("Decoration"))
+        {
+            // any specific logic needed for decorations
+        }
+
+            // If this placed object is a decoration, register its grid cell for synergy checks
+            Decoration decor = current_building.GetComponentInChildren<Decoration>();
         if (decor != null && placed_data.occupied_cells.Count > 0 && DecorRegistry.Instance != null)
         {
             // Use first occupied cell as the decor “anchor”

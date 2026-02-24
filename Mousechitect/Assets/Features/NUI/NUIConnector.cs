@@ -75,6 +75,14 @@ public class NUIConnector : MonoBehaviour
         }
     }
 
+    public void NUIToggleResearchTree()
+    {
+        if (nui_manager != null)
+        {
+            nui_manager.ToggleResearchTreePanel();
+        }
+    }
+
     public void NUISetBuildingIndex(int index)
     {
         building_index = index;
