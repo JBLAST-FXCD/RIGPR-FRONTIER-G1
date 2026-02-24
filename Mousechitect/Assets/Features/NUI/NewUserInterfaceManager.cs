@@ -16,6 +16,7 @@ public class NewUserInterfaceManager : MonoBehaviour
     [SerializeField] private GameObject path_panel;
     [SerializeField] private GameObject destroy_panel;
     [SerializeField] private GameObject move_panel;
+    [SerializeField] private GameObject research_tree_panel;
 
     [Header("Build Panel")]
     [SerializeField] private GameObject build_panel;
@@ -47,6 +48,7 @@ public class NewUserInterfaceManager : MonoBehaviour
         OPEN_PANEL_MOVE,
         OPEN_PANEL_MICE,
         OPEN_PANEL_BUILDING,
+        OPEN_PANEL_RESEARCH_TREE,
         OPEN_PANEL_NONE
     }
     private OPEN_PANEL open_panel = OPEN_PANEL.OPEN_PANEL_NONE;
@@ -110,6 +112,9 @@ public class NewUserInterfaceManager : MonoBehaviour
                 break;
             case OPEN_PANEL.OPEN_PANEL_MOVE:
                 ToggleMovePanel();
+                break;
+            case OPEN_PANEL.OPEN_PANEL_RESEARCH_TREE:
+                ToggleResearchTreePanel();
                 break;
             case OPEN_PANEL.OPEN_PANEL_MICE:
                 //ToggleMicePanel();
@@ -202,6 +207,24 @@ public class NewUserInterfaceManager : MonoBehaviour
             open_panel = OPEN_PANEL.OPEN_PANEL_MOVE;
         }
         nui_connector.NUIToggleMoveTool();
+    }
+
+    public void ToggleResearchTreePanel()
+    {
+        if (open_panel == OPEN_PANEL.OPEN_PANEL_RESEARCH_TREE)
+        {
+            research_tree_panel.GetComponent<Animator>().SetBool("is_panel_open", false);
+            open_panel = OPEN_PANEL.OPEN_PANEL_NONE;
+        }
+        else
+        {
+            if (open_panel != OPEN_PANEL.OPEN_PANEL_NONE)
+            {
+                ClosePanels();
+            }
+            research_tree_panel.GetComponent<Animator>().SetBool("is_panel_open", true);
+            open_panel = OPEN_PANEL.OPEN_PANEL_RESEARCH_TREE;
+        }
     }
 
 

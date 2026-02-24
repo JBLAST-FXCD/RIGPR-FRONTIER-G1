@@ -1,18 +1,19 @@
 using ImGuiNET;
 using System.Collections;
 using System.Collections.Generic;
+using UImGui;
 using UnityEngine;
 
 public class AudioHandler : MonoBehaviour
 {
     public static AudioHandler instance;
-    public AudioSource music_track_1;
-    public AudioSource music_track_2;
-    public AudioSource music_track_3;
+    public AudioSource music_source;
 
-    public bool is_music_playing = false;
+    public AudioClip[] music_tracks;
 
-    private void Start()
+    public bool is_music_playing => music_source != null && music_source.isPlaying;
+
+    private void Awake()
     {
         if (instance == null)
         {
@@ -24,20 +25,25 @@ public class AudioHandler : MonoBehaviour
         }
     }
 
-    private void Update()
+    public void PlayMusic(int track_index)
     {
-        MusicPlaying();
+        if (track_index <0 || track_index >= music_tracks.Length)
+        {
+            DebugWindow.LogToConsole($"Invalid track index: {track_index}", true);
+            return;
+        }
+
+        music_source.clip = music_tracks[track_index];
+        music_source.Play();
+
+        DebugWindow.LogToConsole($"Playing music track: {music_tracks[track_index].name}", true);
     }
 
-    public void MusicPlaying()
+    public void StopMusic()
     {
-        if (!AudioHandler.instance.music_track_1.isPlaying && !AudioHandler.instance.music_track_2.isPlaying && !AudioHandler.instance.music_track_3.isPlaying)
+        if (is_music_playing)
         {
-            is_music_playing = false;
-        }
-        else
-        {
-            is_music_playing = true;
+            music_source.Stop();
         }
     }
 }

@@ -26,6 +26,8 @@ namespace UImGui
         private int scrap_input = 0;
         private int cheese_input = 0;
         private string console_command_input = "";
+        private int selected_audio_track = 0;
+        private string[] cached_track_names = null;
 
         private List<string> console_log = new List<string>();
 
@@ -182,35 +184,65 @@ namespace UImGui
         {
             if (ImGui.CollapsingHeader("Audio Manager"))
             {
-                if (ImGui.Button("Play Sample Track 1") && !AudioHandler.instance.is_music_playing)
+                if (AudioHandler.instance == null)
                 {
-                    AudioHandler.instance.music_track_1.Play();
+                    ImGui.TextColored(new Vector4(1, 0, 0, 1), "AudioHandler not found");
+                    return;
                 }
 
-                if (ImGui.Button("Play Sample Track 2") && !AudioHandler.instance.is_music_playing)
+                if (cached_track_names == null || cached_track_names.Length != AudioHandler.instance.music_tracks.Length)
                 {
-                    AudioHandler.instance.music_track_2.Play();
+                    cached_track_names = new string[AudioHandler.instance.music_tracks.Length];
+                    for (int i=0; i < AudioHandler.instance.music_tracks.Length; i++)
+                    {
+                        AudioClip clip = AudioHandler.instance.music_tracks[i];
+                        cached_track_names[i] = clip != null ? clip.name : $"Empty Track {i}";
+                    }
                 }
 
-                if (ImGui.Button("Play Sample Track 3") && !AudioHandler.instance.is_music_playing)
+                if (cached_track_names.Length > 0)
                 {
-                    AudioHandler.instance.music_track_3.Play();
-                }
-                ImGui.Separator();
-                if (!AudioHandler.instance.is_music_playing)
-                {
-                    ImGui.Text("No music is currently playing");
+                    ImGui.Combo("select track", ref selected_audio_track, cached_track_names, cached_track_names.Length);
+
+                    if (AudioHandler.instance.is_music_playing)
+                    {
+                        ImGui.BeginDisabled();
+                    }
+
+                    if (ImGui.Button("Play seelcted track"))
+                    {
+                        AudioHandler.instance.PlayMusic(selected_audio_track);
+                    }
+
+                    if (AudioHandler.instance.is_music_playing)
+                    {
+                        ImGui.EndDisabled();
+                    }
                 }
                 else
                 {
-                    ImGui.Text("Music is currently playing");
+                    ImGui.TextColored(new Vector4(1, 1, 0, 1), "no tracks found in audiohandler");
                 }
 
-                if (ImGui.Button("Stop Music"))
+                ImGui.Separator();
+
+                if (!AudioHandler.instance.is_music_playing)
                 {
-                    AudioHandler.instance.music_track_1.Stop();
-                    AudioHandler.instance.music_track_2.Stop();
-                    AudioHandler.instance.music_track_3.Stop();
+                    ImGui.Text("no muic currently playing");
+                }
+                else
+                {
+                    ImGui.TextColored(new Vector4(0, 1, 0, 1), $"Currently playing: {cached_track_names[selected_audio_track]}");
+                }
+                if (ImGui.Button("stop music"))
+                {
+                    AudioHandler.instance.StopMusic();
+                }
+
+                float current_volume = AudioHandler.instance.music_source.volume;
+                if (ImGui.SliderFloat("Volume", ref current_volume, 0.0f, 1.0f))
+                {
+                    AudioHandler.instance.music_source.volume = current_volume;
                 }
             }
         }
