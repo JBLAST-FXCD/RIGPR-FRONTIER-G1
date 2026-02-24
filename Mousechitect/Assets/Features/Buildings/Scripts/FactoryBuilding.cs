@@ -114,7 +114,7 @@ public class FactoryBuilding : ParentBuilding, IMilkContainer
         milk_capasity   = milk_capasitys[tier - 1];
     }
 
-    public override void UpdradeFactory()
+    public override void UpdradeBuilding()
     {
         if (tier + 1 <= capacitys.Length && !upgrading)
         {

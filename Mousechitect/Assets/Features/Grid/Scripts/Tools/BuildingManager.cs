@@ -191,6 +191,20 @@ public class BuildingManager : MonoBehaviour, ISaveable
         return is_build_mode_active;
     }
 
+    private IEnumerator AsignTier(int building_tier)
+    {
+        //--- changes the building tier if it has one
+        if (current_building.transform.GetChild(0).GetComponent<ParentBuilding>() != null)
+        {
+            current_building.transform.GetChild(0).GetComponent<ParentBuilding>().Tier = building_tier;
+
+            yield return new WaitForEndOfFrame();
+            if (current_building.transform.GetChild(0).GetComponent<ParentBuilding>() == null)
+                ClearPreview();
+        }
+        //--- Added by Joe Mcdonnell
+    }
+
     // Entry point when a building type is selected (from UI or debug hotkey).
     public void StartPlacingBuilding(int building_index, int building_tier)
     {
@@ -219,26 +233,25 @@ public class BuildingManager : MonoBehaviour, ISaveable
 
         current_building = Instantiate(building_prefab);
 
-        //--- changes the building tier if it has one
-        if (current_building.transform.GetChild(0).GetComponent<ParentBuilding>() != null)
+        StartCoroutine(AsignTier(building_tier));
+
+        if (current_building != null)
         {
-            current_building.transform.GetChild(0).GetComponent<ParentBuilding>().Tier = building_tier;
+            current_building_collider = current_building.GetComponentInChildren<Collider>();
+            current_preview_visual = current_building.GetComponentInChildren<BuildingPreviewVisual>();
+
+            Transform visual = current_building.transform.Find("Visual");
+            base_visual_local_rotation = (visual != null) ? visual.localRotation : Quaternion.identity;
+
+            // reset rotation state for this new preview
+            base_building_rotation = current_building.transform.rotation;
+            current_rotation_y = 0.0f;
+            is_fine_rotation_mode = false;
+            has_used_fine_rotation = false;
+
+            // building spawned with reduced opacity
+            SetBuildingOpacity(current_building, PREVIEW_OPACITY);
         }
-        //--- Added by Joe Mcdonnell
-        current_building_collider = current_building.GetComponentInChildren<Collider>();
-        current_preview_visual = current_building.GetComponentInChildren<BuildingPreviewVisual>();
-
-        Transform visual = current_building.transform.Find("Visual");
-        base_visual_local_rotation = (visual != null) ? visual.localRotation : Quaternion.identity;
-
-        // reset rotation state for this new preview
-        base_building_rotation = current_building.transform.rotation;
-        current_rotation_y = 0.0f;
-        is_fine_rotation_mode = false;
-        has_used_fine_rotation = false;
-
-        // building spawned with reduced opacity
-        SetBuildingOpacity(current_building, PREVIEW_OPACITY);
     }
 
     // Removes the given cells from the occupied set.
@@ -617,14 +630,17 @@ public class BuildingManager : MonoBehaviour, ISaveable
         /*
         // entrance updated by Iain Benner 22/02/2026
         // Re-open the entrance cell so pathfinding has a reachable target
-        Vector2Int entrance = current_building.GetComponentInChildren<ParentBuilding>().GetPosition();
-        if (entrance != null)
+        if (current_building.GetComponentInChildren<ParentBuilding>() != null)
         {
-            // IMPORTANT:
-            // If SetPathOnCells ADDS a modifier to a base speed (common), then:
-            // - building uses -1 to block (1 + -1 = 0)
-            // - entrance should use +1 to undo that block (0 + 1 = 1)
-            grid_manager.SetPathOnCells(new List<Vector2Int> { entrance }, 1.0f);
+            Vector2Int entrance = current_building.GetComponentInChildren<ParentBuilding>().GetPosition();
+            if (entrance != null)
+            {
+                // IMPORTANT:
+                // If SetPathOnCells ADDS a modifier to a base speed (common), then:
+                // - building uses -1 to block (1 + -1 = 0)
+                // - entrance should use +1 to undo that block (0 + 1 = 1)
+                grid_manager.SetPathOnCells(new List<Vector2Int> { entrance }, 1.0f);
+            }
         }
         */
 

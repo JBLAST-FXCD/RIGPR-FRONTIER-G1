@@ -75,7 +75,7 @@ public class ParentBuilding : MonoBehaviour
         }
     }
 
-    public virtual void UpdradeFactory()
+    public virtual void UpdradeBuilding()
     {
         if (tier + 1 <= capacitys.Length && !upgrading)
         {
