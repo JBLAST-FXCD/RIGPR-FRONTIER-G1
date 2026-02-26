@@ -11,6 +11,7 @@ public class NUIConnector : MonoBehaviour
     [SerializeField] private BuildingManager build_tool;
     [SerializeField] private PathTool path_tool;
     [SerializeField] private BuildToolController tool_controller;
+    [SerializeField] private SaveLoadManager save_load_manager;
     int building_index = 0;
 
     [Header("Internal Connections")]
@@ -103,6 +104,15 @@ public class NUIConnector : MonoBehaviour
         {
             path_tool.OnPathButtonPressed(path_index);
         }
+    }
+
+    public void CreateSave()
+    {
+        if (save_load_manager != null)
+        {
+            save_load_manager.SaveGame();
+        }
+        
     }
 
 }

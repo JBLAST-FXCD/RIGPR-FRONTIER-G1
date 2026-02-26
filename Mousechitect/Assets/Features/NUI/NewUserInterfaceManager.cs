@@ -17,6 +17,8 @@ public class NewUserInterfaceManager : MonoBehaviour
     [SerializeField] private GameObject destroy_panel;
     [SerializeField] private GameObject move_panel;
     [SerializeField] private GameObject research_tree_panel;
+    [SerializeField] private GameObject info_panel;
+    
 
     [Header("Build Panel")]
     [SerializeField] private GameObject build_panel;
@@ -27,8 +29,18 @@ public class NewUserInterfaceManager : MonoBehaviour
     [SerializeField] private GameObject[] research_rows;
     [SerializeField] private GameObject[] decoration_rows;
 
+    [Header("Info Panel")]
+    [SerializeField] private GameObject[] pages;
+    [SerializeField] private GameObject[] page_title_data;
+    [SerializeField] private TextMeshProUGUI page_title;
+
+    [Header("Pause Screen")]
+    [SerializeField] private GameObject pause_screen;
+
 
     // --- Internal Variables ---
+
+    int current_info_index = 0;
 
     enum CATEGORY
     {
@@ -49,6 +61,8 @@ public class NewUserInterfaceManager : MonoBehaviour
         OPEN_PANEL_MICE,
         OPEN_PANEL_BUILDING,
         OPEN_PANEL_RESEARCH_TREE,
+        OPEN_PANEL_INFO,
+        OPEN_PANEL_PAUSE,
         OPEN_PANEL_NONE
     }
     private OPEN_PANEL open_panel = OPEN_PANEL.OPEN_PANEL_NONE;
@@ -116,11 +130,17 @@ public class NewUserInterfaceManager : MonoBehaviour
             case OPEN_PANEL.OPEN_PANEL_RESEARCH_TREE:
                 ToggleResearchTreePanel();
                 break;
+            case OPEN_PANEL.OPEN_PANEL_INFO:
+                ToggleInfoPanel();
+                break;
             case OPEN_PANEL.OPEN_PANEL_MICE:
                 //ToggleMicePanel();
                 break;
             case OPEN_PANEL.OPEN_PANEL_BUILDING:
                 //ToggleBuildingPanel();
+                break;
+            case OPEN_PANEL.OPEN_PANEL_PAUSE:
+                TogglePauseMenu();
                 break;
             default:
                 break;
@@ -227,6 +247,83 @@ public class NewUserInterfaceManager : MonoBehaviour
         }
     }
 
+    public void ToggleInfoPanel()
+    {
+        if (open_panel == OPEN_PANEL.OPEN_PANEL_INFO)
+        {
+            info_panel.GetComponent<Animator>().SetBool("is_panel_open", false);
+            open_panel = OPEN_PANEL.OPEN_PANEL_NONE;
+        }
+        else
+        {
+            if (open_panel != OPEN_PANEL.OPEN_PANEL_NONE)
+            {
+                ClosePanels();
+            }
+            info_panel.GetComponent<Animator>().SetBool("is_panel_open", true);
+            open_panel = OPEN_PANEL.OPEN_PANEL_INFO;
+        }
+    }
+
+    public void TogglePauseMenu()
+    {
+        if (open_panel == OPEN_PANEL.OPEN_PANEL_PAUSE)
+        {
+            pause_screen.SetActive(false);
+            open_panel = OPEN_PANEL.OPEN_PANEL_NONE;
+        }
+        else
+        {
+            if (open_panel != OPEN_PANEL.OPEN_PANEL_NONE)
+            {
+                ClosePanels();
+            }
+            pause_screen.SetActive(true);
+            open_panel = OPEN_PANEL.OPEN_PANEL_PAUSE;
+        }
+    }
+
+    public void InfoNext()
+    {
+
+        for (int i = 0; i < pages.Length; i++)
+        {
+            pages[i].SetActive(false);
+        }
+
+        if (current_info_index + 1 > pages.Length-1)
+        {
+            current_info_index = 0;
+        }
+        else
+        {
+            current_info_index++;
+        }
+
+        pages[current_info_index].SetActive(true);
+        page_title.text = page_title_data[current_info_index].GetComponent<TextMeshProUGUI>().text;
+
+    }
+
+    public void InfoPrev()
+    {
+        for (int i = 0; i < pages.Length; i++)
+        {
+            pages[i].SetActive(false);
+        }
+
+        if (current_info_index - 1 < 0)
+        {
+            current_info_index = pages.Length-1;
+        }
+        else
+        {
+            current_info_index--;
+        }
+
+        pages[current_info_index].SetActive(true);
+        page_title.text = page_title_data[current_info_index].GetComponent<TextMeshProUGUI>().text;
+    }
 
     public void BuildCategoryNext()
     {
@@ -294,5 +391,8 @@ public class NewUserInterfaceManager : MonoBehaviour
         UpdateCategory(previous_category);
     }
 
-   
+   public void PauseOptionSave()
+    {
+        nui_connector.CreateSave();
+    }
 }

@@ -101,17 +101,4 @@ public class BuildToolController : MonoBehaviour
 
     }
 
-    // Temporary key to enter Move Mode
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.M))
-        {
-            // Toggle move tool on/off
-            if (current_tool_type == TOOL_TYPE.TOOL_TYPE_MOVE)
-                SetActiveTool(TOOL_TYPE.TOOL_TYPE_NONE);
-            else
-                SetActiveTool(TOOL_TYPE.TOOL_TYPE_MOVE);
-        }
-    }
-
 }
