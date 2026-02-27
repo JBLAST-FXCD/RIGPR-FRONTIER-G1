@@ -25,6 +25,8 @@ public class MoveTool : MonoBehaviour
     [SerializeField] private GridManager grid_manager;
     [SerializeField] private BuildingManager building_manager;
 
+    [SerializeField] private PathTool path_tool;     // Anthony - 27/2/2026
+
     private bool is_tool_active = false;
 
     // Selection
@@ -136,9 +138,21 @@ public class MoveTool : MonoBehaviour
         if (placed.occupied_cells != null)
             original_cells.AddRange(placed.occupied_cells);
 
-        // Temporarily free its current cells to test overlap properly while moving
-        building_manager.ClearOccupiedCells(original_cells);
-        grid_manager.SetPathOnCells(original_cells, 0.0f); // clear blocked modifier
+        // Temporarily free its current cells so overlap checks work while moving
+        if (placed.is_path)
+        {
+            // Clear path occupancy
+            if (path_tool != null)
+                path_tool.ClearPathCells(original_cells);
+        }
+        else
+        {
+            // Clear building occupancy
+            building_manager.ClearOccupiedCells(original_cells);
+        }
+
+        // clear grid speed modifier while moving
+        grid_manager.SetPathOnCells(original_cells, 0.0f);
 
         SetBuildingOpacity(selected_root, PREVIEW_OPACITY);
     }
@@ -152,6 +166,11 @@ public class MoveTool : MonoBehaviour
 
         Vector3 snapped = grid_manager.GetNearestPointOnGrid(hit.point);
         snapped.y = hit.point.y;
+
+        if (selected_placed != null && selected_placed.is_path)
+        {
+            snapped = SnapToEvenAnchor(snapped, hit.point.y);
+        }
 
         selected_root.transform.position = snapped;
 
@@ -179,9 +198,7 @@ public class MoveTool : MonoBehaviour
     private void ConfirmMove()
     {
         if (selected_preview_visual != null)
-        {
             selected_preview_visual.RestoreOriginalColors();
-        }
 
         SetBuildingOpacity(selected_root, 1.0f);
 
@@ -189,32 +206,37 @@ public class MoveTool : MonoBehaviour
         selected_placed.occupied_cells.Clear();
         selected_placed.occupied_cells.AddRange(candidate_cells);
 
-        // Re-occupy in manager + restore blocked cell speed modifier
-        building_manager.AddOccupiedCells(candidate_cells);
-        grid_manager.SetPathOnCells(candidate_cells, selected_placed.speed_modifier);
-
-        // Re-open entrance cell for pathfinding
-        Transform entrance = selected_root.transform.Find("EntrancePoint");
-        if (entrance != null)
+        if (selected_placed.is_path)
         {
-            Vector2Int entrance_cell = new Vector2Int(
-                Mathf.RoundToInt(entrance.position.x),
-                Mathf.RoundToInt(entrance.position.z)
-            );
+            if (path_tool != null)
+                path_tool.AddPathCells(candidate_cells);
 
-            grid_manager.SetPathOnCells(new List<Vector2Int> { entrance_cell }, 1.0f);
+            // Paths only need the grid modifier
+            grid_manager.SetPathOnCells(candidate_cells, selected_placed.speed_modifier);
+        }
+        else
+        {
+            building_manager.AddOccupiedCells(candidate_cells);
+            grid_manager.SetPathOnCells(candidate_cells, selected_placed.speed_modifier);
+
+            // Re-open entrance cell for buildings only
+            Transform entrance = selected_root.transform.Find("EntrancePoint");
+            if (entrance != null)
+            {
+                Vector2Int entrance_cell = new Vector2Int(
+                    Mathf.RoundToInt(entrance.position.x),
+                    Mathf.RoundToInt(entrance.position.z)
+                );
+
+                grid_manager.SetPathOnCells(new List<Vector2Int> { entrance_cell }, 1.0f);
+            }
         }
 
         ClearSelectionState();
 
-        // Exit move mode unless SHIFT is held
-        bool is_shift_held =
-            Input.GetKey(KeyCode.LeftShift) ||
-            Input.GetKey(KeyCode.RightShift);
-
+        bool is_shift_held = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
         if (!is_shift_held)
         {
-            // Disable tool
             BuildToolController controller = FindObjectOfType<BuildToolController>();
             if (controller != null)
                 controller.SetActiveTool_None();
@@ -242,19 +264,28 @@ public class MoveTool : MonoBehaviour
         selected_placed.occupied_cells.Clear();
         selected_placed.occupied_cells.AddRange(original_cells);
 
-        building_manager.AddOccupiedCells(original_cells);
-        grid_manager.SetPathOnCells(original_cells, selected_placed.speed_modifier);
-
-        // Restore entrance cell open
-        Transform entrance = selected_root.transform.Find("EntrancePoint");
-        if (entrance != null)
+        if (selected_placed.is_path)
         {
-            Vector2Int entrance_cell = new Vector2Int(
-                Mathf.RoundToInt(entrance.position.x),
-                Mathf.RoundToInt(entrance.position.z)
-            );
+            if (path_tool != null)
+                path_tool.AddPathCells(original_cells);
 
-            grid_manager.SetPathOnCells(new List<Vector2Int> { entrance_cell }, 1.0f);
+            grid_manager.SetPathOnCells(original_cells, selected_placed.speed_modifier);
+        }
+        else
+        {
+            building_manager.AddOccupiedCells(original_cells);
+            grid_manager.SetPathOnCells(original_cells, selected_placed.speed_modifier);
+
+            Transform entrance = selected_root.transform.Find("EntrancePoint");
+            if (entrance != null)
+            {
+                Vector2Int entrance_cell = new Vector2Int(
+                    Mathf.RoundToInt(entrance.position.x),
+                    Mathf.RoundToInt(entrance.position.z)
+                );
+
+                grid_manager.SetPathOnCells(new List<Vector2Int> { entrance_cell }, 1.0f);
+            }
         }
 
         ClearSelectionState();
@@ -331,5 +362,17 @@ public class MoveTool : MonoBehaviour
                 }
             }
         }
+    }
+    private Vector3 SnapToEvenAnchor(Vector3 world, float y)
+    {
+        float g = grid_manager.GridSize;
+
+        int cx = Mathf.RoundToInt(world.x / g);
+        int cz = Mathf.RoundToInt(world.z / g);
+
+        if ((cx & 1) == 1) cx -= 1;  // force even
+        if ((cz & 1) == 1) cz -= 1;
+
+        return new Vector3(cx * g, y, cz * g);
     }
 }

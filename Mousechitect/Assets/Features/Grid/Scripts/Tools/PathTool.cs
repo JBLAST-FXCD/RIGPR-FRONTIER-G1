@@ -709,4 +709,21 @@ public class PathTool : MonoBehaviour, ISaveable
         out_cells.Add(new Vector2Int(anchor.x + 1, anchor.y + 1));
     }
 
+    // Anthony - 27/2/2026
+    // Lets MoveTool update path occupancy correctly.
+    public void ClearPathCells(List<Vector2Int> cells)
+    {
+        if (cells == null) return;
+
+        for (int i = 0; i < cells.Count; i++)
+            occupied_path_cells.Remove(cells[i]);
+    }
+
+    public void AddPathCells(List<Vector2Int> cells)
+    {
+        if (cells == null) return;
+
+        for (int i = 0; i < cells.Count; i++)
+            occupied_path_cells.Add(cells[i]);
+    }
 }
