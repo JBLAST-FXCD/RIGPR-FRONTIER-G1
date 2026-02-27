@@ -10,7 +10,7 @@ using System.Collections.Generic;
 /// Ensures any prior upgrades are applied before a new upgrade is purchasable.
 /// </summary>
 
-public abstract class BuildingUpgradeHandler : MonoBehaviour, ISaveable
+public abstract class BuildingUpgradeHandler : MonoBehaviour
 {
     [Header("Save Data")]
     public string unique_id;
@@ -70,6 +70,7 @@ public abstract class BuildingUpgradeHandler : MonoBehaviour, ISaveable
         return true;
     }
 
+    /*
     public void PopulateSaveData(GameData data)
     {
         building_save_data saveData = new building_save_data();
@@ -97,5 +98,19 @@ public abstract class BuildingUpgradeHandler : MonoBehaviour, ISaveable
         }
     }
 
+    */
     protected abstract void ApplyUpgradeEffect(UpgradeDefinition upgrade);
+
+    public List<string> GetUnlockedUpgrades()
+    {
+        return new List<string>(UnlockedUpgradeIDs);
+    }
+
+    public void RestoreUnlockedUpgrades(List<string> saved_upgrades)
+    {
+        if (saved_upgrades != null)
+        {
+            UnlockedUpgradeIDs = new HashSet<string>(saved_upgrades);
+        }
+    }
 }

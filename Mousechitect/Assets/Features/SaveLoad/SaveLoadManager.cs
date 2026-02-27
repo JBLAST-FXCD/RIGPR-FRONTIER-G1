@@ -87,28 +87,26 @@ public class SaveLoadManager : MonoBehaviour
     {
         if (!File.Exists(save_file_path))
         {
-            Debug.LogWarning("no save file found at" + save_file_path);
+            DebugWindow.LogToConsole($"no save file found at" + save_file_path, true);
             return;
         }
 
-        // read encrypted string from file
-        string encrypted_text;
-        try
-        {
-            encrypted_text = File.ReadAllText(save_file_path);
-        }
-        catch (IOException e)
-        {
-            Debug.LogError("failed to read savee file" + e.Message);
-            return;
-        }
+        string encrypted_text = File.ReadAllText(save_file_path);
 
         // decrypt json
         string json_text = SaveEncryption.DecryptString(encrypted_text);
 
+        if (string.IsNullOrEmpty(json_text))
+        {
+            DebugWindow.LogToConsole("save file is empty or corrupted", true);
+            return;
+        }
+
+        
         // deserialize json to game data
         GameData data = JsonUtility.FromJson<GameData>(json_text);
-
+/*
+        // deprecated 27/02/2026 - now utilising load sequences to avoid race conditions and ensure correct load order of systems with dependencies - @jess
         // find all active mono behaviours that implement ISaveable
         ISaveable[] saveable_objects = FindObjectsOfType<MonoBehaviour>().OfType<ISaveable>().ToArray();
 
@@ -117,6 +115,26 @@ public class SaveLoadManager : MonoBehaviour
         {
             saveable.LoadFromSaveData(data);
         }
+        DebugWindow.LogToConsole("Items Loaded:" + json_text);
+        */
+        // new load sequence
+        ResourceManager.instance?.LoadFromSaveData(data);
+        ResourceManager.instance?.LoadFromSaveData(data);
+
+        FindObjectOfType<PathTool>()?.LoadFromSaveData(data);
+        FindObjectOfType<PathFinding>()?.LoadFromSaveData(data);
+
+        FindObjectOfType<Mouse_AI>()?.ResetAI();
+
+        BuildingManager b_manager = FindObjectOfType<BuildingManager>();
+        b_manager?.LoadFromSaveData(data);
+
+        PopulationManager.instance?.LoadFromSaveData(data);
+
+        b_manager?.RelinkMiceToBuildings(data);
+
+        FindObjectOfType<PerspectiveCameraController>()?.LoadFromSaveData(data);
+
         DebugWindow.LogToConsole("Items Loaded:" + json_text);
     }
 

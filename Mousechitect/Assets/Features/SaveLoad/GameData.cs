@@ -42,6 +42,8 @@ public class PlayerData
 
     public resource_save_data resources;
     public camera_save_data camera_state;
+
+    public List<mouse_save_data> spawned_mice_data = new List<mouse_save_data>();
 }
 
 // to be implemented
@@ -91,6 +93,7 @@ public struct building_save_data
     public int prefab_index;
     public Vector3 position;
     public Quaternion rotation;
+    public Quaternion visual_rotation;
     public List<Vector2Int> occupied_cells;
 
     public int tier;
@@ -100,6 +103,10 @@ public struct building_save_data
     public int current_milk;
     public int max_milk_capacity;
     public float milk_production_rate;
+
+    public int selected_cheese_index;
+
+    public List<string> unlocked_upgrades;
 }
 
 [System.Serializable]
@@ -137,4 +144,14 @@ public struct route_save_data
 {
     public string key;
     public List<BaseNode> values; 
+}
+
+[System.Serializable]
+public struct mouse_save_data
+{
+    public string mouse_id;
+    public Vector3 mouse_position;
+    public float mouse_morale;
+    public CheeseTypes favourite_cheese;
+    public CheeseTypes least_favourite_cheese;
 }

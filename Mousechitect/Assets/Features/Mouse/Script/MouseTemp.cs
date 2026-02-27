@@ -53,6 +53,26 @@ public class MouseTemp : MonoBehaviour
         moving = false;
     }
 
+    //jess 27/02/2026
+    // saving implementation fixes
+    private void Awake()
+    {
+        if (string.IsNullOrEmpty(mouse_id))
+        {
+            mouse_id = Guid.NewGuid().ToString("N");
+        }
+    }
+
+    public void LoadData(string saved_id, float saved_morale, CheeseTypes fav_cheese, CheeseTypes least_fav_cheese)
+    {
+        mouse_id = saved_id;
+        mouse_morale = saved_morale;
+        favourite_cheese = fav_cheese;
+        least_favourite_cheese = least_fav_cheese;
+
+        preferences_initialised = true;
+    }
+
     protected int SetRotation(Vector3 current_loc, Vector3 new_loc)
     {
         if (current_loc.x > new_loc.x)

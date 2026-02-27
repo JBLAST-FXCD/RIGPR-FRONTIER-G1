@@ -56,7 +56,7 @@ public class BuildingManager : MonoBehaviour, ISaveable
     [SerializeField] private GridManager grid_manager;
     [SerializeField] private LayerMask build_surface_mask;
     [SerializeField] private BuildToolController controller;
-    
+
     // Anthony - 24/2/2026
     [SerializeField] private PathTool path_tool; // used to block buildings on paths
 
@@ -108,7 +108,7 @@ public class BuildingManager : MonoBehaviour, ISaveable
             ToggleBuildMode();
         }
         */
-        
+
         // Exit build mode entirely when ESC is pressed
         if (is_build_mode_active && Input.GetKeyDown(KeyCode.Escape))
         {
@@ -527,7 +527,7 @@ public class BuildingManager : MonoBehaviour, ISaveable
     // INPUT HANDLING
 
     // Handles mouse input while in build mode:
-    
+
     // Note: Camera script locks the mouse to screen centre on RMB.
     // For this reason, RMB cancel is time-based only, not drag-distance based.
     private void HandleMouseInput()
@@ -657,8 +657,8 @@ public class BuildingManager : MonoBehaviour, ISaveable
             // any specific logic needed for decorations
         }
 
-            // If this placed object is a decoration, register its grid cell for synergy checks
-            Decoration decor = current_building.GetComponentInChildren<Decoration>();
+        // If this placed object is a decoration, register its grid cell for synergy checks
+        Decoration decor = current_building.GetComponentInChildren<Decoration>();
         if (decor != null && placed_data.occupied_cells.Count > 0 && DecorRegistry.Instance != null)
         {
             // Use first occupied cell as the decor “anchor”
@@ -685,7 +685,7 @@ public class BuildingManager : MonoBehaviour, ISaveable
             // Leave build mode (this will also hide the build panel via BuildModeUI)
             BuildMode(false);
             controller.SetActiveTool_None();
-            
+
         }
     }
 
@@ -760,6 +760,38 @@ public class BuildingManager : MonoBehaviour, ISaveable
         return true;
     }
 
+    public void RelinkMiceToBuildings(GameData data)
+    {
+        if (data == null || data.building_data == null || data.building_data.buildings == null) return;
+        if (PopulationManager.instance == null) return;
+
+        foreach (building_save_data entry in data.building_data.buildings)
+        {
+            if (entry.mouse_ids == null || entry.mouse_ids.Count == 0) continue;
+
+            if (placed_buildings_by_id.TryGetValue(entry.unique_id, out PlacedObjectData placed))
+            {
+                ParentBuilding parent = placed.GetComponentInChildren<ParentBuilding>();
+                if (parent != null)
+                {
+                    parent.Mouse_occupants.Clear();
+
+                    foreach (string m_id in entry.mouse_ids)
+                    {
+                        MouseTemp mouse = PopulationManager.instance.GetMouseById(m_id);
+                        if (mouse != null)
+                        {
+                            parent.Mouse_occupants.Add(mouse);
+                            mouse.Home = parent;
+                            mouse.Collider = false;
+                            mouse.transform.gameObject.SetActive(false);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     /// <summary>
     /// Writes all placed buildings into GameData for saving.
     /// </summary>
@@ -787,13 +819,37 @@ public class BuildingManager : MonoBehaviour, ISaveable
             entry.position = placed.transform.position;
             entry.rotation = placed.transform.rotation;
 
-            entry.occupied_cells = new List<Vector2Int>();
-            int i = 0;
+            Transform visual = placed.transform.Find("Visual");
+            entry.visual_rotation = (visual != null) ? visual.localRotation : Quaternion.identity;
 
-            while (i < placed.occupied_cells.Count)
+            entry.occupied_cells = new List<Vector2Int>(placed.occupied_cells);
+
+            ParentBuilding parent = placed.GetComponentInChildren<ParentBuilding>();
+
+            if (parent != null)
             {
-                entry.occupied_cells.Add(placed.occupied_cells[i]);
-                ++i;
+                parent.PopulateInstanceSaveData(ref entry);
+            }
+
+            IMilkContainer milk_container = placed.GetComponentInChildren<IMilkContainer>();
+
+            if (milk_container != null)
+            {
+                entry.current_milk = milk_container.CURRENT_MILK_AMOUNT;
+            }
+
+            FactoryBuilding factory = placed.GetComponentInChildren<FactoryBuilding>();
+
+            if (factory != null)
+            {
+                entry.selected_cheese_index = (int)factory.GetSelectedCheese();
+            }
+
+            BuildingUpgradeHandler upgrade_handler = placed.GetComponentInChildren<BuildingUpgradeHandler>();
+
+            if (upgrade_handler != null)
+            {
+                entry.unlocked_upgrades = upgrade_handler.GetUnlockedUpgrades();
             }
 
             data.building_data.buildings.Add(entry);
@@ -802,47 +858,30 @@ public class BuildingManager : MonoBehaviour, ISaveable
 
     public void LoadFromSaveData(GameData data)
     {
-        if (data == null || data.building_data == null || data.building_data.buildings == null)
-        {
-            return;
-        }
+        if (data == null || data.building_data == null || data.building_data.buildings == null) return;
 
         // Clear existing placed buildings
         foreach (KeyValuePair<string, PlacedObjectData> kvp in placed_buildings_by_id)
         {
-            if (kvp.Value != null)
-            {
-                Destroy(kvp.Value.gameObject);
-            }
+            if (kvp.Value != null) Destroy(kvp.Value.gameObject);
         }
-
         placed_buildings_by_id.Clear();
         occupied_cells.Clear();
 
-        int b = 0;
-
-        while (b < data.building_data.buildings.Count)
+        foreach (building_save_data entry in data.building_data.buildings)
         {
-            building_save_data entry = data.building_data.buildings[b];
+            if (entry.prefab_index < 0 || entry.prefab_index >= building_prefabs.Length) continue;
 
-            if (entry.prefab_index < 0 || entry.prefab_index >= building_prefabs.Length)
+            GameObject new_building = Instantiate(building_prefabs[entry.prefab_index], entry.position, entry.rotation);
+
+            Transform visual = new_building.transform.Find("Visual");
+
+            if (visual != null)
             {
-                ++b;
-                continue;
+                visual.localRotation = entry.visual_rotation;
             }
 
-            GameObject new_building = Instantiate(
-                building_prefabs[entry.prefab_index],
-                entry.position,
-                entry.rotation
-            );
-
-            PlacedObjectData placed = new_building.GetComponent<PlacedObjectData>();
-
-            if (placed == null)
-            {
-                placed = new_building.AddComponent<PlacedObjectData>();
-            }
+            PlacedObjectData placed = new_building.GetComponent<PlacedObjectData>() ?? new_building.AddComponent<PlacedObjectData>();
 
             placed.unique_id = entry.unique_id;
             placed.prefab_index = entry.prefab_index;
@@ -850,22 +889,39 @@ public class BuildingManager : MonoBehaviour, ISaveable
             placed.speed_modifier = -1;
 
             placed.occupied_cells.Clear();
-
             if (entry.occupied_cells != null)
             {
-                int i = 0;
-
-                while (i < entry.occupied_cells.Count)
+                foreach (Vector2Int cell in entry.occupied_cells)
                 {
-                    Vector2Int cell = entry.occupied_cells[i];
                     placed.occupied_cells.Add(cell);
                     occupied_cells.Add(cell);
-                    ++i;
                 }
             }
-
-            // Restore speed modifiers for pathfinding
             grid_manager.SetPathOnCells(placed.occupied_cells, placed.speed_modifier);
+
+            ParentBuilding parent = new_building.GetComponentInChildren<ParentBuilding>();
+            if (parent != null)
+            {
+                parent.Tier = entry.tier;
+            }
+
+            IMilkContainer milkContainer = new_building.GetComponentInChildren<IMilkContainer>();
+            if (milkContainer != null)
+            {
+                milkContainer.CURRENT_MILK_AMOUNT = entry.current_milk;
+            }
+
+            FactoryBuilding factory = new_building.GetComponentInChildren<FactoryBuilding>();
+            if (factory != null)
+            {
+                factory.SelectCheese((CheeseTypes)entry.selected_cheese_index);
+            }
+
+            BuildingUpgradeHandler upgradeHandler = new_building.GetComponentInChildren<BuildingUpgradeHandler>();
+            if (upgradeHandler != null && entry.unlocked_upgrades != null)
+            {
+                upgradeHandler.RestoreUnlockedUpgrades(entry.unlocked_upgrades);
+            }
 
             Decoration decor = new_building.GetComponentInChildren<Decoration>();
             if (decor != null && placed.occupied_cells.Count > 0 && DecorRegistry.Instance != null)
@@ -873,12 +929,7 @@ public class BuildingManager : MonoBehaviour, ISaveable
                 DecorRegistry.Instance.UpdateCell(decor, placed.occupied_cells[0]);
             }
 
-
             placed_buildings_by_id[placed.unique_id] = placed;
-
-            ++b;
         }
     }
-
-
 }

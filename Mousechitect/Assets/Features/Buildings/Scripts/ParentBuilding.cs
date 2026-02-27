@@ -150,10 +150,14 @@ public class ParentBuilding : MonoBehaviour
     // GetVectors Updated by Anthony 23/01/26 
     public Vector2Int GetPosition()
     {
-        Transform entrance = Building.transform.Find("EntrancePoint");
-
-        Vector2Int building_loc = new Vector2Int((int)entrance.position.x, (int)entrance.position.z);
-
-        return building_loc;
+        if (Building != null)
+        {
+            Transform entrance = Building.transform.Find("EntrancePoint");
+            if (entrance != null)
+            {
+                return new Vector2Int((int)entrance.position.x, (int)entrance.position.z);
+            }
+        }
+        return new Vector2Int((int)transform.position.x, (int)transform.position.z);
     }
 }

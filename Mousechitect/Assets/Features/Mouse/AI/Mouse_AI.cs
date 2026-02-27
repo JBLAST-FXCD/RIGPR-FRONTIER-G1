@@ -700,4 +700,16 @@ public class Mouse_AI : MonoBehaviour
             });
         }
     }
+
+    // jess 27/02/2026
+    // saving implementation fixes
+    public void ResetAI()
+    {
+        if (mice_route != null)
+        {
+            mice_route.Clear();
+        }
+
+        StopAllCoroutines();
+    }
 }

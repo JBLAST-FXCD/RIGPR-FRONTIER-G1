@@ -274,4 +274,9 @@ public class FactoryBuilding : ParentBuilding, IMilkContainer
     {
         return allowed_cheese_types;
     }
+
+    public CheeseTypes GetSelectedCheese()
+    {
+        return selected_cheese;
+    }
 }
