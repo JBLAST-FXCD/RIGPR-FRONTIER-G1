@@ -4,6 +4,7 @@ using ImGuiNET;
 using UImGui;
 using System.Collections.Generic;
 using System.IO;
+using UnityEditor.SceneManagement;
 
 //// Hani - 09/02/2026
 
@@ -120,11 +121,53 @@ public class PopulationManager : MonoBehaviour, ISaveable
     public void PopulateSaveData(GameData data)
     {
         data.player_data.population = this.current_population;
+
+        data.player_data.spawned_mice_data = new List<mouse_save_data>();
+
+        foreach (GameObject mouse_obj in spawned_mice)
+        {
+            if (mouse_obj == null) continue;
+
+            MouseTemp mt = mouse_obj.GetComponent<MouseTemp>();
+            if (mt != null)
+            {
+                mouse_save_data m_data = new mouse_save_data();
+                m_data.mouse_id = mt.Mouse_id;
+                m_data.mouse_position = mouse_obj.transform.position;
+                m_data.mouse_morale = mt.MouseMorale;
+                m_data.favourite_cheese = mt.FavouriteCheese;
+                m_data.least_favourite_cheese = mt.LeastFavouriteCheese;
+
+                data.player_data.spawned_mice_data.Add(m_data);
+            }
+        }
     }
 
     public void LoadFromSaveData(GameData data)
     {
         this.current_population = data.player_data.population;
+
+        foreach (GameObject m in spawned_mice)
+        {
+            if (m != null) Destroy(m);
+        }
+        spawned_mice.Clear();
+
+        if (data.player_data.spawned_mice_data != null)
+        {
+            foreach (mouse_save_data m_data in data.player_data.spawned_mice_data)
+            {
+                GameObject mouse_obj = Instantiate(mouse_prefab, m_data.mouse_position, Quaternion.identity);
+                MouseTemp mt = mouse_obj.GetComponent<MouseTemp>();
+
+                if (mt != null) 
+                {
+                    mt.LoadData(m_data.mouse_id, m_data.mouse_morale, m_data.favourite_cheese, m_data.least_favourite_cheese);
+                }
+
+                spawned_mice.Add(mouse_obj);
+            }
+        }
         SyncVisualMiceToPopulation();
     }
 
@@ -172,21 +215,37 @@ public class PopulationManager : MonoBehaviour, ISaveable
     }
 
     // updated by Iain Benner 23/02/2026
+    // updated by Jess 27/02/2026
     // Removes the most recently spawned mouse GameObject
     private void DespawnOneMouse()
     {
+        spawned_mice.RemoveAll(m => m == null);
+
         int last = spawned_mice.Count - 1;
         if (last < 0) return;
 
         GameObject mouse = spawned_mice[last];
-        MouseTemp character = mouse.transform.GetComponentInChildren<MouseTemp>();
-        //Ensure mice are not doing task before despawning.
-        if (!character.Moving && character.Path == null)
+        if (mouse != null)
         {
+            MouseTemp character = mouse.transform.GetComponentInChildren<MouseTemp>();
             spawned_mice.RemoveAt(last);
-
-            if (mouse != null) Destroy(mouse);
+            Destroy(mouse);
         }
     }
 
+    public MouseTemp GetMouseById(string id)
+    {
+        if (string.IsNullOrEmpty(id)) return null;
+
+        foreach (GameObject mouse_obj in spawned_mice)
+        {
+            if (mouse_obj == null) continue;
+            MouseTemp mt = mouse_obj.GetComponent<MouseTemp>();
+            if (mt != null && mt.Mouse_id == id)
+            {
+                return mt;
+            }
+        }
+        return null;
+    }
 }
