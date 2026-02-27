@@ -9684,6 +9684,7 @@ MonoBehaviour:
   path_panel: {fileID: 6631778169916334309}
   destroy_panel: {fileID: 8156044810869206421}
   move_panel: {fileID: 5113466968561464954}
+  research_tree_panel: {fileID: 0}
   build_panel: {fileID: 4992313276454480297}
   category_text: {fileID: 879279571732577313}
   residential_rows:
