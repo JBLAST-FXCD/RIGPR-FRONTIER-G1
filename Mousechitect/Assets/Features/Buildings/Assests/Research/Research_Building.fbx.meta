@@ -3,7 +3,32 @@ guid: e130191f49bca47458f92c398ac5cfa0
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ResearchBattery
+    second: {fileID: 2100000, guid: fbca0de05f2c67f49abfe1e9b00c41d3, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ResearchBuildingComputer
+    second: {fileID: 2100000, guid: fd31ed309aab4a442aa41d96d17f7c3c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ResearchCan
+    second: {fileID: 2100000, guid: 95e6ddfe1aea54d4cb64a21ac34bddd6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ResearchGenerator
+    second: {fileID: 2100000, guid: 29b9da8828edfa249a004eb6245aab66, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ResearchScreen
+    second: {fileID: 2100000, guid: 8d71d5e58aa7a9445899313ed6cdafb8, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -70,8 +95,8 @@ ModelImporter:
     useFileScale: 1
     strictVertexDataChecks: 0
   tangentSpace:
-    normalSmoothAngle: 60
-    normalImportMode: 0
+    normalSmoothAngle: 90
+    normalImportMode: 1
     tangentImportMode: 3
     normalCalculationMode: 4
     legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
