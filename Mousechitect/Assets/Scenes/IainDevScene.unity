@@ -203,11 +203,21 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2615216687345029186, guid: 535998bf29c86e64ea383938fcd8d700,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: c898d3c5736b8654e97944ab40ae45dc, type: 2}
     - target: {fileID: 2664988439232354634, guid: 535998bf29c86e64ea383938fcd8d700,
         type: 3}
       propertyPath: m_Name
       value: LevelLayout
       objectReference: {fileID: 0}
+    - target: {fileID: 3958861259075700731, guid: 535998bf29c86e64ea383938fcd8d700,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 2ca1f04dfd66862439a80c31e3717df2, type: 2}
     - target: {fileID: 4096046455437681911, guid: 535998bf29c86e64ea383938fcd8d700,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -258,6 +268,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5710991550249266301, guid: 535998bf29c86e64ea383938fcd8d700,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: c898d3c5736b8654e97944ab40ae45dc, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -358,6 +373,28 @@ PrefabInstance:
       propertyPath: main_camera
       value: 
       objectReference: {fileID: 1602038163}
+    - target: {fileID: 6694263113777920876, guid: c733fd8da5f401e4d9ca1e051eb62673,
+        type: 3}
+      propertyPath: building_prefabs.Array.size
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6694263113777920876, guid: c733fd8da5f401e4d9ca1e051eb62673,
+        type: 3}
+      propertyPath: building_prefabs.Array.data[10]
+      value: 
+      objectReference: {fileID: 2456205720212298267, guid: a5ec174236070dc40b2cd82279526424,
+        type: 3}
+    - target: {fileID: 6694263113777920876, guid: c733fd8da5f401e4d9ca1e051eb62673,
+        type: 3}
+      propertyPath: auto_building_prefabs.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6694263113777920876, guid: c733fd8da5f401e4d9ca1e051eb62673,
+        type: 3}
+      propertyPath: auto_building_prefabs.Array.data[0]
+      value: 
+      objectReference: {fileID: 6505860790449111439, guid: de26c89167eb9924ea10983cd0dda83c,
+        type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

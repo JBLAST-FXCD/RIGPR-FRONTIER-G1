@@ -60,6 +60,9 @@ public class BuildingManager : MonoBehaviour, ISaveable
     // Anthony - 24/2/2026
     [SerializeField] private PathTool path_tool; // used to block buildings on paths
 
+    [Header("Auto place Building Prefabs")]
+    [SerializeField] private GameObject[] auto_building_prefabs;
+
     [Header("Building Prefabs")]
     [SerializeField] private GameObject[] building_prefabs;
 
@@ -99,6 +102,10 @@ public class BuildingManager : MonoBehaviour, ISaveable
     public event Action<GameObject> building_placed;
     public event Action<string> building_removed;
 
+    void Start()
+    {
+        AutoplacePrefabs();
+    }
 
     private void Update()
     {
@@ -191,6 +198,27 @@ public class BuildingManager : MonoBehaviour, ISaveable
         return is_build_mode_active;
     }
 
+    // Iain Benner 27/02/2026
+    protected void AutoplacePrefabs()
+    {
+        foreach (var prefab in auto_building_prefabs)
+        {
+            current_building = Instantiate(prefab);
+
+            current_building_collider = current_building.GetComponentInChildren<Collider>();
+
+            Bounds building_bounds = current_building_collider.bounds;
+
+            // Building surface area - calculate cells covered by building
+            GetCellsForBounds(building_bounds, covered_cells);
+
+            // CheckCellSurfaces(cells) - returns new is_valid_build_zone
+            is_valid_build_zone = CheckCellSurfaces(covered_cells);
+
+            ConfirmBuildingPlacement();
+        }
+    }
+
     private IEnumerator AsignTier(int building_tier)
     {
         //--- changes the building tier if it has one
@@ -208,8 +236,6 @@ public class BuildingManager : MonoBehaviour, ISaveable
     // Entry point when a building type is selected (from UI or debug hotkey).
     public void StartPlacingBuilding(int building_index, int building_tier)
     {
-        ResourceManager resources = ResourceManager.instance;
-
         if (!is_build_mode_active)
         {
             Debug.Log("StartPlacingBuilding called while build mode is inactive.");
