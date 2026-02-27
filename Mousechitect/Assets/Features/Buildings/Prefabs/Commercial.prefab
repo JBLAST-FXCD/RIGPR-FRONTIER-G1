@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 7004985853225984347}
   - component: {fileID: 3747590258626416995}
   - component: {fileID: 166242880349321108}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Visual
   m_TagString: BuildingTest
   m_Icon: {fileID: 0}
@@ -113,9 +113,9 @@ GameObject:
   - component: {fileID: 4561264644756007983}
   - component: {fileID: 265385018511558215}
   - component: {fileID: 4571000792513152829}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Commercial
-  m_TagString: Untagged
+  m_TagString: BuildingTest
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -164,4 +164,4 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7454611493747716669}
-  m_Mesh: {fileID: -527599378179346836, guid: 4810a42da9cbd8347b4ce69c47e8d68b, type: 3}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}

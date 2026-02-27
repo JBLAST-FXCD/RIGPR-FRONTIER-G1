@@ -744,6 +744,7 @@ MonoBehaviour:
     m_Bits: 8
   grid_manager: {fileID: 209364022}
   building_manager: {fileID: 149254173}
+  path_tool: {fileID: 661020216}
 --- !u!114 &661020232 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6907196582077796193, guid: a397e5fb55260ee499eaee94bbb53766,
