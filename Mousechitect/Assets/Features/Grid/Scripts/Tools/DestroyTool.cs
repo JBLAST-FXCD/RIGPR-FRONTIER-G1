@@ -159,7 +159,7 @@ public class DestroyTool : MonoBehaviour
 
             if (placed_data.is_path)
             {
-                // Safety: if a moved path ever ended up in BuildingManager occupancy, clear it.
+                // if a moved path ever ended up in BuildingManager occupancy, clear it.
                 if (building_manager != null && placed_data.occupied_cells != null)
                     building_manager.ClearOccupiedCells(placed_data.occupied_cells);
 

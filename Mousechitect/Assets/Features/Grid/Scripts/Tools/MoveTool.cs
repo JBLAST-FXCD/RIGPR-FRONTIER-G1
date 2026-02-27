@@ -141,17 +141,17 @@ public class MoveTool : MonoBehaviour
         // Temporarily free its current cells so overlap checks work while moving
         if (placed.is_path)
         {
-            // Clear PATH occupancy (this is why old locations stayed blocked)
+            // Clear path occupancy
             if (path_tool != null)
                 path_tool.ClearPathCells(original_cells);
         }
         else
         {
-            // Clear BUILDING occupancy
+            // Clear building occupancy
             building_manager.ClearOccupiedCells(original_cells);
         }
 
-        // Optional: clear grid speed modifier while moving (fine either way)
+        // clear grid speed modifier while moving
         grid_manager.SetPathOnCells(original_cells, 0.0f);
 
         SetBuildingOpacity(selected_root, PREVIEW_OPACITY);
