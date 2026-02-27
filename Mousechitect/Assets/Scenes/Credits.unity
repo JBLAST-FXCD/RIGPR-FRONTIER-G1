@@ -3555,7 +3555,7 @@ PrefabInstance:
     - target: {fileID: 307584671191532955, guid: f2ca39d83313c4f4d9fd9399cb2b74e1,
         type: 3}
       propertyPath: m_text
-      value: William Trise
+      value: Daniel Cooper
       objectReference: {fileID: 0}
     - target: {fileID: 1594885391121013304, guid: f2ca39d83313c4f4d9fd9399cb2b74e1,
         type: 3}
@@ -3565,7 +3565,7 @@ PrefabInstance:
     - target: {fileID: 3119149383583238542, guid: f2ca39d83313c4f4d9fd9399cb2b74e1,
         type: 3}
       propertyPath: m_text
-      value: Design Lead
+      value: Game Designer
       objectReference: {fileID: 0}
     - target: {fileID: 4684193354457118070, guid: f2ca39d83313c4f4d9fd9399cb2b74e1,
         type: 3}
@@ -6920,7 +6920,7 @@ PrefabInstance:
     - target: {fileID: 307584671191532955, guid: f2ca39d83313c4f4d9fd9399cb2b74e1,
         type: 3}
       propertyPath: m_text
-      value: Daniel Cooper
+      value: William Trise
       objectReference: {fileID: 0}
     - target: {fileID: 1594885391121013304, guid: f2ca39d83313c4f4d9fd9399cb2b74e1,
         type: 3}
