@@ -956,6 +956,8 @@ public class BuildingManager : MonoBehaviour, ISaveable
             }
 
             placed_buildings_by_id[placed.unique_id] = placed;
+
+            AutoplacePrefabs();
         }
     }
 }

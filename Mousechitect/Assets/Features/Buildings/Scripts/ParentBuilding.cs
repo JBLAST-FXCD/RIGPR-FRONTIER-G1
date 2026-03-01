@@ -119,18 +119,15 @@ public class ParentBuilding : MonoBehaviour
     //checks building rotion to place the mice on the right side to stop mice appaering inside building.
     public virtual void MouseLeave(MouseTemp mouse)
     {
-        if (!mouse.Moving)
-        {
-            mouse.Home = null;
+        mouse.Home = null;
 
-            mouse.transform.position = Building.transform.Find("EntrancePoint").position;
+        mouse.transform.position = Building.transform.Find("EntrancePoint").position;
 
-            float angle = this.transform.eulerAngles.y;
-            mouse.transform.eulerAngles = new Vector3(0, angle, 0);
-            mouse.transform.gameObject.SetActive(true);
+        float angle = this.transform.eulerAngles.y;
+        mouse.transform.eulerAngles = new Vector3(0, angle, 0);
+        mouse.transform.gameObject.SetActive(true);
 
-            mouse_occupants.Remove(mouse);
-        }
+        mouse_occupants.Remove(mouse);
     }
 
     public bool CheckOccupants(MouseTemp mouse)
@@ -160,5 +157,11 @@ public class ParentBuilding : MonoBehaviour
             }
         }
         return new Vector2Int((int)transform.position.x, (int)transform.position.z);
+    }
+
+    //For pathfinding stress test only.
+    public void SetMaxOccupants(int occupants)
+    {
+        capacity = occupants;
     }
 }

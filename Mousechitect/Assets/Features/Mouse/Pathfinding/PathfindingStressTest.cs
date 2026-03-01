@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class StressTest : MonoBehaviour
@@ -9,6 +8,8 @@ public class StressTest : MonoBehaviour
     [SerializeField] protected MouseTemp mouse;
     [SerializeField] protected GridManager grid_manager;
     [SerializeField] protected PathFinding pathfinding;
+
+    [SerializeField] protected Transform mouse_spawn_point;
 
     ParentBuilding[] buildings;
     MouseTemp[] mouses;
@@ -58,15 +59,27 @@ public class StressTest : MonoBehaviour
 
     protected IEnumerator FirstWave()
     {
+        Vector3 pos = Vector3.zero;
+
+        // Prefer defined spawn points
+        if (mouse_spawn_point != null)
+            pos = mouse_spawn_point.position;
+
         buildings = FindObjectsOfType(typeof(ParentBuilding)) as ParentBuilding[];
         mouses = new MouseTemp[buildings.Length * occupants];
+
+        for (int n = 0; n < buildings.Length; n++)
+        {
+            buildings[n].SetMaxOccupants(occupants);
+        }
 
         int j = 0;
         for (int i = 0; i < mouses.Length; i++)
         {
-            MouseTemp new_mouse = Instantiate(mouse, new Vector3(0.0f, 0.5f, 0.0f), mouse.transform.rotation);
+            MouseTemp new_mouse = Instantiate(mouse, pos, mouse.transform.rotation);
 
-            MoveMouse(new_mouse, buildings[j]);
+            if(buildings[j] != null)
+                MoveMouse(new_mouse, buildings[j]);
 
             mouses[i] = new_mouse;
 
@@ -92,7 +105,8 @@ public class StressTest : MonoBehaviour
             if (mouse.Home != null)
                 mouse.Home.MouseLeave(mouse);
 
-            MoveMouse(mouse, buildings[rand]);
+            if(buildings[rand] != null)
+                MoveMouse(mouse, buildings[rand]);
         }
     }
 

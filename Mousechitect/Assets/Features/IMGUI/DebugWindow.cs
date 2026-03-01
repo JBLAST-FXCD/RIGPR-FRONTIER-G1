@@ -374,7 +374,7 @@ namespace UImGui
 
                     if (ImGui.Button("Kick mouse"))
                     {
-                        if(building.Mouse_occupants.Count > 0)
+                        if(building.Mouse_occupants.Count > 0 && !building.Mouse_occupants[0].Moving)
                             building.MouseLeave(building.Mouse_occupants[0]);
                     }
 

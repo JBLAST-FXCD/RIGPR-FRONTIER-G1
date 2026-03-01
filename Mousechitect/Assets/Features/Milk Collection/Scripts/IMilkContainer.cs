@@ -19,5 +19,5 @@ public interface IMilkContainer
     void SubtractMilk(int MILK);
 
     int MilkToAdd();
-    void AddMilk(int MILK);
+    bool AddMilk(int MILK);
 }

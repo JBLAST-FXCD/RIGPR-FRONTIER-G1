@@ -205,13 +205,15 @@ public class FactoryBuilding : ParentBuilding, IMilkContainer
         return MAX_MILK_CAPACITY - CURRENT_MILK_AMOUNT;
     }
     //Fits GDD requirement of making cheese when theres enough milk
-    public void AddMilk(int MILK)
+    public bool AddMilk(int MILK)
     {
         if (factory_switch == true && CURRENT_MILK_AMOUNT + MILK <= MAX_MILK_CAPACITY)
         {
             CURRENT_MILK_AMOUNT += MILK;
             CheeseProduction();
+            return true;
         }
+        return false;
     }
 
     // Created by Anthony - 08/02/2026

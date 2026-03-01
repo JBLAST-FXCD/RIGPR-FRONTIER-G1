@@ -462,6 +462,21 @@ public class Mouse_AI : MonoBehaviour
         }
     }
 
+    //Jess's work
+    private void AttemptOverflow(int milk)
+    {
+        MilkTank available_tank = MilkManager.Instance.GetAvailableTank();
+
+        if (available_tank != null)
+        {
+            available_tank.AddMilk(milk);
+        }
+        else
+        {
+            // No available tank found milk is wasted
+        }
+    }
+
     //For moving mouse to two buildings because there were no mice in the right building.
     protected void MoveMouse(MouseTemp mouse, ParentBuilding building, MilkTask task)
     {
@@ -488,10 +503,18 @@ public class Mouse_AI : MonoBehaviour
                 else
                 {
                     IMilkContainer container = (IMilkContainer)building;
-                    container.SubtractMilk(task.amount);
-                    mouse.Home.MouseLeave(mouse);
-                    GetRoute(mouse, task.building.GetPosition());
-                    MoveMouse(mouse, task);
+                    if (!container.CanAfford(task.amount))
+                        task.amount = container.CURRENT_MILK_AMOUNT;
+
+                    if(task.amount != 0)
+                    {
+                        container.SubtractMilk(task.amount);
+                        mouse.Home.MouseLeave(mouse);
+                        GetRoute(mouse, task.building.GetPosition());
+                        MoveMouse(mouse, task);
+                    }
+                    else
+                        mouse.Moving = false;
                 }
             }));
         }
@@ -524,7 +547,8 @@ public class Mouse_AI : MonoBehaviour
                 else
                 {
                     IMilkContainer container = (IMilkContainer)task.building;
-                    container.AddMilk(task.amount);
+                    if (!container.AddMilk(task.amount))
+                        AttemptOverflow(task.amount);
                     mouse.Moving = false;
                     pathfinding.SavePath(mouse_loc, building_loc, path);
                 }
@@ -694,6 +718,18 @@ public class Mouse_AI : MonoBehaviour
         Invoke(nameof(BehaviourTree), tree_cycle);
     }
 
+    // jess 27/02/2026
+    // saving implementation fixes
+    public void ResetAI()
+    {
+        if (mice_route != null)
+        {
+            mice_route.Clear();
+        }
+
+        StopAllCoroutines();
+    }
+
     protected void Start()
     {
         MouseTemp.Grid_manager = grid_manager;
@@ -714,20 +750,9 @@ public class Mouse_AI : MonoBehaviour
             UImGui.DebugWindow.Instance.RegisterExternalCommand("AI.false", " - Stops the AI and the control of the mice.", args =>
             {
                 UImGui.DebugWindow.LogToConsole("Mouse_AI Deactivated:");
+                ResetAI();
                 IsActive = false;
             });
         }
-    }
-
-    // jess 27/02/2026
-    // saving implementation fixes
-    public void ResetAI()
-    {
-        if (mice_route != null)
-        {
-            mice_route.Clear();
-        }
-
-        StopAllCoroutines();
     }
 }

@@ -64,18 +64,14 @@ public class MilkCollector : ParentBuilding, IMilkContainer
 
     public override void MouseLeave(MouseTemp mouse)
     {
-        if (!mouse.Moving)
-        {
-            mouse.Home = null;
+        mouse.Home = null;
 
-            mouse.transform.position = Building.transform.Find("EntrancePoint").position;
+        mouse.transform.position = Building.transform.Find("EntrancePoint").position;
 
-            float angle = this.transform.eulerAngles.y;
-            mouse.transform.eulerAngles = new Vector3(0, angle, 0);
-            mouse.transform.gameObject.SetActive(true);
+        float angle = this.transform.eulerAngles.y;
+        mouse.transform.eulerAngles = new Vector3(0, angle, 0);
 
-            mouse_occupants.Remove(mouse);
-        }
+        mouse_occupants.Remove(mouse);
     }
 
     private void ProduceMilk()
@@ -130,8 +126,9 @@ public class MilkCollector : ParentBuilding, IMilkContainer
     {
         return MAX_MILK_CAPACITY - CURRENT_MILK_AMOUNT;
     }
-    public void AddMilk(int MILK)
+    public bool AddMilk(int MILK)
     {
         //Can't add milk only gens milk.
+        return false;
     }
 }

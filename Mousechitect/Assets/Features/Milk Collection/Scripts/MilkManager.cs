@@ -92,7 +92,6 @@ public class MilkManager : MonoBehaviour
         return all_containers.Where(c => c != null && c.CONTAINER_GAME_OBJECT != null).Sum(c => c.CURRENT_MILK_AMOUNT);
     }
 
-    //****************************************************************
     public IMilkContainer RequestMilkSource(int amount_needed)
     {
         // provides a milk container that can fulfill the requested amount
