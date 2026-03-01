@@ -20,7 +20,7 @@ public class MouseTemp : MonoBehaviour
 
     public string Mouse_id { get { return mouse_id; } }
 
-    public Vector2Int Position { get { return new Vector2Int((int)this.transform.position.x, (int)this.transform.position.z); } }
+    public Vector2Int Position { get { return new Vector2Int((int)transform.position.x, (int)transform.position.z); } }
     public bool Moving { get { return moving; } set { moving = value; } }
     public List<BaseNode> Path { get { return path; } set { path = value; } }
     public static GridManager Grid_manager { set { grid_manager = value; } }
@@ -100,6 +100,9 @@ public class MouseTemp : MonoBehaviour
             if (path[i].speed == speed)
             {
                 float time_elapsed = 0;
+
+                if (speed == 0)
+                    speed = 1;
 
                 while (this.transform.position != new_loc)
                 {

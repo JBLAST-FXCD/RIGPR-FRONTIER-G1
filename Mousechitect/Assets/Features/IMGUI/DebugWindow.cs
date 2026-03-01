@@ -462,11 +462,11 @@ namespace UImGui
         {
             if (ImGui.CollapsingHeader("Population Manager"))
             {
-                int population = PopulationManager.instance.current_population;
+                int population = PopulationManager.current_population;
                 float arrival_interval = PopulationManager.instance.base_arrival_interval;
                 if (ImGui.SliderInt("Current Population", ref population, 0, 100))
                 {
-                    PopulationManager.instance.current_population = population;
+                    PopulationManager.current_population = population;
                 }
 
                 if (ImGui.DragFloat("Base Arrival Interval", ref arrival_interval, 0.1f, 1f, 60f))
@@ -477,7 +477,7 @@ namespace UImGui
                 ImGui.Separator();
 
                 ImGui.Text($"Total Housing Capacity: {PopulationManager.instance.total_housing_capacity}");
-                ImGui.Text($"Current Visual Capacity: {PopulationManager.instance.current_visual_capacity}");
+                ImGui.Text($"Current Visual Capacity: {PopulationManager.current_visual_capacity}");
             }
         }
 

@@ -72,6 +72,7 @@ public class ParentBuilding : MonoBehaviour
             resources.SpendResources(scrap_cost);
             building_prefab.transform.localPosition = new Vector3(0, 0, 0);
             building = Instantiate(building_prefab, gameObject.transform);
+            GetComponent<BoxCollider>().center = building.transform.Find("EntrancePoint").localPosition;
         }
     }
 
@@ -98,7 +99,7 @@ public class ParentBuilding : MonoBehaviour
         TierSelection();
         building_prefab.transform.localPosition = new Vector3(0, 0, 0);
         building = Instantiate(building_prefab, gameObject.transform);
-        this.GetComponent<BoxCollider>().center = building.transform.Find("EntrancePoint").localPosition;
+        GetComponent<BoxCollider>().center = building.transform.Find("EntrancePoint").localPosition;
         upgrading = false;
     }
 

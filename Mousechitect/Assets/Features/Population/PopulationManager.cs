@@ -17,11 +17,11 @@ public class PopulationManager : MonoBehaviour, ISaveable
     public static PopulationManager instance;
 
     [Header("Official Population")]
-    public int current_population = 0;
+    public static int current_population = 0;
     public int total_housing_capacity = 0;
 
     [Header("Visual Population")]
-    public int current_visual_capacity = 0;
+    public static int current_visual_capacity = 0;
 
     [Header("Growth Rate Settings")]
     public float base_arrival_interval = 10.0f;
@@ -34,9 +34,12 @@ public class PopulationManager : MonoBehaviour, ISaveable
     [SerializeField] private GameObject mouse_prefab;
     [SerializeField] private Transform[] mouse_spawn_points;
 
-    private readonly List<GameObject> spawned_mice = new List<GameObject>();
+    private readonly static List<GameObject> spawned_mice = new List<GameObject>();
 
-
+    void Start()
+    {
+        SpawnOneMouse();
+    }
 
     private void Awake()
     {
@@ -120,7 +123,7 @@ public class PopulationManager : MonoBehaviour, ISaveable
 
     public void PopulateSaveData(GameData data)
     {
-        data.player_data.population = this.current_population;
+        data.player_data.population = current_population;
 
         data.player_data.spawned_mice_data = new List<mouse_save_data>();
 
@@ -145,7 +148,7 @@ public class PopulationManager : MonoBehaviour, ISaveable
 
     public void LoadFromSaveData(GameData data)
     {
-        this.current_population = data.player_data.population;
+        current_population = data.player_data.population;
 
         foreach (GameObject m in spawned_mice)
         {
@@ -173,7 +176,7 @@ public class PopulationManager : MonoBehaviour, ISaveable
 
     //Updated by Anthony - 10/2/2026
     // Determines how many mouse GameObjects should be spawned visually.
-    private int GetTargetVisualPopulation()
+    private static int GetTargetVisualPopulation()
     {
         return Mathf.Min(current_population, current_visual_capacity);
     }
@@ -192,10 +195,6 @@ public class PopulationManager : MonoBehaviour, ISaveable
         // Spawn mice until the target visual population
         while (spawned_mice.Count < target)
             SpawnOneMouse();
-
-        // Despawn mice if exceed the target visual population
-        while (spawned_mice.Count > target)
-            DespawnOneMouse();
     }
 
     // Spawns a single mouse GameObject at a valid spawn location
@@ -214,23 +213,41 @@ public class PopulationManager : MonoBehaviour, ISaveable
         if (mt != null) mt.InitialisePreferencesIfNeeded();
     }
 
-    // updated by Iain Benner 23/02/2026
-    // updated by Jess 27/02/2026
-    // Removes the most recently spawned mouse GameObject
-    private void DespawnOneMouse()
+    // Iain Benner 01/03/2026
+    //Mice despawn when the AI calls for the mice stopping systems breaking when mice are deleted at the wrong time.
+    public static List<MouseTemp> GetMice()
     {
+        List<MouseTemp> mice = new List<MouseTemp>();
         spawned_mice.RemoveAll(m => m == null);
 
         int last = spawned_mice.Count - 1;
-        if (last < 0) return;
+        if (last < 0) return null;
 
-        GameObject mouse = spawned_mice[last];
-        if (mouse != null)
+        while (spawned_mice.Count > GetTargetVisualPopulation())
         {
-            MouseTemp character = mouse.transform.GetComponentInChildren<MouseTemp>();
-            spawned_mice.RemoveAt(last);
-            Destroy(mouse);
+            if (last == 0) break;
+
+            MouseTemp mouse = spawned_mice[last].transform.GetComponentInChildren<MouseTemp>();
+            if (mouse != null)
+            {
+                if (!mouse.Moving)
+                {
+                    spawned_mice.RemoveAt(last);
+                    Destroy(spawned_mice[last]);
+                }
+            }
+            last--;
         }
+
+        if(spawned_mice.Count > 0)
+        {
+            for (int i = 0; i < spawned_mice.Count; ++i) 
+            {
+                mice.Add(spawned_mice[i].transform.GetComponentInChildren<MouseTemp>());
+            }
+        }
+
+        return mice;
     }
 
     public MouseTemp GetMouseById(string id)

@@ -29,6 +29,7 @@ public class Mouse_AI : MonoBehaviour
 
     //How long the next cycle happens after the last cycle is completed seconds.
     protected float tree_cycle;
+    protected bool IsActive;
 
     //Buildings for creating tasks.
     protected CommercialBuilding[] markets;
@@ -66,6 +67,7 @@ public class Mouse_AI : MonoBehaviour
 
         overtime_multiple = 1.1f;
         tree_cycle = 15;
+        IsActive = true;
 
         milk_tasks = new List<MilkTask>();
         cheese_tasks = new List<CheeseTask>();
@@ -128,18 +130,19 @@ public class Mouse_AI : MonoBehaviour
     {
         if (factory.IsActive && factory.CURRENT_MILK_AMOUNT < factory.MAX_MILK_CAPACITY)
         {
-            MilkTask new_taks = new MilkTask();
-
-            new_taks.building = factory;
-            new_taks.weight = 1 * cheese_weight;
-            new_taks.amount = factory.MilkToAdd();
+            MilkTask new_taks = new()
+            {
+                building = factory,
+                weight = 1 * cheese_weight,
+                amount = factory.MilkToAdd()
+            };
 
             milk_tasks.Add(new_taks);
         }
     }
     protected void CommercialTask(CommercialBuilding market)
     {
-        List<CheeseTypes> keys = new List<CheeseTypes>();
+        List<CheeseTypes> keys = new();
 
         foreach (CheeseTypes c in Enum.GetValues(typeof(CheeseTypes)))
         {
@@ -151,22 +154,24 @@ public class Mouse_AI : MonoBehaviour
 
         if (keys.Count > 0)
         {
-            CheeseTask new_taks = new CheeseTask();
-
-            new_taks.market = market;
-            new_taks.weight = 1 * scrap_weight;
-            new_taks.types = keys;
+            CheeseTask new_taks = new()
+            {
+                market = market,
+                weight = 1 * scrap_weight,
+                types = keys
+            };
 
             cheese_tasks.Add(new_taks);
         }
     }
     protected void TankTask(MilkTank tank)
     {
-        MilkTask new_taks = new MilkTask();
-
-        new_taks.building = tank;
-        new_taks.weight = 1 * milk_weight;
-        new_taks.amount = tank.MilkToAdd();
+        MilkTask new_taks = new()
+        {
+            building = tank,
+            weight = 1 * milk_weight,
+            amount = tank.MilkToAdd()
+        };
 
         milk_tasks.Add(new_taks);
     }
@@ -293,7 +298,7 @@ public class Mouse_AI : MonoBehaviour
         {
             for (int i = 0; i < containers.Count; i++)
             {
-                ParentBuilding building = new ParentBuilding();
+                ParentBuilding building = null;
                 switch (containers[i].Building_type)
                 {
                     case BuildingType.tank:
@@ -361,7 +366,7 @@ public class Mouse_AI : MonoBehaviour
         {
             for (int i = 0; i < containers.Count; i++)
             {
-                ParentBuilding building = new ParentBuilding();
+                ParentBuilding building = null;
                 switch (containers[i].Building_type)
                 {
                     case BuildingType.tank:
@@ -403,7 +408,7 @@ public class Mouse_AI : MonoBehaviour
 
     protected List<IMilkContainer> GetCollectors()
     {
-        List<IMilkContainer> rv = new List<IMilkContainer>();
+        List<IMilkContainer> rv = new();
 
         foreach (IMilkContainer c in containers)
         {
@@ -484,7 +489,6 @@ public class Mouse_AI : MonoBehaviour
                 {
                     IMilkContainer container = (IMilkContainer)building;
                     container.SubtractMilk(task.amount);
-                    mouse.Moving = false;
                     mouse.Home.MouseLeave(mouse);
                     GetRoute(mouse, task.building.GetPosition());
                     MoveMouse(mouse, task);
@@ -622,7 +626,10 @@ public class Mouse_AI : MonoBehaviour
         int change = mice_route.Count;
 
         //Get all mice that are not moving mouse might be in third building.
-        mouses = (FindObjectsOfType(typeof(MouseTemp), true) as MouseTemp[]).ToList();
+        mouses = PopulationManager.GetMice();
+
+        if (!mouses.Any())
+            return false;
 
         for (int i = 0; i < mouses.Count; i++)
         {
@@ -649,7 +656,7 @@ public class Mouse_AI : MonoBehaviour
             }
         }
 
-        //If no task fulfilled, fail.
+        //If no tasks are fulfilled, fail.
         if (change == mice_route.Count)
             return false;
         return true;
@@ -666,18 +673,21 @@ public class Mouse_AI : MonoBehaviour
 
     protected void BehaviourTree()
     {
-        //Sequence
-        if (FindBuildings())
+        if (IsActive)
         {
-            if (Tasks())
+            //Sequence
+            if (FindBuildings())
             {
-                //Selector
-                if (PickTaskWithMouseInBuilding() == false && PickMouse() == false)
+                if (Tasks())
                 {
+                    //Selector
+                    if (PickTaskWithMouseInBuilding() == false && PickMouse() == false)
+                    {
 
+                    }
+                    else
+                        Pathfinding();
                 }
-                else
-                    Pathfinding();
             }
         }
 
@@ -686,14 +696,25 @@ public class Mouse_AI : MonoBehaviour
 
     protected void Start()
     {
+        MouseTemp.Grid_manager = grid_manager;
+        pathfinding.Grid_manager = grid_manager;
+        BehaviourTree();
+
         if (UImGui.DebugWindow.Instance != null)
         {
-            UImGui.DebugWindow.Instance.RegisterExternalCommand("Mouse_AI", " - Allows the AI to be active and control the mice.", args =>
+            UImGui.DebugWindow.Instance.RegisterExternalCommand("AI.true", " - Allows the AI to be active and control the mice.", args =>
             {
                 UImGui.DebugWindow.LogToConsole("Mouse_AI Activated:");
-                MouseTemp.Grid_manager = grid_manager;
-                pathfinding.Grid_manager = grid_manager;
-                BehaviourTree();
+                IsActive = true;
+            });
+        }
+
+        if (UImGui.DebugWindow.Instance != null)
+        {
+            UImGui.DebugWindow.Instance.RegisterExternalCommand("AI.false", " - Stops the AI and the control of the mice.", args =>
+            {
+                UImGui.DebugWindow.LogToConsole("Mouse_AI Deactivated:");
+                IsActive = false;
             });
         }
     }
